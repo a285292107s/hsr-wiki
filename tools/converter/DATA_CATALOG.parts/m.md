@@ -4,7 +4,7 @@
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### MonsterConfig.json (4.10 MB, 2,722 条)
+### MonsterConfig.json (4.20 MB, 2,781 条)
 
 **字段** (26): `AbilityNameList, AttackModifyRatio, CustomValueTags, CustomValues, DamageTypeResistance, DebuffResist, DefenceModifyRatio, DynamicValues, EliteGroup, HPModifyRatio, HardLevelGroup, MonsterID, MonsterIntroduction, MonsterName, MonsterStrategy, MonsterTemplateID, OverrideAIPath, OverrideAISkillSequence, OverrideSkillParams, SkillList, SpeedModifyRatio, SpeedModifyValue, StanceModifyRatio, StanceModifyValue, StanceWeakList, SummonIDList`
 
@@ -59,7 +59,7 @@
 }
 ```
 
-### MessageItemConfig.json (3.10 MB, 13,779 条)
+### MessageItemConfig.json (3.08 MB, 14,024 条)
 
 **字段** (9): `ContactsID, ID, ItemContentID, ItemType, MainText, NextItemIDList, OptionText, SectionID, Sender`
 
@@ -79,7 +79,7 @@
 }
 ```
 
-### MonsterSkillConfig.json (2.48 MB, 3,566 条)
+### MonsterSkillConfig.json (2.57 MB, 3,744 条)
 
 **字段** (19): `AI_CD, AI_ICD, AttackType, DamageType, DelayRatio, ExtraEffectIDList, IconPath, IsThreat, ModifierList, ParamList, PhaseList, SPHitBase, SkillDesc, SkillID, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, SortOrder`
 
@@ -124,7 +124,7 @@
 }
 ```
 
-### MazeBuff.json (1.40 MB, 2,019 条)
+### MazeBuff.json (1.43 MB, 2,058 条)
 
 **字段** (20): `BuffDesc, BuffDescBattle, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, DisplayType, ID, InBattleBindingKey, InBattleBindingType, IsDisplayEnvInLevel, Lv, LvMax, MazeBuffIconType, MazeBuffPool, MazeBuffType, ModifierName, ParamList`
 
@@ -156,7 +156,7 @@
 }
 ```
 
-### MainMission.json (1.06 MB, 2,184 条)
+### MainMission.json (1.07 MB, 2,208 条)
 
 **字段** (21): `BeginOperation, BeginParam, ChapterID, DisplayPriority, DisplayRewardID, IsInRaid, MainMissionID, MissionAdvance, MissionPack, MissionStoryEvent, Name, NextMainMissionList, NextTrackMainMission, RewardID, SubRewardList, SubType, TakeOperation, TakeParam, TrackWeight, Type, WorldID`
 
@@ -192,7 +192,7 @@
 }
 ```
 
-### MazeProp.json (1.05 MB, 1,841 条)
+### MazeProp.json (1.07 MB, 1,877 条)
 
 **字段** (15): `BoardShowList, ConfigEntityPath, DamageTypeList, HasRendererComponent, ID, IsMapContent, JsonPath, LodPriority, MiniMapIconType, MiniMapStateIcons, PerformanceType, PropIconPath, PropName, PropStateList, PropType`
 
@@ -215,20 +215,7 @@
 }
 ```
 
-### MonsterDrop.json (0.90 MB, 4,438 条)
-
-**字段** (4): `AvatarExpReward, DisplayItemList, MonsterTemplateID, WorldLevel`
-
-**首条记录摘要**:
-```json
-{
-  "MonsterTemplateID": 1002011,
-  "AvatarExpReward": 36,
-  "DisplayItemList": "<list[3]>"
-}
-```
-
-### MonsterTemplateConfig.json (0.90 MB, 632 条)
+### MonsterTemplateConfig.json (0.95 MB, 665 条)
 
 **字段** (32): `AIPath, AISkillSequence, AtlasSortID, AttackBase, CriticalDamageBase, DefenceBase, HPBase, IconPath, ImagePath, InitialDelayRatio, JsonConfig, ManikinConfigPath, ManikinImagePath, ManikinPrefabPath, MinimumFatigueRatio, MonsterCampID, MonsterName, MonsterStrategy, MonsterTemplateID, NPCMonsterList, NatureID, PrefabPath, Rank, RoundIconPath, SpeedBase, SpeedModifyValue, StanceBase, StanceCount, StanceModifyValue, StanceType, StatusResistanceBase, TemplateGroupID`
 
@@ -289,7 +276,20 @@
 }
 ```
 
-### MazeFloor.json (0.65 MB, 695 条)
+### MonsterDrop.json (0.94 MB, 4,669 条)
+
+**字段** (4): `AvatarExpReward, DisplayItemList, MonsterTemplateID, WorldLevel`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterTemplateID": 1002011,
+  "AvatarExpReward": 36,
+  "DisplayItemList": "<list[3]>"
+}
+```
+
+### MazeFloor.json (0.66 MB, 703 条)
 
 **字段** (18): `BGMWorldState, BaseFloorID, CombatBGMHigh, CombatBGMLow, EnterAudioEvent, ExitAudioEvent, FloorBGMBusyStateName, FloorBGMGroupName, FloorBGMNormalStateName, FloorDefaultEmotion, FloorID, FloorName, FloorTag, FloorType, MapLayerNameList, MunicipalConfigPath, OptionalLoadBlocksConfig, WalkingEffectAdditiveScale`
 
@@ -318,7 +318,7 @@
 }
 ```
 
-### MappingInfo.json (0.57 MB, 1,722 条)
+### MappingInfo.json (0.58 MB, 1,742 条)
 
 **字段** (9): `Desc, DisplayItemList, FarmType, ID, IsShowInFog, Name, ShowMonsterList, Type, WorldLevel`
 
@@ -343,7 +343,7 @@
 }
 ```
 
-### MazeChest.json (0.34 MB, 2,101 条)
+### MazeChest.json (0.36 MB, 2,168 条)
 
 **字段** (3): `ChestType, ID, WorldID`
 
@@ -356,7 +356,7 @@
 }
 ```
 
-### MonsterStatusConfig.json (0.33 MB, 706 条)
+### MonsterStatusConfig.json (0.35 MB, 754 条)
 
 **字段** (11): `CanDispel, ModifierName, ReadParamList, StatusDesc, StatusEffect, StatusID, StatusIconPath, StatusIconPathHighSize, StatusName, StatusType, TagList`
 
@@ -400,7 +400,7 @@
 }
 ```
 
-### MapEntrance.json (0.19 MB, 923 条)
+### MapEntrance.json (0.20 MB, 933 条)
 
 **字段** (9): `BeginMainMissionList, EntranceType, FinishMainMissionList, FinishSubMissionList, FloorID, ID, PlaneID, StartAnchorID, StartGroupID`
 
@@ -435,7 +435,7 @@
 }
 ```
 
-### MazePuzzleOrigami.json (0.15 MB, 630 条)
+### MazePuzzleOrigami.json (0.15 MB, 660 条)
 
 **字段** (11): `ColonyID, CreateNpcPropState, FloorID, GroupID, MainPropID, MainPropStateList, MirrorGroupID, MirrorMainPropID, NpcGroupID, NpcInstanceID, SubPropID`
 
@@ -456,7 +456,7 @@
 }
 ```
 
-### MiniMapIcon.json (0.13 MB, 422 条)
+### MiniMapIcon.json (0.13 MB, 425 条)
 
 **字段** (17): `BillboardIcon, CircleRange, ConnectID, FiveDimBillboardIDList, ID, IconName, IconOrientetionSwitch, IconPath, IsCrossLayer, IsFollowMapScale, IsFollowPropScale, IsShowCornerArrow, IsShowInBillboard, MissionIconPath, ModelIcon, Priority, isShowinMap`
 
@@ -474,7 +474,7 @@
 }
 ```
 
-### MazePlane.json (0.09 MB, 376 条)
+### MazePlane.json (0.10 MB, 383 条)
 
 **字段** (8): `FloorIDList, MazePoolType, PlaneID, PlaneName, PlaneType, StartFloorID, SubType, WorldID`
 
@@ -498,7 +498,7 @@
 }
 ```
 
-### MessageGroupConfig.json (0.08 MB, 774 条)
+### MessageGroupConfig.json (0.08 MB, 789 条)
 
 **字段** (4): `ActivityModuleID, ID, MessageContactsID, MessageSectionIDList`
 
@@ -529,27 +529,7 @@
 }
 ```
 
-### MessageContactsConfig.json (0.07 MB, 306 条)
-
-**字段** (6): `ContactsCamp, ContactsType, ID, IconPath, Name, SignatureText`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1000,
-  "Name": {
-    "Hash": 7756966884920887303
-  },
-  "IconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "SignatureText": {
-    "Hash": 8614338816010844770
-  },
-  "ContactsType": 1,
-  "ContactsCamp": 1
-}
-```
-
-### MessageSectionConfig.json (0.07 MB, 786 条)
+### MessageSectionConfig.json (0.07 MB, 801 条)
 
 **字段** (4): `ID, IsPerformMessage, MainMissionLink, StartMessageItemIDList`
 
@@ -602,6 +582,26 @@
 }
 ```
 
+### MessageContactsConfig.json (0.07 MB, 316 条)
+
+**字段** (6): `ContactsCamp, ContactsType, ID, IconPath, Name, SignatureText`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1000,
+  "Name": {
+    "Hash": 7756966884920887303
+  },
+  "IconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "SignatureText": {
+    "Hash": 8614338816010844770
+  },
+  "ContactsType": 1,
+  "ContactsCamp": 1
+}
+```
+
 ### MonopolyEventEffect.json (0.06 MB, 634 条)
 
 **字段** (3): `EffectID, Type, TypeParam`
@@ -618,7 +618,7 @@
 }
 ```
 
-### MazeSkill.json (0.05 MB, 208 条)
+### MazeSkill.json (0.05 MB, 210 条)
 
 **字段** (7): `MPCost, MazeSkillDesc, MazeSkillId, MazeSkillName, MazeSkilltype, RelatedAvatarSkill, SkillTriggerKey`
 
@@ -655,21 +655,7 @@
 }
 ```
 
-### MatchThreeScoreCurve.json (0.04 MB, 444 条)
-
-**字段** (6): `AddCurveRatio, AddHigh, AddLow, CurveID, DelayTime, PlayerStep`
-
-**首条记录摘要**:
-```json
-{
-  "CurveID": 1111,
-  "PlayerStep": 1,
-  "DelayTime": 1,
-  "AddCurveRatio": 3
-}
-```
-
-### MissionChapterConfig.json (0.04 MB, 79 条)
+### MissionChapterConfig.json (0.04 MB, 81 条)
 
 **字段** (12): `ChapterDesc, ChapterDisplayPriority, ChapterFigureIconPath, ChapterIconPath, ChapterName, ChapterSequence, ChapterType, FinalMainMission, ID, LinkChapterList, OriginMainMission, StageName`
 
@@ -682,6 +668,20 @@
   "ChapterDisplayPriority": 100,
   "ChapterIconPath": "SpriteOutput/Mission/ChapterIcon/Chapter...",
   "ChapterFigureIconPath": "SpriteOutput/Mission/ChapterIconBig/Chap..."
+}
+```
+
+### MatchThreeScoreCurve.json (0.04 MB, 444 条)
+
+**字段** (6): `AddCurveRatio, AddHigh, AddLow, CurveID, DelayTime, PlayerStep`
+
+**首条记录摘要**:
+```json
+{
+  "CurveID": 1111,
+  "PlayerStep": 1,
+  "DelayTime": 1,
+  "AddCurveRatio": 3
 }
 ```
 
@@ -733,7 +733,7 @@
 }
 ```
 
-### MainMissionSchedule.json (0.04 MB, 462 条)
+### MainMissionSchedule.json (0.04 MB, 463 条)
 
 **字段** (5): `ActivityModuleID, HideRemainTime, IsNotDelete, MainMissionID, ScheduleDataID`
 
@@ -797,6 +797,18 @@
 }
 ```
 
+### MonsterBlackListConfig.json (0.03 MB, 680 条)
+
+**字段** (2): `MonsterID, Rank`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterID": 1002011,
+  "Rank": 2
+}
+```
+
 ### MechCraftBanCellScheme.json (0.03 MB, 115 条)
 
 **字段** (5): `DIIINDCGMBE, EMCCLPLCOKG, GMFGFLLHPJJ, NJMFEDCACPC, PHFMCACHFIJ`
@@ -817,37 +829,7 @@
 }
 ```
 
-### MarbleRandomBuff.json (0.03 MB, 76 条)
-
-**字段** (14): `ActivityID, ConditionList, Desc, EffectParam, EffectType, GameMode, ID, IconPath, IsRepeat, Name, ParamList, SetInactive, UnlockSubMission, Weight`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "ActivityID": 50029,
-  "GameMode": "MARBLE",
-  "Name": {
-    "Hash": 10266392257552005485
-  },
-  "Desc": {
-    "Hash": 1335123673348389684
-  },
-  "ParamList": [
-    60
-  ],
-  "IconPath": "",
-  "EffectType": 1,
-  "EffectParam": 1,
-  "ConditionList": [
-    1
-  ],
-  "Weight": 15,
-  "UnlockSubMission": 803210001
-}
-```
-
-### MonsterGuideConfig.json (0.03 MB, 84 条)
+### MonsterGuideConfig.json (0.03 MB, 88 条)
 
 **字段** (7): `Difficulty, DifficultyGuideList, DifficultyList, MonsterID, PhaseList, TagList, TextGuideList`
 
@@ -880,6 +862,36 @@
     10060,
     10011
   ]
+}
+```
+
+### MarbleRandomBuff.json (0.03 MB, 76 条)
+
+**字段** (14): `ActivityID, ConditionList, Desc, EffectParam, EffectType, GameMode, ID, IconPath, IsRepeat, Name, ParamList, SetInactive, UnlockSubMission, Weight`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ActivityID": 50029,
+  "GameMode": "MARBLE",
+  "Name": {
+    "Hash": 10266392257552005485
+  },
+  "Desc": {
+    "Hash": 1335123673348389684
+  },
+  "ParamList": [
+    60
+  ],
+  "IconPath": "",
+  "EffectType": 1,
+  "EffectParam": 1,
+  "ConditionList": [
+    1
+  ],
+  "Weight": 15,
+  "UnlockSubMission": 803210001
 }
 ```
 
@@ -931,6 +943,24 @@
   "PhaseLimit": 1,
   "FundCost": 100,
   "StatsValue": 40
+}
+```
+
+### MazePuzzleOrigamiFD.json (0.02 MB, 114 条)
+
+**字段** (8): `ColonyID, FDContainerID, FDEntityID, FDSGP, FDSGPValue, FloorID, GroupID, MainPropID`
+
+**首条记录摘要**:
+```json
+{
+  "FloorID": 20502001,
+  "GroupID": 73,
+  "MainPropID": 300010,
+  "ColonyID": 33,
+  "FDSGP": "LG_110001__154_MapIconState_Auto",
+  "FDSGPValue": 2,
+  "FDContainerID": 110001,
+  "FDEntityID": 154
 }
 ```
 
@@ -994,24 +1024,6 @@
   "KOGHELCCHJC": "<dict[5]>",
   "FBFCPNADPKB": "Gentle",
   "FODGHIDJAPP": []
-}
-```
-
-### MazePuzzleOrigamiFD.json (0.02 MB, 102 条)
-
-**字段** (8): `ColonyID, FDContainerID, FDEntityID, FDSGP, FDSGPValue, FloorID, GroupID, MainPropID`
-
-**首条记录摘要**:
-```json
-{
-  "FloorID": 20502001,
-  "GroupID": 73,
-  "MainPropID": 300010,
-  "ColonyID": 33,
-  "FDSGP": "LG_110001__154_MapIconState_Auto",
-  "FDSGPValue": 2,
-  "FDContainerID": 110001,
-  "FDEntityID": 154
 }
 ```
 
@@ -1154,7 +1166,7 @@
 }
 ```
 
-### MonsterGuideTag.json (0.02 MB, 68 条)
+### MonsterGuideTag.json (0.02 MB, 72 条)
 
 **字段** (6): `EffectID, ParameterList, SkillID, TagBriefDescription, TagID, TagName`
 
@@ -1324,6 +1336,28 @@
 }
 ```
 
+### MonsterAtlasExtraPhases.json (0.01 MB, 13 条)
+
+**字段** (10): `CustomValueTags, DamageTypeResistance, DebuffResist, ManikinConfigPath, ManikinPrefabPath, MonsterIntroduction, MonsterName, PhaseID, StanceWeakList, TemplateGroupID`
+
+**首条记录摘要**:
+```json
+{
+  "TemplateGroupID": 4014010,
+  "PhaseID": 1,
+  "StanceWeakList": [
+    "Ice",
+    "Thunder",
+    "Quantum"
+  ],
+  "DebuffResist": "<list[1]>",
+  "DamageTypeResistance": "<list[4]>",
+  "CustomValueTags": [],
+  "ManikinPrefabPath": "Characters/CharacterPrefabs/Manikin/Mons...",
+  "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
+}
+```
+
 ### MonsterTestConfig.json (0.01 MB, 1,612 条)
 
 ### MatchThreeV2BattleItem.json (0.01 MB, 24 条)
@@ -1383,29 +1417,7 @@
 }
 ```
 
-### MonsterAtlasExtraPhases.json (0.01 MB, 12 条)
-
-**字段** (10): `CustomValueTags, DamageTypeResistance, DebuffResist, ManikinConfigPath, ManikinPrefabPath, MonsterIntroduction, MonsterName, PhaseID, StanceWeakList, TemplateGroupID`
-
-**首条记录摘要**:
-```json
-{
-  "TemplateGroupID": 4014010,
-  "PhaseID": 1,
-  "StanceWeakList": [
-    "Ice",
-    "Thunder",
-    "Quantum"
-  ],
-  "DebuffResist": "<list[1]>",
-  "DamageTypeResistance": "<list[4]>",
-  "CustomValueTags": [],
-  "ManikinPrefabPath": "Characters/CharacterPrefabs/Manikin/Mons...",
-  "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
-}
-```
-
-### MazeFloorUnlock.json (0.01 MB, 100 条)
+### MazeFloorUnlock.json (0.01 MB, 102 条)
 
 **字段** (2): `FloorID, UnlockConditionExpression`
 
@@ -1451,6 +1463,25 @@
 }
 ```
 
+### MonsterGuideSkill.json (0.01 MB, 59 条)
+
+**字段** (5): `Difficulty, SkillID, SkillName, SkillTextIDList, Type`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 100111,
+  "Difficulty": 1,
+  "Type": "Normal",
+  "SkillName": {
+    "Hash": 17315960548241071615
+  },
+  "SkillTextIDList": [
+    1001111
+  ]
+}
+```
+
 ### MatchThreeLevel.json (0.01 MB, 24 条)
 
 **字段** (20): `EnvironmentID, GoMissionCondition, HPmax, LevelDescription, LevelID, LevelImage, LevelMission, LevelName, LoseDesc, MissionDescription, Mode, OpponentBirdID, OpponentID, PlayerBirdID, PlayerID, RewardID, TurnStep, UnlockID, VSTalkList, VictoryDesc`
@@ -1474,26 +1505,7 @@
 }
 ```
 
-### MonsterGuideSkill.json (0.01 MB, 57 条)
-
-**字段** (5): `Difficulty, SkillID, SkillName, SkillTextIDList, Type`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 100111,
-  "Difficulty": 1,
-  "Type": "Normal",
-  "SkillName": {
-    "Hash": 17315960548241071615
-  },
-  "SkillTextIDList": [
-    1001111
-  ]
-}
-```
-
-### MonsterGuideSkillText.json (0.01 MB, 57 条)
+### MonsterGuideSkillText.json (0.01 MB, 59 条)
 
 **字段** (5): `Difficulty, EffectIDList, ParameterList, SkillDescription, SkillTextID`
 
@@ -1543,6 +1555,26 @@
 }
 ```
 
+### MazePuzzleOrigamiColony.json (0.01 MB, 45 条)
+
+**字段** (6): `FinishQuestID, FloorID, MaterialCost, MirrorFloorID, OrigamiColonyID, TalkSentenceID`
+
+**首条记录摘要**:
+```json
+{
+  "OrigamiColonyID": 1,
+  "FloorID": 20311001,
+  "MaterialCost": [
+    {
+      "ItemID": 122000,
+      "ItemNum": 1
+    }
+  ],
+  "TalkSentenceID": 414030589,
+  "FinishQuestID": 2200011
+}
+```
+
 ### MonopolyConstValue.json (0.01 MB, 67 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -1554,6 +1586,26 @@
   "Value": {
     "IntValue": 4
   }
+}
+```
+
+### MultiplePathAvatarAtlas.json (0.01 MB, 12 条)
+
+**字段** (3): `AvatarID, StoryIDList, VoiceIDList`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 8001,
+  "VoiceIDList": "<list[60]>",
+  "StoryIDList": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ]
 }
 ```
 
@@ -1585,46 +1637,6 @@
 }
 ```
 
-### MultiplePathAvatarAtlas.json (0.01 MB, 12 条)
-
-**字段** (3): `AvatarID, StoryIDList, VoiceIDList`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 8001,
-  "VoiceIDList": "<list[59]>",
-  "StoryIDList": [
-    11,
-    12,
-    13,
-    14,
-    15,
-    16
-  ]
-}
-```
-
-### MazePuzzleOrigamiColony.json (0.01 MB, 43 条)
-
-**字段** (6): `FinishQuestID, FloorID, MaterialCost, MirrorFloorID, OrigamiColonyID, TalkSentenceID`
-
-**首条记录摘要**:
-```json
-{
-  "OrigamiColonyID": 1,
-  "FloorID": 20311001,
-  "MaterialCost": [
-    {
-      "ItemID": 122000,
-      "ItemNum": 1
-    }
-  ],
-  "TalkSentenceID": 414030589,
-  "FinishQuestID": 2200011
-}
-```
-
 ### MessageItemImage.json (0.01 MB, 71 条)
 
 **字段** (3): `FemaleImagePath, ID, ImagePath`
@@ -1638,7 +1650,7 @@
 }
 ```
 
-### MonsterGuidePhase.json (0.01 MB, 29 条)
+### MonsterGuidePhase.json (0.01 MB, 30 条)
 
 **字段** (7): `Difficulty, PhaseAnswer, PhaseDescription, PhaseID, PhaseName, PhasePic, SkillList`
 
@@ -1742,6 +1754,26 @@
   "DamageTypeResistance": "<list[4]>",
   "ManikinPrefabPath": "Characters/CharacterPrefabs/Manikin/Mons...",
   "ManikinConfigPath": "Config/ConfigCharacter/Manikin/Monster/M..."
+}
+```
+
+### MonsterDifficultyGuide.json (0.01 MB, 54 条)
+
+**字段** (4): `DifficultyGuideDescription, DifficultyGuideID, ParameterList, SkillID`
+
+**首条记录摘要**:
+```json
+{
+  "DifficultyGuideID": 10010,
+  "DifficultyGuideDescription": {
+    "Hash": 1916644733650887747
+  },
+  "SkillID": 100401410,
+  "ParameterList": [
+    0.6,
+    1.25,
+    1
+  ]
 }
 ```
 
@@ -1860,26 +1892,6 @@
   },
   "KEDCLDIKAGC": [],
   "PCEHNLCLKGH": []
-}
-```
-
-### MonsterDifficultyGuide.json (0.01 MB, 51 条)
-
-**字段** (4): `DifficultyGuideDescription, DifficultyGuideID, ParameterList, SkillID`
-
-**首条记录摘要**:
-```json
-{
-  "DifficultyGuideID": 10010,
-  "DifficultyGuideDescription": {
-    "Hash": 1916644733650887747
-  },
-  "SkillID": 100401410,
-  "ParameterList": [
-    0.6,
-    1.25,
-    1
-  ]
 }
 ```
 
@@ -2157,7 +2169,7 @@
 }
 ```
 
-### MapDefaultEntrance.json (0.01 MB, 116 条)
+### MapDefaultEntrance.json (0.01 MB, 118 条)
 
 **字段** (2): `EntranceID, FloorID`
 
@@ -2244,6 +2256,21 @@
 }
 ```
 
+### MonsterTextGuide.json (0.01 MB, 45 条)
+
+**字段** (3): `ParameterList, TextGuideDescription, TextGuideID`
+
+**首条记录摘要**:
+```json
+{
+  "TextGuideID": 10010,
+  "TextGuideDescription": {
+    "Hash": 3311593509976790101
+  },
+  "ParameterList": []
+}
+```
+
 ### MatchThreeV2StarTarget.json (0.01 MB, 30 条)
 
 **字段** (5): `Desc, FinishParamList, FinishType, Reward, StarTargetID`
@@ -2275,21 +2302,6 @@
   "JsonConfigPath": "Config/Gameplays/LittleGame/Marble/Level...",
   "TutorialGroupID": 9838,
   "TotalScore": 4
-}
-```
-
-### MonsterTextGuide.json (0.01 MB, 42 条)
-
-**字段** (3): `ParameterList, TextGuideDescription, TextGuideID`
-
-**首条记录摘要**:
-```json
-{
-  "TextGuideID": 10010,
-  "TextGuideDescription": {
-    "Hash": 3311593509976790101
-  },
-  "ParameterList": []
 }
 ```
 
@@ -2601,6 +2613,21 @@
 }
 ```
 
+### MessageItemTextOverride.json (0.00 MB, 28 条)
+
+**字段** (3): `Conditions, ItemID, MainText`
+
+**首条记录摘要**:
+```json
+{
+  "ItemID": 201750013,
+  "MainText": {
+    "Hash": 10207309115142039176
+  },
+  "Conditions": "[FinishMainMission:1043710]"
+}
+```
+
 ### MonopolyQuizTaskConfig.json (0.00 MB, 24 条)
 
 **字段** (3): `PriorityPlayerIDList, QuizTaskID, TaskDesc`
@@ -2706,21 +2733,6 @@
     "Hash": 11424130676797109994
   },
   "ChallengerImage": "SpriteOutput/Quest/MatchThree/LevelItem/..."
-}
-```
-
-### MessageItemTextOverride.json (0.00 MB, 26 条)
-
-**字段** (3): `Conditions, ItemID, MainText`
-
-**首条记录摘要**:
-```json
-{
-  "ItemID": 201750013,
-  "MainText": {
-    "Hash": 10207309115142039176
-  },
-  "Conditions": "[FinishMainMission:1043710]"
 }
 ```
 
@@ -3112,7 +3124,7 @@
 }
 ```
 
-### MappingInfoEntranceConfig.json (0.00 MB, 51 条)
+### MappingInfoEntranceConfig.json (0.00 MB, 52 条)
 
 **字段** (2): `EntranceID, ID`
 
@@ -4468,8 +4480,8 @@
 **首条记录摘要**:
 ```json
 {
-  "ID": 460,
-  "VersionFinalMainMissionID": 1054604
+  "ID": 470,
+  "VersionFinalMainMissionID": 1054705
 }
 ```
 
@@ -4498,8 +4510,6 @@
 ### MonopolyGuessPlayerConfig.json (0.00 MB, 0 条)
 
 ### MonopolyReportStats.json (0.00 MB, 0 条)
-
-### MonsterBlackListConfig.json (0.00 MB, 0 条)
 
 ### MonsterDropTest.json (0.00 MB, 0 条)
 

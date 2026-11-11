@@ -4,7 +4,7 @@
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### ItemConfig.json (1.79 MB, 2,941 条)
+### ItemConfig.json (1.81 MB, 2,972 条)
 
 **字段** (21): `CustomDataList, ID, InventoryDisplayTag, IsShowRedDot, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, SellType, UseMethod, isVisible`
 
@@ -33,7 +33,7 @@
 }
 ```
 
-### ItemConfigBook.json (0.51 MB, 762 条)
+### ItemConfigBook.json (0.52 MB, 785 条)
 
 **字段** (18): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, UseMethod, isVisible`
 
@@ -67,7 +67,7 @@
 }
 ```
 
-### ItemConfigRelic.json (0.49 MB, 774 条)
+### ItemConfigRelic.json (0.50 MB, 790 条)
 
 **字段** (16): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, SellType, isVisible`
 
@@ -102,7 +102,7 @@
 }
 ```
 
-### ItemComefrom.json (0.38 MB, 2,363 条)
+### ItemComefrom.json (0.39 MB, 2,402 条)
 
 **字段** (7): `ComefromID, Desc, GotoID, GotoParam, ID, NPCMonsterTrackID, Sort`
 
@@ -136,23 +136,7 @@
 }
 ```
 
-### LinearQuest.json (0.32 MB, 2,997 条)
-
-**字段** (4): `LinearID, MaxLevel, MinLevel, QuestList`
-
-**首条记录摘要**:
-```json
-{
-  "LinearID": 1001711,
-  "QuestList": [
-    1001711
-  ],
-  "MinLevel": 1,
-  "MaxLevel": 999
-}
-```
-
-### LimaoNewsMessageItem.json (0.29 MB, 1,202 条)
+### LimaoNewsMessageItem.json (0.33 MB, 1,375 条)
 
 **字段** (11): `BGOCHGHFOLJ, BHNIBPKLDKO, FBKAMIHGLFK, GEFCMECLLIJ, HMGLFJABIII, IJBDLNLOJKK, JAKLCIIEDON, JGMIOKAJMFB, LDLDCLEIFML, LINLNNHIBAK, NJFABJDCPNC`
 
@@ -173,7 +157,23 @@
 }
 ```
 
-### LocalbookConfig.json (0.29 MB, 1,121 条)
+### LinearQuest.json (0.33 MB, 3,054 条)
+
+**字段** (4): `LinearID, MaxLevel, MinLevel, QuestList`
+
+**首条记录摘要**:
+```json
+{
+  "LinearID": 1001711,
+  "QuestList": [
+    1001711
+  ],
+  "MinLevel": 1,
+  "MaxLevel": 999
+}
+```
+
+### LocalbookConfig.json (0.29 MB, 1,144 条)
 
 **字段** (7): `BookContent, BookDisplayType, BookID, BookInsideName, BookSeriesID, BookSeriesInsideID, LocalBookImagePath`
 
@@ -194,7 +194,7 @@
 }
 ```
 
-### LimaoNewsComment.json (0.24 MB, 1,831 条)
+### LimaoNewsComment.json (0.29 MB, 2,167 条)
 
 **字段** (4): `AHCGOKDLKHM, DNJCIDFBHPC, HFFBGDNDBHC, JAKLCIIEDON`
 
@@ -209,7 +209,7 @@
 }
 ```
 
-### LimaoNewsInterviewContent.json (0.21 MB, 1,244 条)
+### LimaoNewsInterviewContent.json (0.26 MB, 1,539 条)
 
 **字段** (5): `ANECPHCPLPP, DFFLADLLADD, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
 
@@ -226,7 +226,21 @@
 }
 ```
 
-### ItemComposeConfig.json (0.19 MB, 343 条)
+### LimaoNewsCommentState.json (0.22 MB, 2,176 条)
+
+**字段** (5): `AEDOBNFDODI, GLBIANIMBII, GNDCCBNILML, HFFBGDNDBHC, KIFJECNOHDG`
+
+**首条记录摘要**:
+```json
+{
+  "HFFBGDNDBHC": 101001,
+  "AEDOBNFDODI": 1,
+  "GLBIANIMBII": [],
+  "GNDCCBNILML": true
+}
+```
+
+### ItemComposeConfig.json (0.20 MB, 345 条)
 
 **字段** (20): `CoinCost, FormulaRequire, FormulaType, FuncType, ID, IsCanAcceleratedCompose, IsShowHoldNumber, ItemComposeTag, ItemID, LimitType, LimitTypeParam, LimitValue, MaterialCost, MaxCount, Order, RelicList, SpecialMaterialCost, SpecialMaterialCostNumber, Type, WorldLevelRequire`
 
@@ -259,7 +273,7 @@
 }
 ```
 
-### LoadingDesc.json (0.19 MB, 421 条)
+### LoadingDesc.json (0.19 MB, 423 条)
 
 **字段** (14): `DescTextmapID, ForceParam, ForceParamForOr, Group, ID, ImageID, LockParam, LockParamForOr, MaxLevel, MinLevel, TitleTextmapID, UnlockParam, UnlockParamForOr, Weight`
 
@@ -287,21 +301,7 @@
 }
 ```
 
-### LimaoNewsCommentState.json (0.19 MB, 1,840 条)
-
-**字段** (5): `AEDOBNFDODI, GLBIANIMBII, GNDCCBNILML, HFFBGDNDBHC, KIFJECNOHDG`
-
-**首条记录摘要**:
-```json
-{
-  "HFFBGDNDBHC": 101001,
-  "AEDOBNFDODI": 1,
-  "GLBIANIMBII": [],
-  "GNDCCBNILML": true
-}
-```
-
-### ItemConfigDisk.json (0.17 MB, 272 条)
+### ItemConfigDisk.json (0.18 MB, 285 条)
 
 **字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, PurposeType, Rarity, ReturnItemIDList, isVisible`
 
@@ -334,7 +334,7 @@
 }
 ```
 
-### ItemConfigEquipment.json (0.11 MB, 170 条)
+### ItemConfigEquipment.json (0.11 MB, 172 条)
 
 **字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, SellType, isVisible`
 
@@ -372,24 +372,7 @@
 }
 ```
 
-### IdleLiveFinishway.json (0.10 MB, 413 条)
-
-**字段** (11): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 8060101,
-  "FinishType": "IdleLiveOpenChestNum",
-  "ParamType": "NoPara",
-  "ParamStr1": "",
-  "ParamIntList": [],
-  "ParamItemList": [],
-  "Progress": 1
-}
-```
-
-### InControlActionMap.json (0.10 MB, 339 条)
+### InControlActionMap.json (0.10 MB, 353 条)
 
 **字段** (7): `FuncGotoIDList, actionName, actionTextmapID, actionTypeList, defaultInControlTypes, defaultKey, defaultMouseType`
 
@@ -407,6 +390,39 @@
   "defaultMouseType": "PositiveY",
   "defaultInControlTypes": [],
   "FuncGotoIDList": []
+}
+```
+
+### IdleLiveFinishway.json (0.10 MB, 413 条)
+
+**字段** (11): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 8060101,
+  "FinishType": "IdleLiveOpenChestNum",
+  "ParamType": "NoPara",
+  "ParamStr1": "",
+  "ParamIntList": [],
+  "ParamItemList": [],
+  "Progress": 1
+}
+```
+
+### LimaoNewsUser.json (0.10 MB, 575 条)
+
+**字段** (4): `DKCPEGMOAHB, JAKLCIIEDON, JEJNHIBLJNM, NJPLKACOMMM`
+
+**首条记录摘要**:
+```json
+{
+  "JAKLCIIEDON": 1,
+  "NJPLKACOMMM": {
+    "Hash": 2541523136256793332
+  },
+  "DKCPEGMOAHB": "SpriteOutput/AvatarRoundIcon/WebIcon/Web...",
+  "JEJNHIBLJNM": "Official"
 }
 ```
 
@@ -499,19 +515,63 @@
 }
 ```
 
-### LimaoNewsUser.json (0.09 MB, 515 条)
+### LimaoNewsPost.json (0.08 MB, 112 条)
 
-**字段** (4): `DKCPEGMOAHB, JAKLCIIEDON, JEJNHIBLJNM, NJPLKACOMMM`
+**字段** (18): `AEONKNDCDKN, BDACPPLKLGL, BDEBECLIHMD, BDKECJFBAJJ, DGLJLJEHNNB, DPFCAIKMBEP, EEIEODMEMFI, EFFFIJHJHMA, GACBINGMEJB, GAPKKIEIEHE, HIHLLBFEONI, JFBDBCKPPEI, KHIALKEMEGH, KJGJGNLACKF, LIDHGBEAJMA, MHLNDBFHHLF, NEPKPFOBEIO, ODLDEEANNCM`
 
 **首条记录摘要**:
 ```json
 {
-  "JAKLCIIEDON": 1,
-  "NJPLKACOMMM": {
-    "Hash": 2541523136256793332
+  "DGLJLJEHNNB": 101,
+  "NEPKPFOBEIO": [
+    2
+  ],
+  "GAPKKIEIEHE": "Auto",
+  "BDKECJFBAJJ": [
+    2400073
+  ],
+  "MHLNDBFHHLF": [],
+  "HIHLLBFEONI": 3,
+  "EFFFIJHJHMA": "Picture",
+  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
+  "EEIEODMEMFI": "",
+  "BDEBECLIHMD": "",
+  "BDACPPLKLGL": "",
+  "DPFCAIKMBEP": {
+    "Hash": 7745117516287334929
   },
-  "DKCPEGMOAHB": "SpriteOutput/AvatarRoundIcon/WebIcon/Web...",
-  "JEJNHIBLJNM": "Official"
+  "KJGJGNLACKF": {
+    "Hash": 13023016003766530778
+  },
+  "LIDHGBEAJMA": "<list[11]>",
+  "GACBINGMEJB": ""
+}
+```
+
+### ItemPlayerCard.json (0.08 MB, 126 条)
+
+**字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 200001,
+  "ItemMainType": "Usable",
+  "ItemSubType": "HeadIcon",
+  "InventoryDisplayTag": 1,
+  "Rarity": "VeryRare",
+  "isVisible": true,
+  "ItemName": {
+    "Hash": 216656405702675284
+  },
+  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "ItemFigureIconPath": "",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 1,
+  "UseMethod": "AutoConversionItem",
+  "CustomDataList": [],
+  "ReturnItemIDList": []
 }
 ```
 
@@ -549,65 +609,6 @@
   "FlySpeed": 0.8,
   "SourceType": "Unlock",
   "SourceID": 1
-}
-```
-
-### ItemPlayerCard.json (0.08 MB, 119 条)
-
-**字段** (17): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 200001,
-  "ItemMainType": "Usable",
-  "ItemSubType": "HeadIcon",
-  "InventoryDisplayTag": 1,
-  "Rarity": "VeryRare",
-  "isVisible": true,
-  "ItemName": {
-    "Hash": 216656405702675284
-  },
-  "ItemIconPath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "ItemFigureIconPath": "",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 1,
-  "UseMethod": "AutoConversionItem",
-  "CustomDataList": [],
-  "ReturnItemIDList": []
-}
-```
-
-### LimaoNewsPost.json (0.07 MB, 101 条)
-
-**字段** (17): `AEONKNDCDKN, BDACPPLKLGL, BDEBECLIHMD, BDKECJFBAJJ, DGLJLJEHNNB, DPFCAIKMBEP, EEIEODMEMFI, EFFFIJHJHMA, GAPKKIEIEHE, HIHLLBFEONI, JFBDBCKPPEI, KHIALKEMEGH, KJGJGNLACKF, LIDHGBEAJMA, MHLNDBFHHLF, NEPKPFOBEIO, ODLDEEANNCM`
-
-**首条记录摘要**:
-```json
-{
-  "DGLJLJEHNNB": 101,
-  "NEPKPFOBEIO": [
-    2
-  ],
-  "GAPKKIEIEHE": "Auto",
-  "BDKECJFBAJJ": [
-    2400073
-  ],
-  "MHLNDBFHHLF": [],
-  "HIHLLBFEONI": 3,
-  "EFFFIJHJHMA": "Picture",
-  "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
-  "EEIEODMEMFI": "",
-  "BDEBECLIHMD": "",
-  "BDACPPLKLGL": "",
-  "DPFCAIKMBEP": {
-    "Hash": 7745117516287334929
-  },
-  "KJGJGNLACKF": {
-    "Hash": 13023016003766530778
-  },
-  "LIDHGBEAJMA": "<list[11]>"
 }
 ```
 
@@ -693,6 +694,25 @@
 }
 ```
 
+### LimaoNewsFinishway.json (0.06 MB, 274 条)
+
+**字段** (10): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2499999,
+  "FinishType": "SubMissionFinishCnt",
+  "ParamType": "ListContain",
+  "ParamStr1": "",
+  "ParamIntList": [
+    804010118
+  ],
+  "ParamItemList": [],
+  "Progress": 1
+}
+```
+
 ### IdleLiveSpecialChat.json (0.06 MB, 169 条)
 
 **字段** (8): `ChatList, FlySpeed, ID, Interval, IsExclusive, RepeatCount, TriggerID, UnlockID`
@@ -710,22 +730,31 @@
 }
 ```
 
-### LimaoNewsFinishway.json (0.06 MB, 250 条)
+### ItemConfigAvatar.json (0.06 MB, 100 条)
 
-**字段** (10): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
+**字段** (14): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 2499999,
-  "FinishType": "SubMissionFinishCnt",
-  "ParamType": "ListContain",
-  "ParamStr1": "",
-  "ParamIntList": [
-    804010118
-  ],
-  "ParamItemList": [],
-  "Progress": 1
+  "ID": 1001,
+  "ItemMainType": "AvatarCard",
+  "ItemSubType": "AvatarCard",
+  "InventoryDisplayTag": 1,
+  "Rarity": "VeryRare",
+  "ItemName": {
+    "Hash": 5115085844323377115
+  },
+  "ItemBGDesc": {
+    "Hash": 13926276512027878662
+  },
+  "ItemIconPath": "SpriteOutput/AvatarIcon/Avatar/1001.png",
+  "ItemFigureIconPath": "SpriteOutput/AvatarIcon/Avatar/1001.png",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/Avatar/1001....",
+  "PileLimit": 1,
+  "CustomDataList": [],
+  "ReturnItemIDList": []
 }
 ```
 
@@ -754,31 +783,35 @@
 }
 ```
 
-### ItemConfigAvatar.json (0.05 MB, 99 条)
+### ItemConfigPlayerRoomDynamic.json (0.05 MB, 83 条)
 
-**字段** (14): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
+**字段** (16): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1001,
-  "ItemMainType": "AvatarCard",
-  "ItemSubType": "AvatarCard",
+  "ID": 291001,
+  "ItemMainType": "Material",
+  "ItemSubType": "TrainPartyDiyMaterial",
   "InventoryDisplayTag": 1,
   "Rarity": "VeryRare",
   "ItemName": {
-    "Hash": 5115085844323377115
+    "Hash": 17450310681412571793
+  },
+  "ItemDesc": {
+    "Hash": 15653177744920198895
   },
   "ItemBGDesc": {
-    "Hash": 13926276512027878662
+    "Hash": 18022915134580072984
   },
-  "ItemIconPath": "SpriteOutput/AvatarIcon/Avatar/1001.png",
-  "ItemFigureIconPath": "SpriteOutput/AvatarIcon/Avatar/1001.png",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/Avatar/1001....",
-  "PileLimit": 1,
+  "ItemIconPath": "SpriteOutput/ItemIcon/FurnitureIcon/2910...",
+  "ItemFigureIconPath": "SpriteOutput/ItemFigures/FurnitureIcon/2...",
+  "ItemCurrencyIconPath": "SpriteOutput/ItemIcon/FurnitureIcon/2910...",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 100,
   "CustomDataList": [],
-  "ReturnItemIDList": []
+  "ReturnItemIDList": [],
+  "ItemGroup": 1001
 }
 ```
 
@@ -826,53 +859,7 @@
 }
 ```
 
-### ItemConfigPlayerRoomDynamic.json (0.05 MB, 79 条)
-
-**字段** (16): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 291001,
-  "ItemMainType": "Material",
-  "ItemSubType": "TrainPartyDiyMaterial",
-  "InventoryDisplayTag": 1,
-  "Rarity": "VeryRare",
-  "ItemName": {
-    "Hash": 17450310681412571793
-  },
-  "ItemDesc": {
-    "Hash": 15653177744920198895
-  },
-  "ItemBGDesc": {
-    "Hash": 18022915134580072984
-  },
-  "ItemIconPath": "SpriteOutput/ItemIcon/FurnitureIcon/2910...",
-  "ItemFigureIconPath": "SpriteOutput/ItemFigures/FurnitureIcon/2...",
-  "ItemCurrencyIconPath": "SpriteOutput/ItemIcon/FurnitureIcon/2910...",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 100,
-  "CustomDataList": [],
-  "ReturnItemIDList": [],
-  "ItemGroup": 1001
-}
-```
-
-### IdleLiveChatStoryPhase.json (0.05 MB, 119 条)
-
-**字段** (4): `ChatList, FlySpeed, ID, Interval`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 101,
-  "ChatList": "<list[15]>",
-  "Interval": 2,
-  "FlySpeed": 1
-}
-```
-
-### ItemConfigAvatarRank.json (0.05 MB, 94 条)
+### ItemConfigAvatarRank.json (0.05 MB, 95 条)
 
 **字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemBGDesc, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
 
@@ -903,7 +890,21 @@
 }
 ```
 
-### LoopCGConfig.json (0.05 MB, 462 条)
+### IdleLiveChatStoryPhase.json (0.05 MB, 119 条)
+
+**字段** (4): `ChatList, FlySpeed, ID, Interval`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "ChatList": "<list[15]>",
+  "Interval": 2,
+  "FlySpeed": 1
+}
+```
+
+### LoopCGConfig.json (0.05 MB, 480 条)
 
 **字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
 
@@ -916,7 +917,7 @@
 }
 ```
 
-### ItemConfigAvatarPlayerIcon.json (0.04 MB, 94 条)
+### ItemConfigAvatarPlayerIcon.json (0.05 MB, 95 条)
 
 **字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, UseMethod, isVisible`
 
@@ -943,7 +944,7 @@
 }
 ```
 
-### IntroData.json (0.04 MB, 231 条)
+### IntroData.json (0.04 MB, 234 条)
 
 **字段** (4): `Desc, Desc_Os, ID, Title`
 
@@ -1010,6 +1011,29 @@
 }
 ```
 
+### LimaoNewsInterview.json (0.03 MB, 24 条)
+
+**字段** (9): `DKPOHCDMHBF, EECIBIDGPEI, GEKGGMKGIPE, HMFGANHKHIM, KMIBDJKKGDE, LIDHGBEAJMA, LMDEHNMJHDJ, LNHLPKEHJBA, PFKLDBGEGAO`
+
+**首条记录摘要**:
+```json
+{
+  "DKPOHCDMHBF": 201,
+  "LNHLPKEHJBA": {
+    "Hash": 1513001872307035594
+  },
+  "HMFGANHKHIM": {
+    "Hash": 5169119345462893113
+  },
+  "LMDEHNMJHDJ": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
+  "PFKLDBGEGAO": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
+  "GEKGGMKGIPE": [],
+  "EECIBIDGPEI": "<list[68]>",
+  "LIDHGBEAJMA": "<list[10]>",
+  "KMIBDJKKGDE": 16032
+}
+```
+
 ### IdleLiveImgDanmu.json (0.03 MB, 140 条)
 
 **字段** (9): `FlySpeed, ID, ImagePath, Interval, IsExclusive, RepeatCount, SizeType, TriggerID, UnlockID`
@@ -1064,29 +1088,6 @@
 }
 ```
 
-### LimaoNewsInterview.json (0.03 MB, 21 条)
-
-**字段** (9): `DKPOHCDMHBF, EECIBIDGPEI, GEKGGMKGIPE, HMFGANHKHIM, KMIBDJKKGDE, LIDHGBEAJMA, LMDEHNMJHDJ, LNHLPKEHJBA, PFKLDBGEGAO`
-
-**首条记录摘要**:
-```json
-{
-  "DKPOHCDMHBF": 201,
-  "LNHLPKEHJBA": {
-    "Hash": 1513001872307035594
-  },
-  "HMFGANHKHIM": {
-    "Hash": 5169119345462893113
-  },
-  "LMDEHNMJHDJ": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
-  "PFKLDBGEGAO": "SpriteOutput/UI/LimaoNews/PostPic/Spcial...",
-  "GEKGGMKGIPE": [],
-  "EECIBIDGPEI": "<list[68]>",
-  "LIDHGBEAJMA": "<list[10]>",
-  "KMIBDJKKGDE": 16032
-}
-```
-
 ### ILHardLevelGroup.json (0.03 MB, 140 条)
 
 **字段** (5): `AttackRatio, DefenceRatio, HPRatio, HardLevelGroup, Level`
@@ -1105,6 +1106,36 @@
   "HPRatio": {
     "Value": 1
   }
+}
+```
+
+### LoopCGEncryptionConfig.json (0.02 MB, 480 条)
+
+**字段** (3): `Encryption, EncryptionMethod, VideoID`
+
+**首条记录摘要**:
+```json
+{
+  "VideoID": 101
+}
+```
+
+### ItemCureInfoData.json (0.02 MB, 108 条)
+
+**字段** (5): `CureInfoDesc, CureInfoTitle, ID, ImgPath, PageID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 140066,
+  "PageID": 1,
+  "CureInfoTitle": {
+    "Hash": 7410281320175374208
+  },
+  "CureInfoDesc": {
+    "Hash": 11649921860993339312
+  },
+  "ImgPath": "SpriteOutput/UI/TempSprite/SubMissionTes..."
 }
 ```
 
@@ -1160,36 +1191,7 @@
 }
 ```
 
-### LoopCGEncryptionConfig.json (0.02 MB, 462 条)
-
-**字段** (3): `Encryption, EncryptionMethod, VideoID`
-
-**首条记录摘要**:
-```json
-{
-  "VideoID": 101
-}
-```
-
-### ItemCureInfoData.json (0.02 MB, 105 条)
-
-**字段** (4): `CureInfoDesc, CureInfoTitle, ID, ImgPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 140066,
-  "CureInfoTitle": {
-    "Hash": 8473171996317953795
-  },
-  "CureInfoDesc": {
-    "Hash": 9562581932070426903
-  },
-  "ImgPath": "SpriteOutput/UI/TempSprite/SubMissionTes..."
-}
-```
-
-### LimaoNewsContent.json (0.02 MB, 120 条)
+### LimaoNewsContent.json (0.02 MB, 124 条)
 
 **字段** (6): `ANECPHCPLPP, DFFLADLLADD, DGLJLJEHNNB, EEIEODMEMFI, MMNJODIJPOE, ODLDEEANNCM`
 
@@ -1206,26 +1208,7 @@
 }
 ```
 
-### IdleLiveMessageContent.json (0.02 MB, 110 条)
-
-**字段** (5): `ContentID, ContentType, MainText, NextContentID, SenderID`
-
-**首条记录摘要**:
-```json
-{
-  "ContentID": 1010,
-  "SenderID": 4,
-  "MainText": {
-    "Hash": 10360930866046369098
-  },
-  "NextContentID": [
-    1011
-  ],
-  "ContentType": "DisplayText"
-}
-```
-
-### LimaoNewsOfficeSurvey.json (0.02 MB, 35 条)
+### LimaoNewsOfficeSurvey.json (0.02 MB, 37 条)
 
 **字段** (15): `AAPEGNAHMJB, ADJDGJOFEJF, ANPKNOHCPDK, DCCHGAPFMJI, EEIEODMEMFI, HIHLLBFEONI, IODMEPHIMDB, JBJJIOFBBCN, KHIALKEMEGH, MGAANANONJP, ODLDEEANNCM, OFMBPNHDBBE, OGICJALDJHP, OMLFNLJDHKG, OOBCHJJPIAC`
 
@@ -1259,6 +1242,25 @@
   "MGAANANONJP": [],
   "ODLDEEANNCM": "SpriteOutput/UI/LimaoNews/PostPic/post_1...",
   "EEIEODMEMFI": ""
+}
+```
+
+### IdleLiveMessageContent.json (0.02 MB, 110 条)
+
+**字段** (5): `ContentID, ContentType, MainText, NextContentID, SenderID`
+
+**首条记录摘要**:
+```json
+{
+  "ContentID": 1010,
+  "SenderID": 4,
+  "MainText": {
+    "Hash": 10360930866046369098
+  },
+  "NextContentID": [
+    1011
+  ],
+  "ContentType": "DisplayText"
 }
 ```
 
@@ -1314,6 +1316,32 @@
 }
 ```
 
+### InfiniteEliteGroup.json (0.02 MB, 64 条)
+
+**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
+
+**首条记录摘要**:
+```json
+{
+  "EliteGroup": 42600101,
+  "AttackRatio": {
+    "Value": 1
+  },
+  "DefenceRatio": {
+    "Value": 1
+  },
+  "HPRatio": {
+    "Value": 1
+  },
+  "SpeedRatio": {
+    "Value": 1
+  },
+  "StanceRatio": {
+    "Value": 1
+  }
+}
+```
+
 ### IdleLiveSpineAnimGroup.json (0.02 MB, 71 条)
 
 **字段** (4): `AnimGroupID, BubbleText, FemaleStateList, MaleStateList`
@@ -1328,6 +1356,35 @@
   "FemaleStateList": [
     "Move_Sit_Idle"
   ]
+}
+```
+
+### ItemConfigBadge.json (0.01 MB, 26 条)
+
+**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 230532,
+  "ItemMainType": "Usable",
+  "ItemSubType": "Badge",
+  "InventoryDisplayTag": 1,
+  "Rarity": "SuperRare",
+  "ItemName": {
+    "Hash": 16326247488708629529
+  },
+  "ItemDesc": {
+    "Hash": 6984404304452614213
+  },
+  "ItemIconPath": "SpriteOutput/ItemIcon/295532.png",
+  "ItemFigureIconPath": "SpriteOutput/ItemFigures/295532.png",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "",
+  "PileLimit": 1,
+  "CustomDataList": [],
+  "ReturnItemIDList": [],
+  "ItemGroup": 1001
 }
 ```
 
@@ -1408,32 +1465,43 @@
 }
 ```
 
-### ItemConfigBadge.json (0.01 MB, 21 条)
+### LimaoNewsWorkPhase.json (0.01 MB, 42 条)
 
-**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemGroup, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList`
+**字段** (8): `CBCAAENONPB, DCDCCOBHCAP, EPDCFPAADJF, FAHDNMHFOKD, FMMELPPDMKI, GABPGBDNDEH, GGKPLJJMBBA, KOAGHJCOOGA`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 230532,
-  "ItemMainType": "Usable",
-  "ItemSubType": "Badge",
-  "InventoryDisplayTag": 1,
-  "Rarity": "SuperRare",
-  "ItemName": {
-    "Hash": 16326247488708629529
+  "GGKPLJJMBBA": 1,
+  "GABPGBDNDEH": 101,
+  "KOAGHJCOOGA": [
+    3
+  ],
+  "EPDCFPAADJF": 1001201,
+  "FMMELPPDMKI": [
+    102,
+    103
+  ],
+  "DCDCCOBHCAP": {
+    "Hash": 3142781706416429922
   },
-  "ItemDesc": {
-    "Hash": 6984404304452614213
-  },
-  "ItemIconPath": "SpriteOutput/ItemIcon/295532.png",
-  "ItemFigureIconPath": "SpriteOutput/ItemFigures/295532.png",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "",
-  "PileLimit": 1,
-  "CustomDataList": [],
-  "ReturnItemIDList": [],
-  "ItemGroup": 1001
+  "FAHDNMHFOKD": {
+    "Hash": 2576500603186312792
+  }
+}
+```
+
+### LimaoNewsPostState.json (0.01 MB, 114 条)
+
+**字段** (5): `AEDOBNFDODI, CNCKNJMHDIL, DGLJLJEHNNB, KIFJECNOHDG, KMIBDJKKGDE`
+
+**首条记录摘要**:
+```json
+{
+  "DGLJLJEHNNB": 101,
+  "AEDOBNFDODI": 1,
+  "CNCKNJMHDIL": [],
+  "KMIBDJKKGDE": 3258
 }
 ```
 
@@ -1505,7 +1573,7 @@
 }
 ```
 
-### ItemUseData.json (0.01 MB, 74 条)
+### ItemUseData.json (0.01 MB, 75 条)
 
 **字段** (4): `IsAutoUse, UseDataID, UseMultipleMax, UseParam`
 
@@ -1517,72 +1585,6 @@
     1000011
   ],
   "UseMultipleMax": 5
-}
-```
-
-### LimaoNewsWorkPhase.json (0.01 MB, 37 条)
-
-**字段** (8): `CBCAAENONPB, DCDCCOBHCAP, EPDCFPAADJF, FAHDNMHFOKD, FMMELPPDMKI, GABPGBDNDEH, GGKPLJJMBBA, KOAGHJCOOGA`
-
-**首条记录摘要**:
-```json
-{
-  "GGKPLJJMBBA": 1,
-  "GABPGBDNDEH": 101,
-  "KOAGHJCOOGA": [
-    3
-  ],
-  "EPDCFPAADJF": 1001201,
-  "FMMELPPDMKI": [
-    102,
-    103
-  ],
-  "DCDCCOBHCAP": {
-    "Hash": 3142781706416429922
-  },
-  "FAHDNMHFOKD": {
-    "Hash": 2576500603186312792
-  }
-}
-```
-
-### LimaoNewsPostState.json (0.01 MB, 103 条)
-
-**字段** (5): `AEDOBNFDODI, CNCKNJMHDIL, DGLJLJEHNNB, KIFJECNOHDG, KMIBDJKKGDE`
-
-**首条记录摘要**:
-```json
-{
-  "DGLJLJEHNNB": 101,
-  "AEDOBNFDODI": 1,
-  "CNCKNJMHDIL": [],
-  "KMIBDJKKGDE": 3258
-}
-```
-
-### InfiniteEliteGroup.json (0.01 MB, 42 条)
-
-**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
-
-**首条记录摘要**:
-```json
-{
-  "EliteGroup": 42600101,
-  "AttackRatio": {
-    "Value": 1
-  },
-  "DefenceRatio": {
-    "Value": 1
-  },
-  "HPRatio": {
-    "Value": 1
-  },
-  "SpeedRatio": {
-    "Value": 1
-  },
-  "StanceRatio": {
-    "Value": 1
-  }
 }
 ```
 
@@ -1602,7 +1604,7 @@
 }
 ```
 
-### LimaoNewsOfficeEvent.json (0.01 MB, 27 条)
+### LimaoNewsOfficeEvent.json (0.01 MB, 28 条)
 
 **字段** (12): `AJGGLOMPFOJ, CPCMBMBFBAI, DNOENIFOBLJ, ELGNMHLEEEH, GHOCDNJOCBH, GMPGDEINODK, HPLHMBBGAOO, JCAGGCBNNDL, LDBCBEDHFPD, MPJLNHJIFIM, NALKJIAJIJK, NMBKAIEIAPE`
 
@@ -1650,6 +1652,31 @@
 ```json
 {
   "ID": 1
+}
+```
+
+### LimaoNewsPlanPhase.json (0.01 MB, 18 条)
+
+**字段** (9): `ABPCHBOBLNB, AIFCBBLPHHI, CCHLHJCMFGM, FBKAMIHGLFK, JEJGIFKGBCO, NFIKDONNJMD, OJBEKHJBIHL, OOKONGHCFBP, OPOPKLGBNKB`
+
+**首条记录摘要**:
+```json
+{
+  "OPOPKLGBNKB": 101,
+  "ABPCHBOBLNB": "Start",
+  "NFIKDONNJMD": 402070302,
+  "JEJGIFKGBCO": {
+    "Hash": 12995951425044401064
+  },
+  "CCHLHJCMFGM": {
+    "Hash": 18273563577507831110
+  },
+  "AIFCBBLPHHI": {
+    "Hash": 7857490487807842557
+  },
+  "OJBEKHJBIHL": "<list[3]>",
+  "OOKONGHCFBP": "Config/StandalonePerformance/StandaloneP...",
+  "FBKAMIHGLFK": "SpriteOutput/UI/LimaoNews/PlanPic/LimaoN..."
 }
 ```
 
@@ -1785,31 +1812,6 @@
 }
 ```
 
-### LimaoNewsPlanPhase.json (0.01 MB, 14 条)
-
-**字段** (9): `ABPCHBOBLNB, AIFCBBLPHHI, CCHLHJCMFGM, FBKAMIHGLFK, JEJGIFKGBCO, NFIKDONNJMD, OJBEKHJBIHL, OOKONGHCFBP, OPOPKLGBNKB`
-
-**首条记录摘要**:
-```json
-{
-  "OPOPKLGBNKB": 101,
-  "ABPCHBOBLNB": "Start",
-  "NFIKDONNJMD": 402070302,
-  "JEJGIFKGBCO": {
-    "Hash": 12995951425044401064
-  },
-  "CCHLHJCMFGM": {
-    "Hash": 18273563577507831110
-  },
-  "AIFCBBLPHHI": {
-    "Hash": 7857490487807842557
-  },
-  "OJBEKHJBIHL": "<list[3]>",
-  "OOKONGHCFBP": "Config/StandalonePerformance/StandaloneP...",
-  "FBKAMIHGLFK": "SpriteOutput/UI/LimaoNews/PlanPic/LimaoN..."
-}
-```
-
 ### IdleLiveAmphoreusCard.json (0.01 MB, 15 条)
 
 **字段** (10): `AbilityName, CardFigure, Desc, GenderLimit, ID, MiniIcon, Name, Param, TriggerChapter, TriggerNode`
@@ -1901,6 +1903,35 @@
 }
 ```
 
+### LimaoNewsInteractEntity.json (0.01 MB, 64 条)
+
+**字段** (4): `FLLFLEEHCJI, KFAGIEFOAGN, LPDDNLPNGJG, MMDDLJCIJLE`
+
+**首条记录摘要**:
+```json
+{
+  "KFAGIEFOAGN": 40300201,
+  "LPDDNLPNGJG": 2540,
+  "MMDDLJCIJLE": 434051102,
+  "FLLFLEEHCJI": 434051107
+}
+```
+
+### LimaoNewsWorkRecord.json (0.01 MB, 47 条)
+
+**字段** (5): `GKENNBPKDDA, MMFOONHFAEB, MNLAMKJIAOC, OGLGIADFFML, OOCPKIGPEHP`
+
+**首条记录摘要**:
+```json
+{
+  "OGLGIADFFML": 101,
+  "MNLAMKJIAOC": "GoalText",
+  "MMFOONHFAEB": {
+    "Hash": 3301907277356787984
+  }
+}
+```
+
 ### IdleLiveChestLevel.json (0.01 MB, 120 条)
 
 **字段** (2): `ExpUpLimit, Level`
@@ -1928,17 +1959,32 @@
 }
 ```
 
-### LimaoNewsInteractEntity.json (0.01 MB, 59 条)
+### ItemConfigAvatarSkin.json (0.01 MB, 9 条)
 
-**字段** (4): `FLLFLEEHCJI, KFAGIEFOAGN, LPDDNLPNGJG, MMDDLJCIJLE`
+**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, isVisible`
 
 **首条记录摘要**:
 ```json
 {
-  "KFAGIEFOAGN": 40300201,
-  "LPDDNLPNGJG": 2540,
-  "MMDDLJCIJLE": 434051102,
-  "FLLFLEEHCJI": 434051107
+  "ID": 1100101,
+  "ItemMainType": "Usable",
+  "ItemSubType": "AvatarSkin",
+  "InventoryDisplayTag": 1,
+  "Rarity": "SuperRare",
+  "isVisible": true,
+  "ItemName": {
+    "Hash": 1022407058163508865
+  },
+  "ItemDesc": {
+    "Hash": 17127819250941528667
+  },
+  "ItemIconPath": "SpriteOutput/ItemIcon/Skin/1100101.png",
+  "ItemFigureIconPath": "SpriteOutput/ItemFigures/Skin/1100101.pn...",
+  "ItemCurrencyIconPath": "",
+  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/AvatarSkin/1...",
+  "PileLimit": 1,
+  "CustomDataList": [],
+  "ReturnItemIDList": []
 }
 ```
 
@@ -1954,18 +2000,15 @@
 }
 ```
 
-### LimaoNewsWorkRecord.json (0.00 MB, 39 条)
+### LimaoNewsMessage.json (0.00 MB, 77 条)
 
-**字段** (5): `GKENNBPKDDA, MMFOONHFAEB, MNLAMKJIAOC, OGLGIADFFML, OOCPKIGPEHP`
+**字段** (3): `IIAJADPLGLH, JNFGLIOMLEJ, JOPENKFKBOH`
 
 **首条记录摘要**:
 ```json
 {
-  "OGLGIADFFML": 101,
-  "MNLAMKJIAOC": "GoalText",
-  "MMFOONHFAEB": {
-    "Hash": 3301907277356787984
-  }
+  "IIAJADPLGLH": 1000001,
+  "JNFGLIOMLEJ": 100000100
 }
 ```
 
@@ -2029,47 +2072,6 @@
 }
 ```
 
-### ItemConfigAvatarSkin.json (0.00 MB, 8 条)
-
-**字段** (15): `CustomDataList, ID, InventoryDisplayTag, ItemAvatarIconPath, ItemCurrencyIconPath, ItemDesc, ItemFigureIconPath, ItemIconPath, ItemMainType, ItemName, ItemSubType, PileLimit, Rarity, ReturnItemIDList, isVisible`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1100101,
-  "ItemMainType": "Usable",
-  "ItemSubType": "AvatarSkin",
-  "InventoryDisplayTag": 1,
-  "Rarity": "SuperRare",
-  "isVisible": true,
-  "ItemName": {
-    "Hash": 1022407058163508865
-  },
-  "ItemDesc": {
-    "Hash": 17127819250941528667
-  },
-  "ItemIconPath": "SpriteOutput/ItemIcon/Skin/1100101.png",
-  "ItemFigureIconPath": "SpriteOutput/ItemFigures/Skin/1100101.pn...",
-  "ItemCurrencyIconPath": "",
-  "ItemAvatarIconPath": "SpriteOutput/AvatarShopIcon/AvatarSkin/1...",
-  "PileLimit": 1,
-  "CustomDataList": [],
-  "ReturnItemIDList": []
-}
-```
-
-### LimaoNewsMessage.json (0.00 MB, 68 条)
-
-**字段** (3): `IIAJADPLGLH, JNFGLIOMLEJ, JOPENKFKBOH`
-
-**首条记录摘要**:
-```json
-{
-  "IIAJADPLGLH": 1000001,
-  "JNFGLIOMLEJ": 100000100
-}
-```
-
 ### LittleWheelSelectConfig.json (0.00 MB, 20 条)
 
 **字段** (9): `GameMode, Left1, Left2, Left3, Left4, Right1, Right2, Right3, Right4`
@@ -2097,7 +2099,9 @@
     15
   ],
   "Right3": [],
-  "Right4": []
+  "Right4": [
+    4700
+  ]
 }
 ```
 
@@ -2113,6 +2117,34 @@
   "SortID": 1,
   "Type": "ItemID",
   "Param": 22
+}
+```
+
+### LimaoNewsWork.json (0.00 MB, 12 条)
+
+**字段** (8): `AEONKNDCDKN, GDEOCHKAEMO, GGKPLJJMBBA, KOAGHJCOOGA, KPNIGDPANOC, LHCNEHAHKHM, LLLJACLJAEP, ONDPOGOJIID`
+
+**首条记录摘要**:
+```json
+{
+  "GGKPLJJMBBA": 1,
+  "KOAGHJCOOGA": [
+    1,
+    3,
+    4
+  ],
+  "AEONKNDCDKN": 8015001,
+  "GDEOCHKAEMO": 1377,
+  "LLLJACLJAEP": {
+    "Hash": 16436133568019783941
+  },
+  "LHCNEHAHKHM": 1000901,
+  "ONDPOGOJIID": "Config/Level/LINews/Work/LimaoWork01Star...",
+  "KPNIGDPANOC": [
+    101,
+    104,
+    105
+  ]
 }
 ```
 
@@ -2176,34 +2208,6 @@
   },
   "Icon": "SpriteOutput/Quest/IdleLive/FuctionIcon/...",
   "UnlockId": 2001
-}
-```
-
-### LimaoNewsWork.json (0.00 MB, 10 条)
-
-**字段** (8): `AEONKNDCDKN, GDEOCHKAEMO, GGKPLJJMBBA, KOAGHJCOOGA, KPNIGDPANOC, LHCNEHAHKHM, LLLJACLJAEP, ONDPOGOJIID`
-
-**首条记录摘要**:
-```json
-{
-  "GGKPLJJMBBA": 1,
-  "KOAGHJCOOGA": [
-    1,
-    3,
-    4
-  ],
-  "AEONKNDCDKN": 8015001,
-  "GDEOCHKAEMO": 1377,
-  "LLLJACLJAEP": {
-    "Hash": 16436133568019783941
-  },
-  "LHCNEHAHKHM": 1000901,
-  "ONDPOGOJIID": "Config/Level/LINews/Work/LimaoWork01Star...",
-  "KPNIGDPANOC": [
-    101,
-    104,
-    105
-  ]
 }
 ```
 
@@ -2377,6 +2381,66 @@
 }
 ```
 
+### LittleWheelFuncConfig.json (0.00 MB, 21 条)
+
+**字段** (3): `IconPath, LittleWheelFuncID, Type`
+
+**首条记录摘要**:
+```json
+{
+  "LittleWheelFuncID": "Message",
+  "IconPath": "SpriteOutput/labyrinthPlay/PhoneMessageN..."
+}
+```
+
+### LimaoNewsWorkResult.json (0.00 MB, 12 条)
+
+**字段** (4): `CNHMEJDOMAK, JLCMIFIDGNF, OCOBPNMHGIO, PHKHAFCBGMH`
+
+**首条记录摘要**:
+```json
+{
+  "PHKHAFCBGMH": 1001,
+  "OCOBPNMHGIO": "Config/Level/LINews/Work/LimaoWork01Back...",
+  "CNHMEJDOMAK": 1001501,
+  "JLCMIFIDGNF": [
+    102,
+    101,
+    103,
+    104
+  ]
+}
+```
+
+### LimaoNewsSpecial.json (0.00 MB, 8 条)
+
+**字段** (7): `AEONKNDCDKN, BDKECJFBAJJ, CFKKNEHABHH, IHALCLABNOJ, LIDHGBEAJMA, OMLFNLJDHKG, OOKJNEGICEI`
+
+**首条记录摘要**:
+```json
+{
+  "IHALCLABNOJ": 1,
+  "OOKJNEGICEI": [
+    201,
+    202,
+    203
+  ],
+  "OMLFNLJDHKG": [
+    2400030
+  ],
+  "BDKECJFBAJJ": [
+    2400004
+  ],
+  "AEONKNDCDKN": 8015010,
+  "LIDHGBEAJMA": [
+    201001,
+    202003,
+    201010
+  ],
+  "CFKKNEHABHH": "PressConference"
+}
+```
+
 ### ItemGiftPackData.json (0.00 MB, 12 条)
 
 **字段** (4): `GroupDesc, GroupID, ID, RewardList`
@@ -2390,18 +2454,6 @@
   "GroupDesc": {
     "Hash": 7509559092966294882
   }
-}
-```
-
-### LittleWheelFuncConfig.json (0.00 MB, 20 条)
-
-**字段** (3): `IconPath, LittleWheelFuncID, Type`
-
-**首条记录摘要**:
-```json
-{
-  "LittleWheelFuncID": "Message",
-  "IconPath": "SpriteOutput/labyrinthPlay/PhoneMessageN..."
 }
 ```
 
@@ -2478,35 +2530,6 @@
 }
 ```
 
-### LimaoNewsSpecial.json (0.00 MB, 7 条)
-
-**字段** (7): `AEONKNDCDKN, BDKECJFBAJJ, CFKKNEHABHH, IHALCLABNOJ, LIDHGBEAJMA, OMLFNLJDHKG, OOKJNEGICEI`
-
-**首条记录摘要**:
-```json
-{
-  "IHALCLABNOJ": 1,
-  "OOKJNEGICEI": [
-    201,
-    202,
-    203
-  ],
-  "OMLFNLJDHKG": [
-    2400030
-  ],
-  "BDKECJFBAJJ": [
-    2400004
-  ],
-  "AEONKNDCDKN": 8015010,
-  "LIDHGBEAJMA": [
-    201001,
-    202003,
-    201010
-  ],
-  "CFKKNEHABHH": "PressConference"
-}
-```
-
 ### ItemComposeType.json (0.00 MB, 9 条)
 
 **字段** (8): `IsMainType, MainTypeID, MainTypeOrder, TypeID, TypeIconPath, TypeTextmapID, UnlockDescribe, UnlockID`
@@ -2524,22 +2547,16 @@
 }
 ```
 
-### LimaoNewsWorkResult.json (0.00 MB, 10 条)
+### LimaoNewsLocation.json (0.00 MB, 22 条)
 
-**字段** (4): `CNHMEJDOMAK, JLCMIFIDGNF, OCOBPNMHGIO, PHKHAFCBGMH`
+**字段** (2): `HIHLLBFEONI, JFKMCIFGHLK`
 
 **首条记录摘要**:
 ```json
 {
-  "PHKHAFCBGMH": 1001,
-  "OCOBPNMHGIO": "Config/Level/LINews/Work/LimaoWork01Back...",
-  "CNHMEJDOMAK": 1001501,
-  "JLCMIFIDGNF": [
-    102,
-    101,
-    103,
-    104
-  ]
+  "JFKMCIFGHLK": {
+    "Hash": 1652022200471624107
+  }
 }
 ```
 
@@ -2594,19 +2611,6 @@
   "ID": 1,
   "PurposeText": {
     "Hash": 8092518062232321212
-  }
-}
-```
-
-### LimaoNewsLocation.json (0.00 MB, 19 条)
-
-**字段** (2): `HIHLLBFEONI, JFKMCIFGHLK`
-
-**首条记录摘要**:
-```json
-{
-  "JFKMCIFGHLK": {
-    "Hash": 1652022200471624107
   }
 }
 ```
@@ -2803,6 +2807,37 @@
 }
 ```
 
+### LimaoNewsPlan.json (0.00 MB, 3 条)
+
+**字段** (6): `AEONKNDCDKN, BBOHFMDPCJP, KCJAICDOHPN, KFCJIAKLCFD, LIIBNDIFNDO, OIHMMHAJHHB`
+
+**首条记录摘要**:
+```json
+{
+  "LIIBNDIFNDO": 1,
+  "KCJAICDOHPN": [
+    101,
+    104,
+    106,
+    102,
+    107,
+    105,
+    108,
+    103
+  ],
+  "AEONKNDCDKN": 8015003,
+  "KFCJIAKLCFD": {
+    "Hash": 4829158079586745055
+  },
+  "BBOHFMDPCJP": {
+    "Hash": 11692972633243211498
+  },
+  "OIHMMHAJHHB": {
+    "Hash": 13908234661158266129
+  }
+}
+```
+
 ### IdleLiveEquipSlot.json (0.00 MB, 6 条)
 
 **字段** (4): `ID, ImagePath, Title, Type`
@@ -2829,6 +2864,21 @@
   "ID": 1,
   "Icon": "",
   "SenderType": "Self"
+}
+```
+
+### ItemGenderedConfig.json (0.00 MB, 4 条)
+
+**字段** (5): `CMNOEFFFNPE, DEJJGGOABPA, GJMHAJGIHOM, HHIIGAIJEDA, KAINAFFMLBK`
+
+**首条记录摘要**:
+```json
+{
+  "CMNOEFFFNPE": 229001,
+  "KAINAFFMLBK": "GENDER_MAN",
+  "GJMHAJGIHOM": "SpriteOutput/ItemIcon/DressIcon/229001_m...",
+  "HHIIGAIJEDA": "SpriteOutput/ItemFigures/DressIcon/22900...",
+  "DEJJGGOABPA": ""
 }
 ```
 
@@ -2959,37 +3009,6 @@
   ],
   "IconPath": "SpriteOutput/UI/Avatar/Icon/IconDefence....",
   "StartPoint": 101
-}
-```
-
-### LimaoNewsPlan.json (0.00 MB, 2 条)
-
-**字段** (6): `AEONKNDCDKN, BBOHFMDPCJP, KCJAICDOHPN, KFCJIAKLCFD, LIIBNDIFNDO, OIHMMHAJHHB`
-
-**首条记录摘要**:
-```json
-{
-  "LIIBNDIFNDO": 1,
-  "KCJAICDOHPN": [
-    101,
-    104,
-    106,
-    102,
-    107,
-    105,
-    108,
-    103
-  ],
-  "AEONKNDCDKN": 8015003,
-  "KFCJIAKLCFD": {
-    "Hash": 4829158079586745055
-  },
-  "BBOHFMDPCJP": {
-    "Hash": 11692972633243211498
-  },
-  "OIHMMHAJHHB": {
-    "Hash": 13908234661158266129
-  }
 }
 ```
 
@@ -3202,21 +3221,6 @@
 }
 ```
 
-### ItemGenderedConfig.json (0.00 MB, 2 条)
-
-**字段** (5): `CMNOEFFFNPE, DEJJGGOABPA, GJMHAJGIHOM, HHIIGAIJEDA, KAINAFFMLBK`
-
-**首条记录摘要**:
-```json
-{
-  "CMNOEFFFNPE": 229001,
-  "KAINAFFMLBK": "GENDER_MAN",
-  "GJMHAJGIHOM": "SpriteOutput/ItemIcon/DressIcon/229001_m...",
-  "HHIIGAIJEDA": "SpriteOutput/ItemFigures/DressIcon/22900...",
-  "DEJJGGOABPA": ""
-}
-```
-
 ### IdleLiveAvatarUpgradeLimit.json (0.00 MB, 9 条)
 
 **字段** (2): `LevelLimit, UnlockID`
@@ -3324,18 +3328,6 @@
 }
 ```
 
-### ItemGotoData.json (0.00 MB, 4 条)
-
-**字段** (2): `GotoID, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 281,
-  "GotoID": 617
-}
-```
-
 ### ItemAutoTransfer.json (0.00 MB, 1 条)
 
 **字段** (2): `ItemID, TransferList`
@@ -3370,6 +3362,18 @@
   "TeamRecommendIDList": [
     7
   ]
+}
+```
+
+### ItemGotoData.json (0.00 MB, 3 条)
+
+**字段** (2): `GotoID, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 281,
+  "GotoID": 617
 }
 ```
 

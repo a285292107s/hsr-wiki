@@ -1,12 +1,12 @@
 # DATA_CATALOG 分片：文件名首字母 EFGH
 
-> 本文件由 `gen_catalog.py` 自动生成，是 [DATA_CATALOG.md](../DATA_CATALOG.md) 总索引的分片 e-h（共 385 个文件）。
+> 本文件由 `gen_catalog.py` 自动生成，是 [DATA_CATALOG.md](../DATA_CATALOG.md) 总索引的分片 e-h（共 424 个文件）。
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### GridFightFrontSkill.json (6.05 MB, 4,052 条)
+### GridFightFrontSkill.json (12.19 MB, 8,024 条)
 
-**字段** (34): `AttackType, BPAdd, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, HideInUI, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, SPNeed, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
+**字段** (35): `AttackType, BPAdd, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, HideInUI, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, RelatedExRankIDList, SPBase, SPMultipleRatio, SPNeed, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
 
 **首条记录摘要**:
 ```json
@@ -35,6 +35,7 @@
   },
   "RatedSkillTreeID": [],
   "RatedRankID": [],
+  "RelatedExRankIDList": [],
   "ExtraEffectIDList": [],
   "SimpleExtraEffectIDList": [],
   "ShowStanceList": "<list[3]>",
@@ -54,7 +55,7 @@
 }
 ```
 
-### FreeStyleMotion.json (3.63 MB, 7,972 条)
+### FreeStyleMotion.json (3.70 MB, 8,113 条)
 
 **字段** (7): `FreeStyleCharacterID, ID, LoopMotionPath, LoopMotionRibbonPath, StartMotion, StartMotionPath, StartMotionRibbonPath`
 
@@ -71,7 +72,7 @@
 }
 ```
 
-### FinishWay.json (1.26 MB, 5,798 条)
+### FinishWay.json (1.33 MB, 6,078 条)
 
 **字段** (13): `FinishType, ID, IsBackTrack, MazeFloorID, MazePlaneID, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
 
@@ -89,52 +90,7 @@
 }
 ```
 
-### FunNumMultiplier.json (0.75 MB, 10,000 条)
-
-**字段** (2): `FunNum, Multiplier`
-
-**首条记录摘要**:
-```json
-{
-  "Multiplier": {
-    "Value": 1
-  }
-}
-```
-
-### EquipmentPromotionConfig.json (0.65 MB, 1,190 条)
-
-**字段** (12): `BaseAttack, BaseAttackAdd, BaseDefence, BaseDefenceAdd, BaseHP, BaseHPAdd, EquipmentID, MaxLevel, PlayerLevelRequire, Promotion, PromotionCostList, WorldLevelRequire`
-
-**首条记录摘要**:
-```json
-{
-  "EquipmentID": 20000,
-  "PromotionCostList": "<list[2]>",
-  "PlayerLevelRequire": 15,
-  "MaxLevel": 20,
-  "BaseHP": {
-    "Value": 38.4
-  },
-  "BaseHPAdd": {
-    "Value": 5.76
-  },
-  "BaseAttack": {
-    "Value": 14.4
-  },
-  "BaseAttackAdd": {
-    "Value": 2.16
-  },
-  "BaseDefence": {
-    "Value": 12
-  },
-  "BaseDefenceAdd": {
-    "Value": 1.8
-  }
-}
-```
-
-### GridFightBackBESkillConfig.json (0.55 MB, 446 条)
+### GridFightBackBESkillConfig.json (1.32 MB, 1,062 条)
 
 **字段** (24): `AttackType, BPAdd, BPNeed, CutinPath, DelayRatio, ParamList, SPBase, SPMultipleRatio, SPNeed, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
 
@@ -179,7 +135,20 @@
 }
 ```
 
-### GridFightRoleStar.json (0.41 MB, 266 条)
+### FunNumMultiplier.json (0.75 MB, 10,000 条)
+
+**字段** (2): `FunNum, Multiplier`
+
+**首条记录摘要**:
+```json
+{
+  "Multiplier": {
+    "Value": 1
+  }
+}
+```
+
+### GridFightRoleStar.json (0.75 MB, 482 条)
 
 **字段** (27): `AIPath, BEID, BESkillIDList, BackAbilityName, BackEnergyBar, BackInitialEnergyBar, BackInitialSP, BackMaxSP, BackOneWordDesc, BackParamList, BackPowerBase, BackShowSkillIDList, ExtraHealBase, ExtraShieldBase, FrontOneWordDesc, FrontPowerBase, FrontShowSkillIDList, GeneralPropertyModifyList, ID, JsonOverrideConfig, LuckChance, LuckDamage, ShowStanceList, SkillOverrideDest, SkillOverrideSrc, StanceDamageDisplay, Star`
 
@@ -233,6 +202,73 @@
 }
 ```
 
+### EquipmentPromotionConfig.json (0.66 MB, 1,204 条)
+
+**字段** (12): `BaseAttack, BaseAttackAdd, BaseDefence, BaseDefenceAdd, BaseHP, BaseHPAdd, EquipmentID, MaxLevel, PlayerLevelRequire, Promotion, PromotionCostList, WorldLevelRequire`
+
+**首条记录摘要**:
+```json
+{
+  "EquipmentID": 20000,
+  "PromotionCostList": "<list[2]>",
+  "PlayerLevelRequire": 15,
+  "MaxLevel": 20,
+  "BaseHP": {
+    "Value": 38.4
+  },
+  "BaseHPAdd": {
+    "Value": 5.76
+  },
+  "BaseAttack": {
+    "Value": 14.4
+  },
+  "BaseAttackAdd": {
+    "Value": 2.16
+  },
+  "BaseDefence": {
+    "Value": 12
+  },
+  "BaseDefenceAdd": {
+    "Value": 1.8
+  }
+}
+```
+
+### GridFightBackSkillExtraDesc.json (0.61 MB, 1,069 条)
+
+**字段** (7): `ConditionDesc, ConditionSimpleDesc, ExtraEffectIDList, ParamList, SimpleExtraEffectIDList, SimpleParamList, SkillID`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 10010201,
+  "ConditionDesc": {
+    "Hash": 11085778083433463291
+  },
+  "ParamList": "<list[7]>",
+  "ConditionSimpleDesc": {
+    "Hash": 10307392774845083218
+  },
+  "SimpleParamList": "<list[7]>",
+  "ExtraEffectIDList": [],
+  "SimpleExtraEffectIDList": []
+}
+```
+
+### GridFightRankAttachment.json (0.54 MB, 2,928 条)
+
+**字段** (4): `GeneralPropertyModifyList, Rank, RoleID, Star`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1001,
+  "Rank": 1,
+  "Star": 1,
+  "GeneralPropertyModifyList": "<list[1]>"
+}
+```
+
 ### FateMazeBuff.json (0.39 MB, 383 条)
 
 **字段** (18): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, DisplayType, ID, InBattleBindingKey, InBattleBindingType, IsDisplayEnvInLevel, Lv, LvMax, MazeBuffIconType, MazeBuffType, ModifierName, ParamList`
@@ -263,35 +299,7 @@
 }
 ```
 
-### EquipmentSkillConfig.json (0.38 MB, 850 条)
-
-**字段** (7): `AbilityName, AbilityProperty, Level, ParamList, SkillDesc, SkillID, SkillName`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 20000,
-  "SkillName": {
-    "Hash": 570935296534718368
-  },
-  "SkillDesc": {
-    "Hash": 6055381904431186061
-  },
-  "Level": 1,
-  "AbilityName": "Ability20000",
-  "ParamList": [
-    {
-      "Value": 0.12
-    },
-    {
-      "Value": 3
-    }
-  ],
-  "AbilityProperty": []
-}
-```
-
-### HardLevelGroup.json (0.37 MB, 745 条)
+### HardLevelGroup.json (0.39 MB, 787 条)
 
 **字段** (10): `AttackRatio, CombatPowerList, DefenceRatio, HPRatio, HardLevelGroup, Level, SpeedRatio, StanceRatio, StatusProbability, StatusResistance`
 
@@ -319,7 +327,35 @@
 }
 ```
 
-### EliteGroup.json (0.35 MB, 1,423 条)
+### EquipmentSkillConfig.json (0.38 MB, 860 条)
+
+**字段** (7): `AbilityName, AbilityProperty, Level, ParamList, SkillDesc, SkillID, SkillName`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 20000,
+  "SkillName": {
+    "Hash": 570935296534718368
+  },
+  "SkillDesc": {
+    "Hash": 6055381904431186061
+  },
+  "Level": 1,
+  "AbilityName": "Ability20000",
+  "ParamList": [
+    {
+      "Value": 0.12
+    },
+    {
+      "Value": 3
+    }
+  ],
+  "AbilityProperty": []
+}
+```
+
+### EliteGroup.json (0.35 MB, 1,437 条)
 
 **字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
 
@@ -380,17 +416,63 @@
 }
 ```
 
-### GridFightRankAttachment.json (0.30 MB, 1,596 条)
+### GridFightEnemyDifficultyLv.json (0.30 MB, 903 条)
 
-**字段** (4): `GeneralPropertyModifyList, Rank, RoleID, Star`
+**字段** (8): `AllDamageReduce, AttackRatio, ChapterID, DefenceRatio, EnemyDifficultyLevel, HPRatio, SpeedRatio, StanceRatio`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1001,
+  "ChapterID": 1,
+  "AttackRatio": {
+    "Value": 1
+  },
+  "DefenceRatio": {
+    "Value": 1
+  },
+  "HPRatio": {
+    "Value": 1
+  },
+  "SpeedRatio": {
+    "Value": 1
+  },
+  "StanceRatio": {
+    "Value": 1
+  },
+  "AllDamageReduce": {
+    "Value": 0.7
+  }
+}
+```
+
+### GridFightBackRoleRank.json (0.30 MB, 498 条)
+
+**字段** (14): `AllMemberGeneralPropertyList, Desc, DescParamList, ExtraEffectIDList, IconPath, ModifyEnergyBar, ModifySkillList, Name, OwnerGeneralPropertyList, Param, Rank, RankAbility, RankID, Trigger`
+
+**首条记录摘要**:
+```json
+{
+  "RankID": 100101,
   "Rank": 1,
-  "Star": 1,
-  "GeneralPropertyModifyList": "<list[1]>"
+  "Name": {
+    "Hash": 6337308428856077169
+  },
+  "Desc": {
+    "Hash": 1528372340106895187
+  },
+  "IconPath": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
+  "Trigger": {
+    "Hash": 2089636447
+  },
+  "OwnerGeneralPropertyList": "<list[1]>",
+  "AllMemberGeneralPropertyList": [],
+  "ModifySkillList": [],
+  "RankAbility": [],
+  "Param": [],
+  "DescParamList": [
+    0.15
+  ],
+  "ExtraEffectIDList": []
 }
 ```
 
@@ -428,56 +510,9 @@
 }
 ```
 
-### GridFightEnemyDifficultyLv.json (0.26 MB, 903 条)
+### GridFightAugment.json (0.27 MB, 411 条)
 
-**字段** (7): `AttackRatio, ChapterID, DefenceRatio, EnemyDifficultyLevel, HPRatio, SpeedRatio, StanceRatio`
-
-**首条记录摘要**:
-```json
-{
-  "ChapterID": 1,
-  "AttackRatio": {
-    "Value": 1
-  },
-  "DefenceRatio": {
-    "Value": 1
-  },
-  "HPRatio": {
-    "Value": 1
-  },
-  "SpeedRatio": {
-    "Value": 1
-  },
-  "StanceRatio": {
-    "Value": 1
-  }
-}
-```
-
-### GridFightBackSkillExtraDesc.json (0.25 MB, 450 条)
-
-**字段** (7): `ConditionDesc, ConditionSimpleDesc, ExtraEffectIDList, ParamList, SimpleExtraEffectIDList, SimpleParamList, SkillID`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 10010201,
-  "ConditionDesc": {
-    "Hash": 11085778083433463291
-  },
-  "ParamList": "<list[7]>",
-  "ConditionSimpleDesc": {
-    "Hash": 10307392774845083218
-  },
-  "SimpleParamList": "<list[7]>",
-  "ExtraEffectIDList": [],
-  "SimpleExtraEffectIDList": []
-}
-```
-
-### GridFightAugment.json (0.24 MB, 334 条)
-
-**字段** (15): `AugmentGameRefScore, AugmentGameRefTrait, AugmentSavedValueList, AugmentSearchKey, CategoryID, ChapterLimitList, EffectParamList, HexDesc, HexName, ID, IconPath, IsOCEffective, JsonPath, MiniIconPath, Quality`
+**字段** (14): `AugmentGameRefScore, AugmentGameRefTrait, AugmentSearchKey, CategoryID, ChapterLimitList, EffectParamList, HexDesc, HexName, ID, IconPath, IsOCEffective, JsonPath, MiniIconPath, Quality`
 
 **首条记录摘要**:
 ```json
@@ -504,62 +539,42 @@
       "Value": 7
     }
   ],
-  "AugmentSavedValueList": [
-    "Augment100101_SavedValue01"
-  ],
   "AugmentGameRefTrait": [],
   "AugmentGameRefScore": []
 }
 ```
 
-### HeliobusComment.json (0.18 MB, 909 条)
+### GridFightEquipment.json (0.21 MB, 240 条)
 
-**字段** (8): `CommentOptionTextID, HeliobusCommentID, HeliobusCommentTextID, HeliobusUserID, IsPlayerComment, PlayerCommentIDList, ReplyIncomeReward, Tendency`
-
-**首条记录摘要**:
-```json
-{
-  "HeliobusCommentID": 10100,
-  "HeliobusUserID": 1,
-  "IsPlayerComment": true,
-  "HeliobusCommentTextID": {
-    "Hash": 3465349314410659807
-  },
-  "PlayerCommentIDList": []
-}
-```
-
-### GachaBasicInfo.json (0.18 MB, 292 条)
-
-**字段** (12): `EndTime, GachaID, GachaType, PoolDesc, PoolDescFTC, PoolLabelIcon, PoolLabelIconSelected, PoolName, PrefabPath, SortID, StartTime, TypeTitle`
+**字段** (16): `AbilityName, DisplaySpecialParam, DressRule, DressRuleParamList, EffectParamList, EquipCategory, EquipDesc, EquipFunc, EquipFuncParamList, EquipType, EquipmentTagList, GeneralPropertyList, ID, IsDisplaySpecialParam, JsonPath, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "GachaID": 1001,
-  "GachaType": "Normal",
-  "SortID": 99,
-  "StartTime": "",
-  "EndTime": "",
-  "PrefabPath": "UI/Drawcard/GachaPanel/StandardGacha_100...",
-  "PoolName": {
-    "Hash": 12642828881931173103
-  },
-  "PoolDesc": {
-    "Hash": 1121704090967857799
-  },
-  "PoolDescFTC": {
-    "Hash": 6970163302865048869
-  },
-  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
-  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
-  "TypeTitle": {
-    "Hash": 10012362747660649297
-  }
+  "ID": 350201,
+  "DressRuleParamList": [],
+  "EquipCategory": "Basic",
+  "EquipFuncParamList": [],
+  "AbilityName": "",
+  "ParamList": [
+    {
+      "Value": 0.05
+    }
+  ],
+  "GeneralPropertyList": "<list[1]>",
+  "EquipmentTagList": [
+    6
+  ],
+  "JsonPath": "",
+  "EffectParamList": [
+    {
+      "Value": 0.05
+    }
+  ]
 }
 ```
 
-### GridFightServantSkill.json (0.17 MB, 132 条)
+### GridFightServantSkill.json (0.20 MB, 162 条)
 
 **字段** (25): `AttackType, DelayRatio, ExtraEffectIDList, Level, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPBase, SPMultipleRatio, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SimpleSkillDesc, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
 
@@ -618,34 +633,140 @@
 }
 ```
 
-### GridFightBackRoleRank.json (0.15 MB, 252 条)
+### GridFightTraitMazebuff.json (0.19 MB, 273 条)
 
-**字段** (14): `AllMemberGeneralPropertyList, Desc, DescParamList, ExtraEffectIDList, IconPath, ModifyEnergyBar, ModifySkillList, Name, OwnerGeneralPropertyList, Param, Rank, RankAbility, RankID, Trigger`
+**字段** (15): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "RankID": 100101,
-  "Rank": 1,
-  "Name": {
-    "Hash": 6337308428856077169
-  },
-  "Desc": {
-    "Hash": 1528372340106895187
-  },
-  "IconPath": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
-  "Trigger": {
-    "Hash": 2089636447
-  },
-  "OwnerGeneralPropertyList": "<list[1]>",
-  "AllMemberGeneralPropertyList": [],
-  "ModifySkillList": [],
-  "RankAbility": [],
-  "Param": [],
-  "DescParamList": [
-    0.15
+  "ID": 35300211,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_Origin_3002_Type1",
+  "ParamList": [
+    {
+      "Value": 0.1
+    }
   ],
-  "ExtraEffectIDList": []
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 4548294859696429646
+  },
+  "BuffDesc": {
+    "Hash": 16103914094188446966
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
+}
+```
+
+### GachaBasicInfo.json (0.19 MB, 306 条)
+
+**字段** (12): `EndTime, GachaID, GachaType, PoolDesc, PoolDescFTC, PoolLabelIcon, PoolLabelIconSelected, PoolName, PrefabPath, SortID, StartTime, TypeTitle`
+
+**首条记录摘要**:
+```json
+{
+  "GachaID": 1001,
+  "GachaType": "Normal",
+  "SortID": 99,
+  "StartTime": "",
+  "EndTime": "",
+  "PrefabPath": "UI/Drawcard/GachaPanel/StandardGacha_100...",
+  "PoolName": {
+    "Hash": 12642828881931173103
+  },
+  "PoolDesc": {
+    "Hash": 1121704090967857799
+  },
+  "PoolDescFTC": {
+    "Hash": 6970163302865048869
+  },
+  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
+  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIcon/Ta...",
+  "TypeTitle": {
+    "Hash": 10012362747660649297
+  }
+}
+```
+
+### HeliobusComment.json (0.18 MB, 909 条)
+
+**字段** (8): `CommentOptionTextID, HeliobusCommentID, HeliobusCommentTextID, HeliobusUserID, IsPlayerComment, PlayerCommentIDList, ReplyIncomeReward, Tendency`
+
+**首条记录摘要**:
+```json
+{
+  "HeliobusCommentID": 10100,
+  "HeliobusUserID": 1,
+  "IsPlayerComment": true,
+  "HeliobusCommentTextID": {
+    "Hash": 3465349314410659807
+  },
+  "PlayerCommentIDList": []
+}
+```
+
+### GridFightBackEquipment.json (0.16 MB, 345 条)
+
+**字段** (8): `AllMemberGeneralPropertyList, BackEquipmentDesc, EquipmentID, Level, OwnerGeneralPropertyList, ParamFormat, ParamList, RoleID`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1003,
+  "EquipmentID": 23000,
+  "Level": 1,
+  "BackEquipmentDesc": {
+    "Hash": 9778359379731183808
+  },
+  "ParamList": [
+    {
+      "Value": 0.06
+    },
+    {
+      "Value": 0
+    }
+  ],
+  "ParamFormat": "[i]%",
+  "AllMemberGeneralPropertyList": [],
+  "OwnerGeneralPropertyList": "<list[1]>"
+}
+```
+
+### HeartDialTalk.json (0.15 MB, 1,135 条)
+
+**字段** (5): `FloorIDList, ID, IsKaomoji, SDFText, VoiceID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 103050403,
+  "VoiceID": 103050403,
+  "SDFText": {
+    "Hash": 6332579846061516669
+  },
+  "FloorIDList": [
+    20312001
+  ]
+}
+```
+
+### GridFightSkillSubIcon.json (0.14 MB, 2,120 条)
+
+**字段** (3): `SkillComeFrom, SkillID, SubIconType`
+
+**首条记录摘要**:
+```json
+{
+  "SkillComeFrom": "Back",
+  "SkillID": 10060201,
+  "SubIconType": "Replace"
 }
 ```
 
@@ -666,55 +787,49 @@
 }
 ```
 
-### GridFightEquipment.json (0.13 MB, 148 条)
+### GridFightBasicBonusPoolV2.json (0.13 MB, 1,121 条)
 
-**字段** (15): `AbilityName, DressRule, DressRuleParamList, EffectParamList, EquipCategory, EquipDesc, EquipFunc, EquipFuncParamList, EquipType, EquipmentTagList, GeneralPropertyList, ID, IsDisplaySpecialParam, JsonPath, ParamList`
+**字段** (5): `BonusID, BonusType, BonusTypeParam, BonusTypeParamList, Value`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 350201,
-  "DressRuleParamList": [],
-  "EquipCategory": "Basic",
-  "EquipFuncParamList": [],
-  "AbilityName": "",
+  "BonusID": 1,
+  "Value": 1,
+  "BonusTypeParam": 1,
+  "BonusTypeParamList": []
+}
+```
+
+### GridFightBackBEConfig.json (0.13 MB, 210 条)
+
+**字段** (15): `AbilityList, ActionBarDescrptionText, AssetPackName, BEActionBarType, BattleEventID, BattleEventName, DescrptionText, EliteGroup, EventSubType, HardLevel, HeadIcon, OverrideProperty, ParamList, Speed, Team`
+
+**首条记录摘要**:
+```json
+{
+  "BattleEventID": 62200,
+  "Team": "TeamNeutral",
+  "EventSubType": "GridFightCountDownWarningEvent",
+  "BattleEventName": "BattleEventName_62200",
+  "HeadIcon": "SpriteOutput/AvatarIconTeam/999.png",
+  "AbilityList": "<list[2]>",
+  "OverrideProperty": "<list[1]>",
+  "Speed": {
+    "Value": 100
+  },
+  "HardLevel": true,
+  "DescrptionText": "",
   "ParamList": [
     {
-      "Value": 0.05
+      "Value": 0.5
     }
   ],
-  "GeneralPropertyList": "<list[1]>",
-  "EquipmentTagList": [
-    6
-  ],
-  "JsonPath": "",
-  "EffectParamList": [
-    {
-      "Value": 0.05
-    }
-  ]
+  "AssetPackName": ""
 }
 ```
 
-### HeartDialTalk.json (0.13 MB, 989 条)
-
-**字段** (5): `FloorIDList, ID, IsKaomoji, SDFText, VoiceID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 103050403,
-  "VoiceID": 103050403,
-  "SDFText": {
-    "Hash": 6332579846061516669
-  },
-  "FloorIDList": [
-    20312001
-  ]
-}
-```
-
-### EquipmentConfig.json (0.12 MB, 170 条)
+### EquipmentConfig.json (0.12 MB, 172 条)
 
 **字段** (18): `AvatarBaseType, AvatarDetailOffset, BattleDialogOffset, CoinCost, EquipmentID, EquipmentName, ExpProvide, ExpType, GachaResultOffset, ImagePath, ItemRightPanelOffset, MaxPromotion, MaxRank, RankUpCostList, Rarity, Release, SkillID, ThumbnailPath`
 
@@ -760,39 +875,25 @@
 }
 ```
 
-### GridFightTraitMazebuff.json (0.10 MB, 158 条)
+### GridFightTraitLayer.json (0.12 MB, 267 条)
 
-**字段** (15): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+**字段** (10): `AllMemberPropertyList, Layer, MazebuffID, OverrideBEPropertyList, PropertyBindType, PropertyDesc, PropertyParamList, Quality, TraitID, TraitMemberPropertyList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 35300211,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 1,
-  "ModifierName": "",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "StageAbility_GridFight_Origin_3002_Type1",
-  "ParamList": [
-    {
-      "Value": 0.1
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 4548294859696429646
-  },
-  "BuffDesc": {
-    "Hash": 16103914094188446966
-  },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
+  "TraitID": 1001,
+  "Layer": 2,
+  "MazebuffID": 35100101,
+  "PropertyBindType": "SpecificScope",
+  "TraitMemberPropertyList": [],
+  "AllMemberPropertyList": [],
+  "OverrideBEPropertyList": [],
+  "PropertyParamList": []
 }
 ```
 
-### GotoConfig.json (0.10 MB, 768 条)
+### GotoConfig.json (0.10 MB, 782 条)
 
 **字段** (6): `GotoType, ID, ParamIntList, ParamStringList, UnlockID, UnlockMainMission`
 
@@ -808,21 +909,7 @@
 }
 ```
 
-### GridFightBasicBonusPoolV2.json (0.10 MB, 811 条)
-
-**字段** (5): `BonusID, BonusType, BonusTypeParam, BonusTypeParamList, Value`
-
-**首条记录摘要**:
-```json
-{
-  "BonusID": 1,
-  "Value": 1,
-  "BonusTypeParam": 1,
-  "BonusTypeParamList": []
-}
-```
-
-### EmojiConfig.json (0.10 MB, 487 条)
+### EmojiConfig.json (0.10 MB, 495 条)
 
 **字段** (8): `EmojiGroupID, EmojiID, EmojiPath, Gender, GenderLink, IsTrainMembers, KeyWords, SameGroupOrder`
 
@@ -841,7 +928,7 @@
 }
 ```
 
-### ExtraEffectConfig.json (0.09 MB, 315 条)
+### ExtraEffectConfig.json (0.10 MB, 326 条)
 
 **字段** (6): `DescParamList, ExtraEffectDesc, ExtraEffectID, ExtraEffectIconPath, ExtraEffectName, ExtraEffectType`
 
@@ -858,6 +945,38 @@
   "DescParamList": [],
   "ExtraEffectIconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffCo...",
   "ExtraEffectType": 2
+}
+```
+
+### GridFightDivisionStage.json (0.09 MB, 168 条)
+
+**字段** (16): `AffixChooseNumList, BinaryNodeDiffAddRule, DivisionID, EffectParamList, EnemyDifficultyLevel, EnvironmentBuffList, EnvironmentDescList, ExpModify, JsonPath, LevelBaseAttackMultiRatio, LevelBaseCounterMultiRatio, LevelBaseHPMultiRatio, OCScoreRule, ScoreRule, UniqueEnvironmentDescList, WeeklyScoreModify`
+
+**首条记录摘要**:
+```json
+{
+  "DivisionID": 1,
+  "AffixChooseNumList": [],
+  "EnvironmentBuffList": [],
+  "UniqueEnvironmentDescList": [],
+  "EnvironmentDescList": [
+    "GridFight_EnvironmentDesc_None"
+  ],
+  "ScoreRule": 801,
+  "OCScoreRule": 801,
+  "WeeklyScoreModify": 100,
+  "ExpModify": 100,
+  "JsonPath": "",
+  "EffectParamList": [],
+  "LevelBaseHPMultiRatio": {
+    "Value": 1
+  },
+  "LevelBaseAttackMultiRatio": {
+    "Value": 1
+  },
+  "LevelBaseCounterMultiRatio": {
+    "Value": 1
+  }
 }
 ```
 
@@ -940,7 +1059,7 @@
 }
 ```
 
-### FuncUnlockData.json (0.08 MB, 486 条)
+### FuncUnlockData.json (0.08 MB, 489 条)
 
 **字段** (3): `Conditions, ShowCondition, UnlockID`
 
@@ -958,30 +1077,22 @@
 }
 ```
 
-### GridFightBackEquipment.json (0.08 MB, 165 条)
+### GridFightCombinationBonus.json (0.07 MB, 481 条)
 
-**字段** (8): `AllMemberGeneralPropertyList, BackEquipmentDesc, EquipmentID, Level, OwnerGeneralPropertyList, ParamFormat, ParamList, RoleID`
+**字段** (3): `BonusID, BonusNumberList, CombinationBonusList`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1003,
-  "EquipmentID": 23000,
-  "Level": 1,
-  "BackEquipmentDesc": {
-    "Hash": 9778359379731183808
-  },
-  "ParamList": [
-    {
-      "Value": 0.06
-    },
-    {
-      "Value": 0
-    }
+  "BonusID": 11001,
+  "CombinationBonusList": [
+    1,
+    201
   ],
-  "ParamFormat": "[i]%",
-  "AllMemberGeneralPropertyList": [],
-  "OwnerGeneralPropertyList": "<list[1]>"
+  "BonusNumberList": [
+    20000,
+    10000
+  ]
 }
 ```
 
@@ -1012,49 +1123,54 @@
 }
 ```
 
-### GridFightTraitLayer.json (0.07 MB, 152 条)
+### GridFightPortalBuff.json (0.07 MB, 120 条)
 
-**字段** (10): `AllMemberPropertyList, Layer, MazebuffID, OverrideBEPropertyList, PropertyBindType, PropertyDesc, PropertyParamList, Quality, TraitID, TraitMemberPropertyList`
+**字段** (14): `DelayedShowBonus, EffectParamList, ID, IconPath, IfInBook, IsOCEffective, JsonPath, PortalBuffDesc, PortalBuffTitle, PortalGameRefScore, PortalGameRefTrait, ShowBonusID, ShowBonusIDList, ShowNpcIDList`
 
 **首条记录摘要**:
 ```json
 {
-  "TraitID": 1001,
-  "Layer": 2,
-  "MazebuffID": 35100101,
-  "PropertyBindType": "SpecificScope",
-  "TraitMemberPropertyList": [],
-  "AllMemberPropertyList": [],
-  "OverrideBEPropertyList": [],
-  "PropertyParamList": []
+  "ID": 101,
+  "JsonPath": "Config/Level/GridFight/PortalBuff/GridFi...",
+  "EffectParamList": [
+    {
+      "Value": 2
+    }
+  ],
+  "PortalBuffTitle": {
+    "Hash": 9052694893348241712
+  },
+  "PortalBuffDesc": {
+    "Hash": 9437218109261494594
+  },
+  "IconPath": "SpriteOutput/GridFight/Portal/101.png",
+  "ShowBonusID": 40017,
+  "ShowBonusIDList": [
+    40017
+  ],
+  "IsOCEffective": 1,
+  "PortalGameRefTrait": [],
+  "PortalGameRefScore": [],
+  "DelayedShowBonus": [],
+  "IfInBook": true,
+  "ShowNpcIDList": []
 }
 ```
 
-### GridFightBackBEConfig.json (0.07 MB, 119 条)
+### GridFightBackBEData.json (0.07 MB, 211 条)
 
-**字段** (15): `AbilityList, ActionBarDescrptionText, AssetPackName, BEActionBarType, BattleEventID, BattleEventName, DescrptionText, EliteGroup, EventSubType, HardLevel, HeadIcon, OverrideProperty, ParamList, Speed, Team`
+**字段** (7): `BEActionBarPrefab, BasePoint, BattleEventID, Config, LevelAreaPrefab, Prefab, SkillIDList`
 
 **首条记录摘要**:
 ```json
 {
   "BattleEventID": 62200,
-  "Team": "TeamNeutral",
-  "EventSubType": "GridFightCountDownWarningEvent",
-  "BattleEventName": "BattleEventName_62200",
-  "HeadIcon": "SpriteOutput/AvatarIconTeam/999.png",
-  "AbilityList": "<list[2]>",
-  "OverrideProperty": "<list[1]>",
-  "Speed": {
-    "Value": 100
-  },
-  "HardLevel": true,
-  "DescrptionText": "",
-  "ParamList": [
-    {
-      "Value": 0.5
-    }
-  ],
-  "AssetPackName": ""
+  "Config": "",
+  "Prefab": "",
+  "LevelAreaPrefab": "",
+  "BEActionBarPrefab": "",
+  "BasePoint": "",
+  "SkillIDList": []
 }
 ```
 
@@ -1106,16 +1222,111 @@
 }
 ```
 
-### GridFightSkillSubIcon.json (0.06 MB, 997 条)
+### GridFightRoleSkillDisplay.json (0.07 MB, 280 条)
 
-**字段** (3): `SkillComeFrom, SkillID, SubIconType`
+**字段** (5): `CategoryTagList, FrontBackType, IconPath, Name, RoleID`
 
 **首条记录摘要**:
 ```json
 {
-  "SkillComeFrom": "Back",
-  "SkillID": 10060201,
-  "SubIconType": "Replace"
+  "RoleID": 1001,
+  "FrontBackType": "Back",
+  "Name": {
+    "Hash": 10699595132174638196
+  },
+  "IconPath": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
+  "CategoryTagList": [
+    "Shield"
+  ]
+}
+```
+
+### GridFightTraitRemark.json (0.07 MB, 109 条)
+
+**字段** (11): `ConditionParamList, ConditionType, Format, ID, IsInBook, ParamSource, Position, TextOrder, TraitRemark, TraitRemarkParamList, TraitSimpleRemark`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1002,
+  "Position": "Back",
+  "TextOrder": 2,
+  "TraitRemark": {
+    "Hash": 1850822872832395150
+  },
+  "TraitSimpleRemark": {
+    "Hash": 8828794964573923387
+  },
+  "Format": "GreyToHighlight",
+  "ConditionType": "ExpertActivate",
+  "ConditionParamList": [
+    1205
+  ],
+  "TraitRemarkParamList": "<list[13]>",
+  "IsInBook": true
+}
+```
+
+### GridFightItems.json (0.06 MB, 269 条)
+
+**字段** (5): `ID, IconPath, ItemName, ItemPriority, SmallIconPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 350101,
+  "ItemPriority": 1,
+  "IconPath": "SpriteOutput/GridFight/Equipment/350101....",
+  "SmallIconPath": "SpriteOutput/GridFight/EquipmentSmall/35...",
+  "ItemName": {
+    "Hash": 10537163807765380095
+  }
+}
+```
+
+### GridFightRoleRecommendEquip.json (0.06 MB, 280 条)
+
+**字段** (4): `FirstRecommendEquipList, FrontBackType, RoleID, SecondRecommendEquipList`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1001,
+  "FrontBackType": "Back",
+  "FirstRecommendEquipList": [
+    35030203,
+    35030608,
+    35030508
+  ],
+  "SecondRecommendEquipList": [
+    35030506,
+    35030206,
+    35030305
+  ]
+}
+```
+
+### GridFightSpecialGoods.json (0.06 MB, 165 条)
+
+**字段** (11): `Cost, EffectParamList, GoodDesc, GoodName, GroupID, ID, IconPath, JsonPath, LowerGoodID, MiniIconPath, Quality`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 101,
+  "GroupID": 1,
+  "Cost": 24,
+  "Quality": 1,
+  "IconPath": "",
+  "MiniIconPath": "",
+  "JsonPath": "Config/Level/GridFight/SpecialGoods/Cyre...",
+  "GoodName": {
+    "Hash": 678352926252366
+  },
+  "GoodDesc": {
+    "Hash": 11037750777867872464
+  },
+  "EffectParamList": []
 }
 ```
 
@@ -1145,6 +1356,84 @@
 }
 ```
 
+### GridFightRoleBasicInfo.json (0.06 MB, 140 条)
+
+**字段** (16): `AvatarID, BackendRankList, ChargeType, EquipmentID, FrontBackType, HealOrShieldDisplay, ID, IsExpert, IsFakeAvatar, IsInBook, IsInPool, MaxSPIcon, Rarity, SeasonID, SpecialAvatarID, TraitList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "AvatarID": 1001,
+  "FrontBackType": "Back",
+  "Rarity": 1,
+  "HealOrShieldDisplay": "Shield",
+  "ChargeType": [
+    "Speed"
+  ],
+  "MaxSPIcon": "",
+  "TraitList": [
+    1001,
+    2010
+  ],
+  "IsInPool": true,
+  "IsInBook": true,
+  "BackendRankList": "<list[6]>",
+  "SpecialAvatarID": 3701001,
+  "SeasonID": 1
+}
+```
+
+### GridFightTraitBasicInfo.json (0.06 MB, 67 条)
+
+**字段** (16): `ActivationType, BEIDList, BaseDescParamList, CutinPath, ID, IconPath, LevelGraphPath, MiniIconPath, SeasonID, TraitBaseDesc, TraitBaseSimpleDesc, TraitEffectList, TraitName, TraitSearchKey, TraitSortPriority, TraitType`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "ActivationType": "GreaterEqualThan",
+  "TraitSearchKey": "Origin_1001",
+  "IconPath": "SpriteOutput/GridFight/TraitIcon/Icon/10...",
+  "MiniIconPath": "SpriteOutput/GridFight/TraitIcon/MiniIco...",
+  "BEIDList": [
+    62201
+  ],
+  "TraitName": {
+    "Hash": 16635147986466422796
+  },
+  "TraitEffectList": [],
+  "TraitBaseDesc": {
+    "Hash": 14610959320175737237
+  },
+  "TraitBaseSimpleDesc": {
+    "Hash": 17340321087791696433
+  },
+  "BaseDescParamList": [
+    {
+      "Value": 10
+    }
+  ],
+  "CutinPath": "",
+  "LevelGraphPath": "",
+  "SeasonID": 1,
+  "TraitSortPriority": 61
+}
+```
+
+### GridFightTraitMazebuffPlus.json (0.06 MB, 269 条)
+
+**字段** (3): `BEParamList, MazebuffID, ShowStanceList`
+
+**首条记录摘要**:
+```json
+{
+  "MazebuffID": 35100101,
+  "ShowStanceList": "<list[3]>",
+  "BEParamList": "<list[5]>"
+}
+```
+
 ### FarmElementConfig.json (0.05 MB, 203 条)
 
 **字段** (10): `AutoObtainDamageType, DamageType, DropList, ID, MappingInfoID, MaxChallengeCnt, ParamList, StageID, StaminaCost, WorldLevel`
@@ -1164,6 +1453,25 @@
   ],
   "ParamList": [],
   "StageID": 1012010
+}
+```
+
+### GridFightElationEquip.json (0.05 MB, 197 条)
+
+**字段** (3): `ElationEquipDesc, ID, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 350201,
+  "ElationEquipDesc": {
+    "Hash": 4387124778405518223
+  },
+  "ParamList": [
+    {
+      "Value": 0.05
+    }
+  ]
 }
 ```
 
@@ -1245,37 +1553,38 @@
 }
 ```
 
-### GridFightPortalBuff.json (0.05 MB, 84 条)
+### GridFightAffixMazebuff.json (0.05 MB, 82 条)
 
-**字段** (14): `DelayedShowBonus, EffectParamList, ID, IconPath, IfInBook, IsOCEffective, JsonPath, PortalBuffDesc, PortalBuffTitle, PortalGameRefScore, PortalGameRefTrait, ShowBonusID, ShowBonusIDList, ShowNpcIDList`
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 101,
-  "JsonPath": "Config/Level/GridFight/PortalBuff/GridFi...",
-  "EffectParamList": [
+  "ID": 35301001,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_35301001",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
+  "ParamList": [
     {
-      "Value": 2
+      "Value": 0.6
+    },
+    {
+      "Value": 0.3
     }
   ],
-  "PortalBuffTitle": {
-    "Hash": 9052694893348241712
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 11973524563197982816
   },
-  "PortalBuffDesc": {
-    "Hash": 9437218109261494594
+  "BuffDesc": {
+    "Hash": 203591965729467267
   },
-  "IconPath": "SpriteOutput/GridFight/Portal/101.png",
-  "ShowBonusID": 40017,
-  "ShowBonusIDList": [
-    40017
-  ],
-  "IsOCEffective": 1,
-  "PortalGameRefTrait": [],
-  "PortalGameRefScore": [],
-  "DelayedShowBonus": [],
-  "IfInBook": true,
-  "ShowNpcIDList": []
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -1309,35 +1618,6 @@
   "StageScore": 3000,
   "Weight": 100,
   "SpecialMonsterScoreList": {}
-}
-```
-
-### GridFightDivisionStage.json (0.05 MB, 97 条)
-
-**字段** (15): `AffixChooseNumList, BinaryNodeDiffAddRule, DivisionID, EnemyDifficultyLevel, EnvironmentBuffList, EnvironmentDescList, ExpModify, JsonPath, LevelBaseAttackMultiRatio, LevelBaseHPMultiRatio, OCScoreRule, ScoreRule, SeasonID, UniqueEnvironmentDescList, WeeklyScoreModify`
-
-**首条记录摘要**:
-```json
-{
-  "DivisionID": 1,
-  "AffixChooseNumList": [],
-  "EnvironmentBuffList": [],
-  "UniqueEnvironmentDescList": [],
-  "EnvironmentDescList": [
-    "GridFight_EnvironmentDesc_None"
-  ],
-  "SeasonID": 1,
-  "ScoreRule": 801,
-  "OCScoreRule": 801,
-  "WeeklyScoreModify": 100,
-  "ExpModify": 100,
-  "JsonPath": "",
-  "LevelBaseHPMultiRatio": {
-    "Value": 1
-  },
-  "LevelBaseAttackMultiRatio": {
-    "Value": 1
-  }
 }
 ```
 
@@ -1383,6 +1663,30 @@
 }
 ```
 
+### GridFightPrayQuest.json (0.05 MB, 120 条)
+
+**字段** (13): `AcceptBonus, AcceptEffectParamList, AcceptJsonPath, EffectParamList, FinishBonus, FinishWayID, ID, JsonPath, PrayDesc, PrayDisPlayDesc, PrayPriceDesc, PrayTitle, PrayType`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 7320001,
+  "PrayType": "FateWhite",
+  "FinishWayID": 7320001,
+  "FinishBonus": 23140,
+  "AcceptJsonPath": "",
+  "AcceptEffectParamList": [],
+  "JsonPath": "",
+  "EffectParamList": [],
+  "PrayDesc": {
+    "Hash": 6309928406107447514
+  },
+  "PrayTitle": {
+    "Hash": 15361108566241695636
+  }
+}
+```
+
 ### HeliobusUser.json (0.05 MB, 235 条)
 
 **字段** (3): `HeliobusUserID, HeliobusUserName, UserIconPath`
@@ -1395,6 +1699,25 @@
     "Hash": 3907393653287306190
   },
   "UserIconPath": "SpriteOutput/Quest/Heliobus/HeliobusUser..."
+}
+```
+
+### GridFightDivisionInfo.json (0.04 MB, 168 条)
+
+**字段** (9): `DivisionIcon, DivisionLevel, DivisionName, DivisionRewardQuest, DivisionShowPic, ID, IsPromotion, Progress, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "SeasonID": 1,
+  "Progress": 1,
+  "DivisionRewardQuest": [],
+  "DivisionIcon": "",
+  "DivisionShowPic": "",
+  "DivisionName": {
+    "Hash": 9148341949944255495
+  }
 }
 ```
 
@@ -1465,7 +1788,38 @@
 }
 ```
 
-### GameplayGuideData.json (0.04 MB, 112 条)
+### GridFightSpotLight.json (0.04 MB, 82 条)
+
+**字段** (12): `Desc, EffectParamList, EnemyDiffLvAdd, ID, Icon, IsCarry, IsOCEffective, JsonPath, Name, SuitableAvatarList, Tag, TraitID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 100000,
+  "Icon": "SpriteOutput/GridFight/MainCharacterBuff...",
+  "Name": {
+    "Hash": 287356835200933535
+  },
+  "Desc": {
+    "Hash": 15499966669783838028
+  },
+  "JsonPath": "Config/Level/GridFight/SpotLight/GridFig...",
+  "EffectParamList": [
+    {
+      "Value": 0.45
+    }
+  ],
+  "Tag": [
+    41,
+    1
+  ],
+  "SuitableAvatarList": "<list[6]>",
+  "IsOCEffective": true,
+  "IsCarry": true
+}
+```
+
+### GameplayGuideData.json (0.04 MB, 114 条)
 
 **字段** (12): `ID, IconPath, MapEntranceID, Name, Order, OverrideShowCondition, RelatedID, ShowItemAmount, SubType, TabID, TabIconPath, UnlockMission`
 
@@ -1491,38 +1845,40 @@
 }
 ```
 
-### GridFightAffixMazebuff.json (0.04 MB, 71 条)
+### FiveDimPuzzleChallenge.json (0.04 MB, 60 条)
 
-**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+**字段** (15): `ActiveDescText, ActiveNameText, DescText, FinishDescText, FinishNameText, FloorID, GroupID, InstanceID, NameText, ProgressGPList, ProgressLimit, PuzzleID, PuzzleStateGP, RelatedMissionIDList, UIActiveGP`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 35301001,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 1,
-  "ModifierName": "ADV_StageAbility_35301001",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
-  "ParamList": [
-    {
-      "Value": 0.6
-    },
-    {
-      "Value": 0.3
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 11973524563197982816
+  "PuzzleID": 1050101,
+  "FloorID": 10501001,
+  "GroupID": 53,
+  "InstanceID": 110001,
+  "PuzzleStateGP": "LG_110001__63_ChestStateS_Auto",
+  "UIActiveGP": "LG_110001_LittleGameUIActive",
+  "NameText": {
+    "Hash": 15465075350105141510
   },
-  "BuffDesc": {
-    "Hash": 203591965729467267
+  "DescText": {
+    "Hash": 2189671480971208087
   },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
+  "ActiveNameText": {
+    "Hash": 15465075350105141510
+  },
+  "ActiveDescText": {
+    "Hash": 2189671480971208087
+  },
+  "FinishNameText": {
+    "Hash": 2012001348524219443
+  },
+  "FinishDescText": {
+    "Hash": 5177779949803579851
+  },
+  "ProgressGPList": "<list[3]>",
+  "ProgressLimit": 3,
+  "RelatedMissionIDList": []
 }
 ```
 
@@ -1538,69 +1894,35 @@
 }
 ```
 
-### GridFightItems.json (0.04 MB, 166 条)
+### GridFightTraitMazebuffS2.json (0.04 MB, 62 条)
 
-**字段** (5): `ID, IconPath, ItemName, ItemPriority, SmallIconPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 350101,
-  "ItemPriority": 1,
-  "IconPath": "SpriteOutput/GridFight/Equipment/350101....",
-  "SmallIconPath": "SpriteOutput/GridFight/EquipmentSmall/35...",
-  "ItemName": {
-    "Hash": 10537163807765380095
-  }
-}
-```
-
-### GridFightBackBEData.json (0.04 MB, 120 条)
-
-**字段** (7): `BEActionBarPrefab, BasePoint, BattleEventID, Config, LevelAreaPrefab, Prefab, SkillIDList`
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "BattleEventID": 62200,
-  "Config": "",
-  "Prefab": "",
-  "LevelAreaPrefab": "",
-  "BEActionBarPrefab": "",
-  "BasePoint": "",
-  "SkillIDList": []
-}
-```
-
-### GridFightRoleBasicInfo.json (0.04 MB, 77 条)
-
-**字段** (17): `AvatarID, BackendRankList, ChargeType, EquipmentID, FrontBackType, HealOrShieldDisplay, ID, IsExpert, IsInBook, IsInPool, MaxSPIcon, Rarity, RoleSavedValueList, SeasonID, SeasonIDList, SpecialAvatarID, TraitList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "AvatarID": 1001,
-  "SeasonIDList": [],
-  "FrontBackType": "Back",
-  "Rarity": 1,
-  "HealOrShieldDisplay": "Shield",
-  "ChargeType": [
-    "Speed"
+  "ID": 110000001,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_110000001",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_Origin_100202_110...",
+  "ParamList": [
+    {
+      "Value": 0.2
+    }
   ],
-  "MaxSPIcon": "",
-  "TraitList": [
-    1001,
-    2010
-  ],
-  "IsInPool": true,
-  "IsInBook": true,
-  "BackendRankList": "<list[6]>",
-  "SpecialAvatarID": 3701001,
-  "SeasonID": 1,
-  "RoleSavedValueList": [
-    "GP_Avatar_Mar_7th_01"
-  ]
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 969986799970153121
+  },
+  "BuffDesc": {
+    "Hash": 10522838566968734305
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -1634,22 +1956,123 @@
 }
 ```
 
-### GridFightCombinationBonus.json (0.04 MB, 230 条)
+### GridFightAugmentMazebuff.json (0.04 MB, 63 条)
 
-**字段** (3): `BonusID, BonusNumberList, CombinationBonusList`
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "BonusID": 11001,
-  "CombinationBonusList": [
-    1,
-    201
+  "ID": 35401001,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 3,
+  "ModifierName": "ADV_StageAbility_35401001",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
+  "ParamList": [
+    {
+      "Value": 0.3
+    },
+    {
+      "Value": 0.3
+    }
   ],
-  "BonusNumberList": [
-    20000,
-    10000
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 18118184519004368802
+  },
+  "BuffDesc": {
+    "Hash": 2068835060799850456
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
+}
+```
+
+### GridFightRankSkillModify.json (0.04 MB, 184 条)
+
+**字段** (5): `ModifyOps, ModifySkillIndexs, ModifyValues, RankID, SkillID`
+
+**首条记录摘要**:
+```json
+{
+  "RankID": 100306,
+  "SkillID": 10030401,
+  "ModifySkillIndexs": [
+    3
+  ],
+  "ModifyOps": [
+    "Mul"
+  ],
+  "ModifyValues": [
+    {
+      "Value": 1.2
+    }
   ]
+}
+```
+
+### GridFightOrb.json (0.04 MB, 533 条)
+
+**字段** (4): `BonusID, OrbID, OrbName, Type`
+
+**首条记录摘要**:
+```json
+{
+  "OrbID": 100,
+  "BonusID": 20001,
+  "Type": "White"
+}
+```
+
+### GuideChallengeData.json (0.04 MB, 105 条)
+
+**字段** (8): `ID, IconPath, MapEntranceID, Name, RelatedID, TabID, TabIconPath, UnlockConditions`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 9999,
+  "Name": {
+    "Hash": 6410641494565517684
+  },
+  "IconPath": "",
+  "TabIconPath": "",
+  "UnlockConditions": [
+    {
+      "Type": "PlayerLevel",
+      "Param": "21"
+    }
+  ],
+  "TabID": 1001
+}
+```
+
+### GridFightEliteGroup.json (0.04 MB, 146 条)
+
+**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
+
+**首条记录摘要**:
+```json
+{
+  "EliteGroup": 831,
+  "AttackRatio": {
+    "Value": 0.6
+  },
+  "DefenceRatio": {
+    "Value": 1
+  },
+  "HPRatio": {
+    "Value": 0.5
+  },
+  "SpeedRatio": {
+    "Value": 1
+  },
+  "StanceRatio": {
+    "Value": 1
+  }
 }
 ```
 
@@ -1669,32 +2092,6 @@
   "DynamicIndexList": [],
   "Level": 1,
   "MazeBuffID": 3113001
-}
-```
-
-### GridFightEliteGroup.json (0.04 MB, 146 条)
-
-**字段** (6): `AttackRatio, DefenceRatio, EliteGroup, HPRatio, SpeedRatio, StanceRatio`
-
-**首条记录摘要**:
-```json
-{
-  "EliteGroup": 831,
-  "AttackRatio": {
-    "Value": 0.6
-  },
-  "DefenceRatio": {
-    "Value": 1
-  },
-  "HPRatio": {
-    "Value": 1
-  },
-  "SpeedRatio": {
-    "Value": 1
-  },
-  "StanceRatio": {
-    "Value": 1
-  }
 }
 ```
 
@@ -1738,161 +2135,6 @@
 }
 ```
 
-### GridFightRoleSkillDisplay.json (0.04 MB, 154 条)
-
-**字段** (5): `CategoryTagList, FrontBackType, IconPath, Name, RoleID`
-
-**首条记录摘要**:
-```json
-{
-  "RoleID": 1001,
-  "FrontBackType": "Back",
-  "Name": {
-    "Hash": 10699595132174638196
-  },
-  "IconPath": "SpriteOutput/SkillIcons/Avatar/1001/Skil...",
-  "CategoryTagList": [
-    "Shield"
-  ]
-}
-```
-
-### GuideChallengeData.json (0.04 MB, 102 条)
-
-**字段** (8): `ID, IconPath, MapEntranceID, Name, RelatedID, TabID, TabIconPath, UnlockConditions`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 9999,
-  "Name": {
-    "Hash": 6410641494565517684
-  },
-  "IconPath": "",
-  "TabIconPath": "",
-  "UnlockConditions": [
-    {
-      "Type": "PlayerLevel",
-      "Param": "21"
-    }
-  ],
-  "TabID": 1001
-}
-```
-
-### FiveDimPuzzleChallenge.json (0.04 MB, 52 条)
-
-**字段** (15): `ActiveDescText, ActiveNameText, DescText, FinishDescText, FinishNameText, FloorID, GroupID, InstanceID, NameText, ProgressGPList, ProgressLimit, PuzzleID, PuzzleStateGP, RelatedMissionIDList, UIActiveGP`
-
-**首条记录摘要**:
-```json
-{
-  "PuzzleID": 1050101,
-  "FloorID": 10501001,
-  "GroupID": 53,
-  "InstanceID": 110001,
-  "PuzzleStateGP": "LG_110001__63_ChestStateS_Auto",
-  "UIActiveGP": "LG_110001_LittleGameUIActive",
-  "NameText": {
-    "Hash": 15465075350105141510
-  },
-  "DescText": {
-    "Hash": 2189671480971208087
-  },
-  "ActiveNameText": {
-    "Hash": 15465075350105141510
-  },
-  "ActiveDescText": {
-    "Hash": 2189671480971208087
-  },
-  "FinishNameText": {
-    "Hash": 2012001348524219443
-  },
-  "FinishDescText": {
-    "Hash": 5177779949803579851
-  },
-  "ProgressGPList": "<list[3]>",
-  "ProgressLimit": 3,
-  "RelatedMissionIDList": []
-}
-```
-
-### GridFightAugmentMazebuff.json (0.03 MB, 58 条)
-
-**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 35401001,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 3,
-  "ModifierName": "ADV_StageAbility_35401001",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "StageAbility_GridFight_MonsterTag_1001",
-  "ParamList": [
-    {
-      "Value": 0.3
-    },
-    {
-      "Value": 0.3
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 18118184519004368802
-  },
-  "BuffDesc": {
-    "Hash": 2068835060799850456
-  },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
-}
-```
-
-### GridFightRoleRecommendEquip.json (0.03 MB, 154 条)
-
-**字段** (4): `FirstRecommendEquipList, FrontBackType, RoleID, SecondRecommendEquipList`
-
-**首条记录摘要**:
-```json
-{
-  "RoleID": 1001,
-  "FrontBackType": "Back",
-  "FirstRecommendEquipList": [
-    35030203,
-    35030608,
-    35030508
-  ],
-  "SecondRecommendEquipList": [
-    35030506,
-    35030206,
-    35030305
-  ]
-}
-```
-
-### GridFightElationEquip.json (0.03 MB, 126 条)
-
-**字段** (3): `ElationEquipDesc, ID, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 350201,
-  "ElationEquipDesc": {
-    "Hash": 4387124778405518223
-  },
-  "ParamList": [
-    {
-      "Value": 0.05
-    }
-  ]
-}
-```
-
 ### EvolveBuildGearConfig.json (0.03 MB, 181 条)
 
 **字段** (7): `DynamicIndexList, GearID, IndexList, Level, MazeBuffID, SimpIndexList, Type`
@@ -1912,42 +2154,29 @@
 }
 ```
 
-### GridFightTraitMazebuffPlus.json (0.03 MB, 154 条)
+### GridFightBackServant.json (0.03 MB, 485 条)
 
-**字段** (3): `BEParamList, MazebuffID, ShowStanceList`
+**字段** (4): `BESkillIDList, RoleID, ServantBEID, Star`
 
 **首条记录摘要**:
 ```json
 {
-  "MazebuffID": 35100101,
-  "ShowStanceList": "<list[3]>",
-  "BEParamList": "<list[5]>"
+  "RoleID": 1001,
+  "Star": 1,
+  "BESkillIDList": []
 }
 ```
 
-### GridFightTraitRemark.json (0.03 MB, 58 条)
+### FreeStyleCharacterInfo.json (0.03 MB, 306 条)
 
-**字段** (10): `ConditionParamList, ConditionType, Format, ID, IsInBook, Position, TextOrder, TraitRemark, TraitRemarkParamList, TraitSimpleRemark`
+**字段** (3): `AvatarBodyID, AvatarFlagID, FreeStyleCharacterID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1002,
-  "Position": "Back",
-  "TextOrder": 2,
-  "TraitRemark": {
-    "Hash": 1850822872832395150
-  },
-  "TraitSimpleRemark": {
-    "Hash": 8828794964573923387
-  },
-  "Format": "GreyToHighlight",
-  "ConditionType": "ExpertActivate",
-  "ConditionParamList": [
-    1205
-  ],
-  "TraitRemarkParamList": "<list[13]>",
-  "IsInBook": true
+  "FreeStyleCharacterID": "NPC_Male",
+  "AvatarFlagID": 1,
+  "AvatarBodyID": 1
 }
 ```
 
@@ -1973,20 +2202,83 @@
 }
 ```
 
-### FreeStyleCharacterInfo.json (0.03 MB, 301 条)
+### GridFightTraitEffectLayerPa.json (0.03 MB, 160 条)
 
-**字段** (3): `AvatarBodyID, AvatarFlagID, FreeStyleCharacterID`
+**字段** (5): `DescParamList, EffectParamList, ID, Layer, TraitEffectDesc`
 
 **首条记录摘要**:
 ```json
 {
-  "FreeStyleCharacterID": "NPC_Male",
-  "AvatarFlagID": 1,
-  "AvatarBodyID": 1
+  "ID": 10021,
+  "Layer": 2,
+  "EffectParamList": [
+    {
+      "Value": 1
+    }
+  ],
+  "DescParamList": []
 }
 ```
 
-### FarmStageUnlockConfig.json (0.03 MB, 90 条)
+### GridFightSpecialModify.json (0.03 MB, 81 条)
+
+**字段** (11): `ConditionType, DependRoleID, DependRoleIDList, ModifyOps, ModifyRoleID, ModifySkillID, ModifySkillIndexs, ModifySkillType, ModifyValues, MultipleValueKey, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ModifyRoleID": 1403,
+  "ModifySkillID": 14039901,
+  "ModifyOps": [
+    "Add"
+  ],
+  "ModifySkillIndexs": [
+    1
+  ],
+  "ModifyValues": [
+    {
+      "Value": 0.06
+    }
+  ],
+  "MultipleValueKey": "GP_Avatar_Cyrene_01",
+  "ParamList": [],
+  "DependRoleID": 1415,
+  "DependRoleIDList": [
+    1415
+  ]
+}
+```
+
+### GridFightBonfireEventDialog.json (0.03 MB, 203 条)
+
+**字段** (5): `ID, Sentence, SentenceID, SentencePetPalShow, SentenceShow`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1020040101,
+  "SentenceID": 1,
+  "Sentence": {
+    "Hash": 13410880042942685106
+  },
+  "SentenceShow": 2,
+  "SentencePetPalShow": 1
+}
+```
+
+### GridFightSeasonAugment.json (0.03 MB, 632 条)
+
+**字段** (2): `AugmentID, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "AugmentID": 100101,
+  "SeasonID": 1
+}
+```
+
+### FarmStageUnlockConfig.json (0.03 MB, 91 条)
 
 **字段** (10): `FarmGachaIDList, FarmType, ID, OpenInAdvanceLimitActivityModuleID, OpenInAdvanceLimitUnlockID, UIEnterBattleArea, UIEntranceBgPath, UIEnviromentConfig, UnlockWorldLevelEnd, UnlockWorldLevelStart`
 
@@ -2003,6 +2295,22 @@
 }
 ```
 
+### GridFightMonster.json (0.03 MB, 184 条)
+
+**字段** (6): `MonsterID, MonsterTier, Star1EliteGroup3, Star2EliteGroup3, Star3EliteGroup3, Star4EliteGroup3`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterID": 800101020,
+  "MonsterTier": 1,
+  "Star1EliteGroup3": 851,
+  "Star2EliteGroup3": 852,
+  "Star3EliteGroup3": 853,
+  "Star4EliteGroup3": 854
+}
+```
+
 ### HeartDialScriptCondition.json (0.03 MB, 153 条)
 
 **字段** (6): `ControlConditionID, FullConditionID, LockConditionID, MissingConditionID, ScriptID, UnLockConditionID`
@@ -2016,25 +2324,6 @@
   "LockConditionID": 10001001,
   "UnLockConditionID": 10001001,
   "ControlConditionID": 10001001
-}
-```
-
-### GridFightDivisionInfo.json (0.03 MB, 97 条)
-
-**字段** (9): `DivisionIcon, DivisionLevel, DivisionName, DivisionRewardQuest, DivisionShowPic, ID, IsPromotion, Progress, SeasonID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "SeasonID": 1,
-  "Progress": 1,
-  "DivisionRewardQuest": [],
-  "DivisionIcon": "",
-  "DivisionShowPic": "",
-  "DivisionName": {
-    "Hash": 9148341949944255495
-  }
 }
 ```
 
@@ -2065,96 +2354,7 @@
 }
 ```
 
-### GridFightMonster.json (0.03 MB, 162 条)
-
-**字段** (6): `MonsterID, MonsterTier, Star1EliteGroup3, Star2EliteGroup3, Star3EliteGroup3, Star4EliteGroup3`
-
-**首条记录摘要**:
-```json
-{
-  "MonsterID": 800101020,
-  "MonsterTier": 1,
-  "Star1EliteGroup3": 851,
-  "Star2EliteGroup3": 852,
-  "Star3EliteGroup3": 853,
-  "Star4EliteGroup3": 854
-}
-```
-
-### GridFightOrb.json (0.03 MB, 376 条)
-
-**字段** (4): `BonusID, OrbID, OrbName, Type`
-
-**首条记录摘要**:
-```json
-{
-  "OrbID": 100,
-  "BonusID": 20001,
-  "Type": "White"
-}
-```
-
-### GridFightTraitBasicInfo.json (0.03 MB, 33 条)
-
-**字段** (16): `ActivationType, BEIDList, BaseDescParamList, CutinPath, ID, IconPath, LevelGraphPath, MiniIconPath, SeasonID, TraitBaseDesc, TraitBaseSimpleDesc, TraitEffectList, TraitName, TraitSearchKey, TraitSortPriority, TraitType`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "ActivationType": "GreaterEqualThan",
-  "TraitSearchKey": "Origin_1001",
-  "IconPath": "SpriteOutput/GridFight/TraitIcon/Icon/10...",
-  "MiniIconPath": "SpriteOutput/GridFight/TraitIcon/MiniIco...",
-  "BEIDList": [
-    62201
-  ],
-  "TraitName": {
-    "Hash": 16635147986466422796
-  },
-  "TraitEffectList": [],
-  "TraitBaseDesc": {
-    "Hash": 14610959320175737237
-  },
-  "TraitBaseSimpleDesc": {
-    "Hash": 17340321087791696433
-  },
-  "BaseDescParamList": [
-    {
-      "Value": 10
-    }
-  ],
-  "CutinPath": "",
-  "LevelGraphPath": "",
-  "SeasonID": 1,
-  "TraitSortPriority": 61
-}
-```
-
-### GridFightRankSkillModify.json (0.03 MB, 124 条)
-
-**字段** (5): `ModifyOps, ModifySkillIndexs, ModifyValues, RankID, SkillID`
-
-**首条记录摘要**:
-```json
-{
-  "RankID": 100306,
-  "SkillID": 10030401,
-  "ModifySkillIndexs": [
-    3
-  ],
-  "ModifyOps": [
-    "Mul"
-  ],
-  "ModifyValues": [
-    {
-      "Value": 1.2
-    }
-  ]
-}
-```
-
-### GridFightConstCommon.json (0.02 MB, 146 条)
+### GridFightConstCommon.json (0.03 MB, 160 条)
 
 **字段** (2): `ConstValueName, Value`
 
@@ -2166,7 +2366,135 @@
 }
 ```
 
-### EnterPageConfig.json (0.02 MB, 513 条)
+### GridFightRoleRecomSpotLight.json (0.03 MB, 126 条)
+
+**字段** (4): `FirstRecommendSpotLightList, FrontBackType, RoleID, SecondRecommendSpotLightList`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 100402,
+  "FrontBackType": "Front",
+  "FirstRecommendSpotLightList": [
+    100900,
+    100307,
+    100001,
+    100000
+  ],
+  "SecondRecommendSpotLightList": [
+    100000,
+    120401
+  ]
+}
+```
+
+### GridFightPetPalEff.json (0.03 MB, 70 条)
+
+**字段** (8): `AddDesc, Desc, EffectParamList, ID, IsOCEffective, JsonPath, SimpleDesc, SwitchDesc`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 102001,
+  "Desc": {
+    "Hash": 15071735831388370720
+  },
+  "SwitchDesc": {
+    "Hash": 17842115265421951151
+  },
+  "SimpleDesc": {
+    "Hash": 3649357519543386243
+  },
+  "IsOCEffective": true,
+  "JsonPath": "Config/Level/GridFight/petpal/GridFightP...",
+  "EffectParamList": []
+}
+```
+
+### GFTraitBESkillConfig.json (0.03 MB, 20 条)
+
+**字段** (18): `AttackType, CutinPath, DelayRatio, ParamList, SPMultipleRatio, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, UltraSkillIcon`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 20120101,
+  "SkillName": {
+    "Hash": 509493294835931323
+  },
+  "SkillTag": {
+    "Hash": 15983939177738998168
+  },
+  "SkillTypeDesc": {
+    "Hash": 765041958489320547
+  },
+  "SkillTriggerKey": "SkillP01EX",
+  "SkillIcon": "SpriteOutput/SkillIcons/Com/SkillIcon_Pr...",
+  "UltraSkillIcon": "",
+  "CutinPath": "",
+  "SkillDesc": {
+    "Hash": 14274449035728838828
+  },
+  "SimpleSkillDesc": {
+    "Hash": 12968048256951062608
+  },
+  "ShowStanceList": "<list[3]>",
+  "SPMultipleRatio": {
+    "Value": 0.5
+  },
+  "DelayRatio": {
+    "Value": 1
+  },
+  "ParamList": [
+    {
+      "Value": 1
+    }
+  ],
+  "SimpleParamList": [
+    {
+      "Value": 1
+    }
+  ],
+  "SkillEffect": "Enhance",
+  "SkillButtonEffType": ""
+}
+```
+
+### GridFightSeasonItem.json (0.02 MB, 340 条)
+
+**字段** (3): `ConfigID, ItemID, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "ItemID": 99989,
+  "SeasonID": 2,
+  "ConfigID": 99989
+}
+```
+
+### GridFightBonfireEventOption.json (0.02 MB, 72 条)
+
+**字段** (8): `Desc, DialogID, EffectParamList, EventID, JsonPath, OptionID, OptionShowType, Title`
+
+**首条记录摘要**:
+```json
+{
+  "EventID": 10600301,
+  "OptionID": 1,
+  "JsonPath": "Config/Level/GridFight/petpal/bonfire/Gr...",
+  "Title": {
+    "Hash": 17458836781851226761
+  },
+  "Desc": {
+    "Hash": 16097287124724778303
+  },
+  "DialogID": 1060030102,
+  "EffectParamList": []
+}
+```
+
+### EnterPageConfig.json (0.02 MB, 529 条)
 
 **字段** (1): `Key`
 
@@ -2177,7 +2505,42 @@
 }
 ```
 
-### GridFightAffixConfig.json (0.02 MB, 55 条)
+### GridFightSeasonTalent.json (0.02 MB, 40 条)
+
+**字段** (13): `Cost, EffectDesc, EffectParamList, EffectTag, EffectTitle, ID, IconPath, IsImportant, IsOCEffective, JsonPath, NextTalentIDList, PreTalentIDList, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2011,
+  "SeasonID": 2,
+  "NextTalentIDList": [],
+  "PreTalentIDList": [],
+  "Cost": 20,
+  "IconPath": "SpriteOutput/GridFight/AttributeIcon/Whi...",
+  "JsonPath": "Config/Level/GridFight/SeasonTalent/Seas...",
+  "IsOCEffective": 1,
+  "EffectParamList": [
+    {
+      "Value": 1
+    },
+    {
+      "Value": 0.99
+    }
+  ],
+  "EffectTag": {
+    "Hash": 15097219401480747513
+  },
+  "EffectTitle": {
+    "Hash": 5627671704163293419
+  },
+  "EffectDesc": {
+    "Hash": 11893880221757873933
+  }
+}
+```
+
+### GridFightAffixConfig.json (0.02 MB, 53 条)
 
 **字段** (7): `AffixDesc, AffixName, EffectParamList, ID, IconPath, JsonPath, RuleParamList`
 
@@ -2207,31 +2570,22 @@
 }
 ```
 
-### GridFightSeasonTalent.json (0.02 MB, 40 条)
+### GridFightPrayQuestFinishWay.json (0.02 MB, 105 条)
 
-**字段** (13): `Cost, EffectDesc, EffectParamList, EffectTag, EffectTitle, ID, IconPath, IsImportant, IsOCEffective, JsonPath, NextTalentIDList, PreTalentIDList, SeasonID`
+**字段** (11): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 2011,
-  "SeasonID": 1,
-  "NextTalentIDList": [],
-  "PreTalentIDList": [],
-  "Cost": 20,
-  "IconPath": "SpriteOutput/GridFight/AttributeIcon/Whi...",
-  "JsonPath": "Config/Level/GridFight/SeasonTalent/Seas...",
-  "IsOCEffective": 1,
-  "EffectParamList": "<list[3]>",
-  "EffectTag": {
-    "Hash": 15097219401480747513
-  },
-  "EffectTitle": {
-    "Hash": 5627671704163293419
-  },
-  "EffectDesc": {
-    "Hash": 11893880221757873933
-  }
+  "ID": 7320001,
+  "FinishType": "GridFightTraitRoleTotalStar",
+  "ParamType": "NoPara",
+  "ParamInt1": 1013,
+  "ParamStr1": "",
+  "ParamIntList": [],
+  "ParamItemList": [],
+  "Progress": 5,
+  "IsBackTrack": true
 }
 ```
 
@@ -2280,26 +2634,6 @@
 }
 ```
 
-### GridFightPrayQuest.json (0.02 MB, 88 条)
-
-**字段** (8): `AcceptBonus, FinishBonus, FinishWayID, ID, PrayDesc, PrayPriceDesc, PrayTitle, PrayType`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 7320001,
-  "PrayType": "FateWhite",
-  "FinishWayID": 7320001,
-  "FinishBonus": 23140,
-  "PrayDesc": {
-    "Hash": 6309928406107447514
-  },
-  "PrayTitle": {
-    "Hash": 15361108566241695636
-  }
-}
-```
-
 ### GridFightSkillDescMod.json (0.02 MB, 155 条)
 
 **字段** (4): `ModifySkillDesc, ModifySkillID, ModifySkillSimpleDesc, ModifySkillType`
@@ -2332,6 +2666,21 @@
 }
 ```
 
+### GridFightRolePropertyConfig.json (0.02 MB, 57 条)
+
+**字段** (8): `ExtraEffectID, IconPath, IsDisplay, MiniIconPath, Order, PanelPropertyName, PropertyName, PropertyType`
+
+**首条记录摘要**:
+```json
+{
+  "PropertyType": "ExtraAttackAddedRatio1",
+  "IsDisplay": true,
+  "Order": 12,
+  "IconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt...",
+  "MiniIconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt..."
+}
+```
+
 ### GridFightBonusPoolV2.json (0.02 MB, 110 条)
 
 **字段** (5): `BonusList, BonusMaxNumberList, BonusWeightList, RandomBonusID, TotalValue`
@@ -2350,21 +2699,6 @@
   "BonusWeightList": [
     100
   ]
-}
-```
-
-### GridFightRolePropertyConfig.json (0.02 MB, 55 条)
-
-**字段** (8): `ExtraEffectID, IconPath, IsDisplay, MiniIconPath, Order, PanelPropertyName, PropertyName, PropertyType`
-
-**首条记录摘要**:
-```json
-{
-  "PropertyType": "ExtraAttackAddedRatio1",
-  "IsDisplay": true,
-  "Order": 12,
-  "IconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt...",
-  "MiniIconPath": "SpriteOutput/BuffIcon/Inlevel/IconBuffAt..."
 }
 ```
 
@@ -2403,6 +2737,19 @@
     610103
   ],
   "Likes": "<list[15]>"
+}
+```
+
+### GridFightRoleConfig_Index_SeasonAndTrait.json (0.02 MB, 61 条)
+
+**字段** (3): `MGNHKOHFLPO, PIKLFGGHKGD, PNPJBPCMINL`
+
+**首条记录摘要**:
+```json
+{
+  "PNPJBPCMINL": 1,
+  "PIKLFGGHKGD": 1001,
+  "MGNHKOHFLPO": "<list[8]>"
 }
 ```
 
@@ -2446,6 +2793,41 @@
     2,
     3
   ]
+}
+```
+
+### GridFightSpotLightMazebuff.json (0.02 MB, 31 条)
+
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 131000001,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_131000001",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_SpotLight_1310000...",
+  "ParamList": [
+    {
+      "Value": 0.12
+    },
+    {
+      "Value": 0.12
+    }
+  ],
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 15401494364474521550
+  },
+  "BuffDesc": {
+    "Hash": 475909464068989358
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -2498,28 +2880,37 @@
 }
 ```
 
-### GridFightBackServant.json (0.02 MB, 265 条)
+### FunctionHud.json (0.02 MB, 75 条)
 
-**字段** (4): `BESkillIDList, RoleID, ServantBEID, Star`
+**字段** (7): `FunctionID, ID, IconPath, Name, OverrideHudIconPath, RedDot, RedDotHud`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1001,
-  "Star": 1,
-  "BESkillIDList": []
+  "ID": 2,
+  "FunctionID": 2,
+  "Name": {
+    "Hash": 6024850270121446748
+  },
+  "IconPath": "SpriteOutput/PhoneAPPIcon/MapIcon.png",
+  "RedDot": "",
+  "OverrideHudIconPath": "",
+  "RedDotHud": ""
 }
 ```
 
-### GridFightSeasonAugment.json (0.02 MB, 334 条)
+### GridFightEquipRecommendRole.json (0.02 MB, 118 条)
 
-**字段** (2): `AugmentID, SeasonID`
+**字段** (3): `EquipID, RecommendRoleIDList, Season`
 
 **首条记录摘要**:
 ```json
 {
-  "AugmentID": 100101,
-  "SeasonID": 1
+  "EquipID": 353201,
+  "Season": 2,
+  "RecommendRoleIDList": [
+    604202
+  ]
 }
 ```
 
@@ -2554,22 +2945,58 @@
 }
 ```
 
-### FunctionHud.json (0.02 MB, 74 条)
+### GridFightServantStar.json (0.02 MB, 42 条)
 
-**字段** (7): `FunctionID, ID, IconPath, Name, OverrideHudIconPath, RedDot, RedDotHud`
+**字段** (14): `AIPath, HPBase, HPInherit, HPSkill, ID, JsonOverrideConfig, ServantID, ServantShowSkiilIDList, SkillOverrideDest, SkillOverrideSrc, SpeedBase, SpeedInherit, SpeedSkill, Star`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 2,
-  "FunctionID": 2,
-  "Name": {
-    "Hash": 6024850270121446748
+  "ID": 1402,
+  "Star": 1,
+  "ServantID": 11402,
+  "JsonOverrideConfig": "Config/ConfigCharacter/GridFight/3.5/Ava...",
+  "AIPath": "Config/ConfigAI/ComplexSkillAIGlobalGrou...",
+  "SkillOverrideSrc": [
+    1140203
+  ],
+  "SkillOverrideDest": [
+    114020301
+  ],
+  "ServantShowSkiilIDList": [],
+  "HPBase": "#6",
+  "HPInherit": "#5",
+  "HPSkill": 140204,
+  "SpeedBase": "0",
+  "SpeedInherit": "#4",
+  "SpeedSkill": 140204
+}
+```
+
+### GridFightTrailblazeGoods.json (0.02 MB, 47 条)
+
+**字段** (12): `Cost, Desc, EffectParamList, FatherGoodID, ID, Icon, JsonPath, ParamList, TrailGoodDesc, TrailGoodSimpleDesc, TrailGoodTitle, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 999,
+  "Type": "RefreshGoods",
+  "ParamList": [],
+  "JsonPath": "",
+  "EffectParamList": [],
+  "Cost": 1,
+  "Icon": "SpriteOutput/GridFight/GridItem/281035.p...",
+  "Desc": "",
+  "TrailGoodTitle": {
+    "Hash": 1684883762565003501
   },
-  "IconPath": "SpriteOutput/PhoneAPPIcon/MapIcon.png",
-  "RedDot": "",
-  "OverrideHudIconPath": "",
-  "RedDotHud": ""
+  "TrailGoodDesc": {
+    "Hash": 14613670693083910042
+  },
+  "TrailGoodSimpleDesc": {
+    "Hash": 11503361744680137369
+  }
 }
 ```
 
@@ -2596,68 +3023,6 @@
 }
 ```
 
-### GridFightEquipRecommendRole.json (0.02 MB, 133 条)
-
-**字段** (2): `EquipID, RecommendRoleIDList`
-
-**首条记录摘要**:
-```json
-{
-  "EquipID": 35030101,
-  "RecommendRoleIDList": [
-    1310,
-    1315,
-    1015,
-    1204,
-    1402,
-    1502
-  ]
-}
-```
-
-### GridFightSpecialGoods.json (0.02 MB, 43 条)
-
-**字段** (10): `Cost, EffectParamList, GoodDesc, GoodName, GroupID, ID, IconPath, JsonPath, MiniIconPath, Quality`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 101,
-  "GroupID": 1,
-  "Cost": 24,
-  "Quality": 1,
-  "IconPath": "",
-  "MiniIconPath": "",
-  "JsonPath": "Config/Level/GridFight/SpecialGoods/Cyre...",
-  "GoodName": {
-    "Hash": 678352926252366
-  },
-  "GoodDesc": {
-    "Hash": 11037750777867872464
-  },
-  "EffectParamList": []
-}
-```
-
-### GridFightPrayQuestFinishWay.json (0.02 MB, 73 条)
-
-**字段** (11): `FinishType, ID, IsBackTrack, ParamInt1, ParamInt2, ParamInt3, ParamIntList, ParamItemList, ParamStr1, ParamType, Progress`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 7320001,
-  "FinishType": "GridFightTraitRoleTotalStar",
-  "ParamType": "NoPara",
-  "ParamInt1": 1013,
-  "ParamStr1": "",
-  "ParamIntList": [],
-  "ParamItemList": [],
-  "Progress": 5,
-  "IsBackTrack": true
-}
-```
-
 ### FateBuff.json (0.02 MB, 51 条)
 
 **字段** (8): `BEOGEKDEPLO, BJBGDFFIFJF, EFAIIOHKFGD, JFGICGNCKDA, NDAIGIEMABD, NOKPLOBPMMD, OFNCHIDJOME, PMIEAEGJNMJ`
@@ -2675,6 +3040,29 @@
   "JFGICGNCKDA": {
     "Hash": 11704338782879787708
   }
+}
+```
+
+### GridFightCamp.json (0.02 MB, 28 条)
+
+**字段** (9): `BattleAreaList, BossBattleArea, CampName, ID, IconPath, IfRandomEnabled, InitialRandomCode, MonsterList, ShowPicPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "InitialRandomCode": 1,
+  "IfRandomEnabled": 1,
+  "IconPath": "SpriteOutput/BuffIcon/Inlevel/IconDeBuff...",
+  "ShowPicPath": "SpriteOutput/MonsterMiddleIcon/Monster_1...",
+  "CampName": {
+    "Hash": 9407187405023584149
+  },
+  "MonsterList": "<list[12]>",
+  "BattleAreaList": [
+    2011101,
+    2013201
+  ]
 }
 ```
 
@@ -2738,52 +3126,80 @@
 }
 ```
 
-### GFTraitBESkillConfig.json (0.01 MB, 12 条)
+### GuideVideoConfig.json (0.01 MB, 139 条)
 
-**字段** (17): `CutinPath, DelayRatio, ParamList, SPMultipleRatio, ShowStanceList, SimpleParamList, SimpleSkillDesc, SkillButtonEffType, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, UltraSkillIcon`
+**字段** (3): `SizeType, VideoID, VideoPath`
 
 **首条记录摘要**:
 ```json
 {
-  "SkillID": 20120101,
-  "SkillName": {
-    "Hash": 509493294835931323
+  "VideoID": 11001,
+  "VideoPath": "Activity_Parkour_Guide_Bomb.usm",
+  "SizeType": "Small"
+}
+```
+
+### GiftDanmuSender.json (0.01 MB, 103 条)
+
+**字段** (3): `ID, IconPath, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2,
+  "Name": {
+    "Hash": 16381686742476373737
   },
-  "SkillTag": {
-    "Hash": 15983939177738998168
+  "IconPath": "SpriteOutput/MonsterMiddleIcon/Monster_9..."
+}
+```
+
+### GridFightRoleAutoWeight.json (0.01 MB, 139 条)
+
+**字段** (3): `IsDamageEnhancedByEquip, OverWriteDamageCarry, RoleID`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1001,
+  "OverWriteDamageCarry": {
+    "Value": -1
+  }
+}
+```
+
+### GridFightChimeraInfo.json (0.01 MB, 28 条)
+
+**字段** (11): `Desc, DescRole, EffectParamList, FunDesc, ID, IconPath, JsonPath, LimitNum, NameDesc, RoleID, Star`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 505,
+  "Star": 1,
+  "IconPath": "SpriteOutput/Quest/ChimeraDuel/Chimera/C...",
+  "NameDesc": {
+    "Hash": 753669471503669987
   },
-  "SkillTypeDesc": {
-    "Hash": 765041958489320547
+  "Desc": {
+    "Hash": 3234241946870600880
   },
-  "SkillTriggerKey": "SkillP01EX",
-  "SkillIcon": "SpriteOutput/SkillIcons/Com/SkillIcon_Pr...",
-  "UltraSkillIcon": "",
-  "CutinPath": "",
-  "SkillDesc": {
-    "Hash": 14274449035728838828
-  },
-  "SimpleSkillDesc": {
-    "Hash": 12968048256951062608
-  },
-  "ShowStanceList": "<list[3]>",
-  "SPMultipleRatio": {
-    "Value": 0.5
-  },
-  "DelayRatio": {
-    "Value": 1
-  },
-  "ParamList": [
+  "JsonPath": "Config/Level/GridFight/TraitEffect/Chime...",
+  "EffectParamList": [
     {
-      "Value": 1
+      "Value": 0.1
+    },
+    {
+      "Value": 0.15
     }
   ],
-  "SimpleParamList": [
-    {
-      "Value": 1
-    }
-  ],
-  "SkillEffect": "Enhance",
-  "SkillButtonEffType": ""
+  "RoleID": 140402,
+  "DescRole": {
+    "Hash": 5346757335780387443
+  },
+  "FunDesc": {
+    "Hash": 16856711034387073867
+  }
 }
 ```
 
@@ -2809,30 +3225,6 @@
 }
 ```
 
-### GridFightCamp.json (0.01 MB, 25 条)
-
-**字段** (10): `BattleAreaList, BossBattleArea, CampName, ID, IconPath, IfRandomEnabled, InitialRandomCode, MonsterList, SeasonID, ShowPicPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "InitialRandomCode": 1,
-  "IfRandomEnabled": 1,
-  "IconPath": "SpriteOutput/BuffIcon/Inlevel/IconDeBuff...",
-  "ShowPicPath": "SpriteOutput/MonsterMiddleIcon/Monster_1...",
-  "CampName": {
-    "Hash": 9407187405023584149
-  },
-  "MonsterList": "<list[10]>",
-  "BattleAreaList": [
-    2011101,
-    2013201
-  ],
-  "SeasonID": 1
-}
-```
-
 ### EquipmentExpType.json (0.01 MB, 240 条)
 
 **字段** (3): `Exp, ExpType, Level`
@@ -2843,39 +3235,6 @@
   "ExpType": 1,
   "Level": 1,
   "Exp": 40
-}
-```
-
-### GiftDanmuSender.json (0.01 MB, 100 条)
-
-**字段** (3): `ID, IconPath, Name`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2,
-  "Name": {
-    "Hash": 16381686742476373737
-  },
-  "IconPath": "SpriteOutput/MonsterMiddleIcon/Monster_9..."
-}
-```
-
-### GridFightTraitEffectLayerPa.json (0.01 MB, 74 条)
-
-**字段** (5): `DescParamList, EffectParamList, ID, Layer, TraitEffectDesc`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10021,
-  "Layer": 2,
-  "EffectParamList": [
-    {
-      "Value": 1
-    }
-  ],
-  "DescParamList": []
 }
 ```
 
@@ -2917,20 +3276,50 @@
 }
 ```
 
-### GuideVideoConfig.json (0.01 MB, 123 条)
+### GridFightCampSeason.json (0.01 MB, 53 条)
 
-**字段** (3): `SizeType, VideoID, VideoPath`
+**字段** (3): `CampID, MonsterList, SeasonID`
 
 **首条记录摘要**:
 ```json
 {
-  "VideoID": 11001,
-  "VideoPath": "Activity_Parkour_Guide_Bomb.usm",
-  "SizeType": "Small"
+  "CampID": 1,
+  "SeasonID": 1,
+  "MonsterList": "<list[10]>"
 }
 ```
 
-### FinishTypeConfig.json (0.01 MB, 209 条)
+### GridFightEnhance.json (0.01 MB, 25 条)
+
+**字段** (11): `Cost, EffectParamList, EnhanceDesc, EnhanceName, EnhanceSimpleDesc, GroupID, ID, IconPath, JsonPath, PrevEnhanceIDList, SelectCondition`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "GroupID": 30021,
+  "PrevEnhanceIDList": [],
+  "Cost": 5,
+  "JsonPath": "Config/Level/GridFight/TraitEffect/Black...",
+  "EffectParamList": [
+    {
+      "Value": 0.1
+    }
+  ],
+  "EnhanceDesc": {
+    "Hash": 9177983544050011641
+  },
+  "EnhanceName": {
+    "Hash": 16893851613310700444
+  },
+  "EnhanceSimpleDesc": {
+    "Hash": 11151812731105197968
+  },
+  "IconPath": "SpriteOutput/GridFight/TraitTargetEffect..."
+}
+```
+
+### FinishTypeConfig.json (0.01 MB, 211 条)
 
 **字段** (2): `FinishType, NeedVerseParam`
 
@@ -2954,14 +3343,14 @@
     11,
     32
   ],
-  "HudFuncEntranceIDList": "<list[10]>",
+  "HudFuncEntranceIDList": "<list[11]>",
   "LeftHudFuncEntranceIDList": [
     1,
     3,
     4,
     16
   ],
-  "UnlockGotoTypeList": "<list[74]>",
+  "UnlockGotoTypeList": "<list[76]>",
   "WheelSupport": true
 }
 ```
@@ -2997,31 +3386,27 @@
 }
 ```
 
-### GridFightServantStar.json (0.01 MB, 29 条)
+### GridFightPetPalEffHandBook.json (0.01 MB, 50 条)
 
-**字段** (14): `AIPath, HPBase, HPInherit, HPSkill, ID, JsonOverrideConfig, ServantID, ServantShowSkiilIDList, SkillOverrideDest, SkillOverrideSrc, SpeedBase, SpeedInherit, SpeedSkill, Star`
+**字段** (6): `CategoryDesc, CategoryID, GroupDesc, GroupID, PetPalEffList, PetPalID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1402,
-  "Star": 1,
-  "ServantID": 11402,
-  "JsonOverrideConfig": "Config/ConfigCharacter/GridFight/3.5/Ava...",
-  "AIPath": "Config/ConfigAI/ComplexSkillAIGlobalGrou...",
-  "SkillOverrideSrc": [
-    1140203
+  "CategoryID": 1,
+  "GroupID": 1000,
+  "PetPalEffList": [
+    102001,
+    102002,
+    102003
   ],
-  "SkillOverrideDest": [
-    114020301
-  ],
-  "ServantShowSkiilIDList": [],
-  "HPBase": "#6",
-  "HPInherit": "#5",
-  "HPSkill": 140204,
-  "SpeedBase": "0",
-  "SpeedInherit": "#4",
-  "SpeedSkill": 140204
+  "CategoryDesc": {
+    "Hash": 16117635727725690206
+  },
+  "GroupDesc": {
+    "Hash": 3410258267899365042
+  },
+  "PetPalID": 2
 }
 ```
 
@@ -3079,6 +3464,35 @@
 }
 ```
 
+### GFTraitBEOverrideConfig.json (0.01 MB, 8 条)
+
+**字段** (9): `AbilityName, OneWordDesc, OneWordDescSimple, OverrideBEProperty, OverrideSkillIDList, SpecialIconPath, TraitID, TraitLayer, TraitTitleDesc`
+
+**首条记录摘要**:
+```json
+{
+  "TraitID": 2012,
+  "TraitLayer": 3,
+  "OverrideBEProperty": "<list[8]>",
+  "OverrideSkillIDList": [
+    20120101,
+    20120201,
+    20120301
+  ],
+  "AbilityName": "StageAbility_GridFight_Origin_2012_Trait...",
+  "TraitTitleDesc": {
+    "Hash": 4748922567390602214
+  },
+  "OneWordDesc": {
+    "Hash": 11459212831199823686
+  },
+  "OneWordDescSimple": {
+    "Hash": 4288701258675993229
+  },
+  "SpecialIconPath": "SpriteOutput/SkillIcons/Com/SkillIcon_Pr..."
+}
+```
+
 ### FightFestPaperInterview.json (0.01 MB, 30 条)
 
 **字段** (8): `Comment, Detail, IconPath, Info, Name, PaperID, SortWeight, TextJoinItemID`
@@ -3105,15 +3519,39 @@
 }
 ```
 
-### GridFightSeasonItem.json (0.01 MB, 225 条)
+### GridFightCraftConfig.json (0.01 MB, 91 条)
 
-**字段** (2): `ItemID, SeasonID`
+**字段** (4): `CostEquipList, CraftEquipID, CraftID, ID`
 
 **首条记录摘要**:
 ```json
 {
-  "ItemID": 99990,
-  "SeasonID": 1
+  "CraftID": 1,
+  "ID": 35030101,
+  "CraftEquipID": 35030101,
+  "CostEquipList": [
+    350201,
+    350201
+  ]
+}
+```
+
+### GachaGroupData.json (0.01 MB, 33 条)
+
+**字段** (5): `GachaIDList, GroupID, GroupType, PoolLabelIcon, PoolLabelIconSelected`
+
+**首条记录摘要**:
+```json
+{
+  "GroupID": 1,
+  "GachaIDList": [
+    2042,
+    2043,
+    2044
+  ],
+  "GroupType": "MultiAvatarUp",
+  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIconLim...",
+  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIconLim..."
 }
 ```
 
@@ -3129,6 +3567,19 @@
   "AvatarNum": 2,
   "RewardID": 114111,
   "ExtraRewardID": 115111
+}
+```
+
+### GridFightRoleGameRefScore.json (0.01 MB, 140 条)
+
+**字段** (3): `RoleID, RoleInGameRefScore, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1001,
+  "SeasonID": 1,
+  "RoleInGameRefScore": 3
 }
 ```
 
@@ -3164,19 +3615,6 @@
   "BonusBaseTypeList": [
     "Mage"
   ]
-}
-```
-
-### GridFightRoleConfig_Index_SeasonAndTrait.json (0.01 MB, 32 条)
-
-**字段** (3): `MGNHKOHFLPO, PIKLFGGHKGD, PNPJBPCMINL`
-
-**首条记录摘要**:
-```json
-{
-  "PNPJBPCMINL": 1,
-  "PIKLFGGHKGD": 1001,
-  "MGNHKOHFLPO": "<list[8]>"
 }
 ```
 
@@ -3220,6 +3658,18 @@
 }
 ```
 
+### EquipmentAtlas.json (0.01 MB, 172 条)
+
+**字段** (2): `DefaultUnlock, EquipmentID`
+
+**首条记录摘要**:
+```json
+{
+  "EquipmentID": 20000,
+  "DefaultUnlock": true
+}
+```
+
 ### FightFestStageInfo.json (0.01 MB, 20 条)
 
 **字段** (10): `ChallengeName, EnvironmentBuffID, EventID, HighLightDesc, PreviewMonsterList, RecommadCoachID, RecommadNature, SpecialAvatarList, TutorialID, UIEnterBattleAreaID`
@@ -3255,15 +3705,30 @@
 }
 ```
 
-### EquipmentAtlas.json (0.01 MB, 170 条)
+### GridFightRoleSkillRemark.json (0.01 MB, 24 条)
 
-**字段** (2): `DefaultUnlock, EquipmentID`
+**字段** (10): `ConditionParamList, ConditionType, ID, ParamSource, RemarkParamList, RoleSkillRemark, RoleSkillRemarkSimple, RoleSkillRemarkTitle, SkillID, SkillType`
 
 **首条记录摘要**:
 ```json
 {
-  "EquipmentID": 20000,
-  "DefaultUnlock": true
+  "ID": 1,
+  "SkillID": 1505029701,
+  "RoleSkillRemarkTitle": {
+    "Hash": 16683101279809659564
+  },
+  "RoleSkillRemark": {
+    "Hash": 6796818637963467128
+  },
+  "RoleSkillRemarkSimple": {
+    "Hash": 13920876301823691090
+  },
+  "ParamSource": "Skill",
+  "RemarkParamList": [],
+  "ConditionType": "MoonGameSubtrait",
+  "ConditionParamList": [
+    1003021
+  ]
 }
 ```
 
@@ -3372,25 +3837,6 @@
 }
 ```
 
-### GachaGroupData.json (0.01 MB, 29 条)
-
-**字段** (5): `GachaIDList, GroupID, GroupType, PoolLabelIcon, PoolLabelIconSelected`
-
-**首条记录摘要**:
-```json
-{
-  "GroupID": 1,
-  "GachaIDList": [
-    2042,
-    2043,
-    2044
-  ],
-  "GroupType": "MultiAvatarUp",
-  "PoolLabelIcon": "SpriteOutput/DrawCardPic/GachaTabIconLim...",
-  "PoolLabelIconSelected": "SpriteOutput/DrawCardPic/GachaTabIconLim..."
-}
-```
-
 ### HeliobusChallengeStage.json (0.01 MB, 16 条)
 
 **字段** (16): `BattleAreaGroupID, BattleAreaID, BattleTargetList, ChallengeDesc, ChallengeID, ChallengeName, EventID, FloorID, HeliobusChallengeHard, HeliobusMazeBuff, HeliobusSkillRecList, MonsterList, PlaneID, PreChallengeID, RewardID, UnlockPhase`
@@ -3474,35 +3920,44 @@
 }
 ```
 
-### GridFightEnhance.json (0.01 MB, 25 条)
+### GridFightClaraEnhance.json (0.01 MB, 23 条)
 
-**字段** (9): `Cost, EffectParamList, EnhanceDesc, EnhanceName, EnhanceSimpleDesc, GroupID, ID, IconPath, SelectCondition`
+**字段** (12): `BuffID, Category, CostCoin, EnhanceDesc, EnhanceName, EnhanceSelectDesc, EnhanceSelectName, EnhanceSelectSimpleDesc, EnhanceSimpleDesc, ID, Limit, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1,
-  "GroupID": 30021,
-  "Cost": 5,
-  "EffectParamList": [
-    {
-      "Value": 0.1
-    }
-  ],
-  "EnhanceDesc": {
-    "Hash": 9177983544050011641
-  },
+  "ID": 1001,
+  "Category": "Counter",
+  "Limit": 1,
+  "BuffID": 110000031,
   "EnhanceName": {
-    "Hash": 16893851613310700444
+    "Hash": 415871563712151643
+  },
+  "EnhanceSelectName": {
+    "Hash": 8937104385766132734
+  },
+  "EnhanceSelectSimpleDesc": {
+    "Hash": 1181285500037433867
+  },
+  "EnhanceSelectDesc": {
+    "Hash": 15993134651118734069
   },
   "EnhanceSimpleDesc": {
-    "Hash": 11151812731105197968
+    "Hash": 6382429443730221248
   },
-  "IconPath": "SpriteOutput/GridFight/TraitTargetEffect..."
+  "EnhanceDesc": {
+    "Hash": 17237053286132591897
+  },
+  "ParamList": [
+    {
+      "Value": 0.4
+    }
+  ]
 }
 ```
 
-### Function.json (0.01 MB, 77 条)
+### Function.json (0.01 MB, 78 条)
 
 **字段** (5): `GotoID, ID, OverrideGotoID, OverrideUnlockID, UnlockID`
 
@@ -3608,6 +4063,20 @@
 }
 ```
 
+### GridFightTraitEffect.json (0.01 MB, 54 条)
+
+**字段** (4): `ID, TraitEffectIconPath, TraitEffectJson, TraitEffectType`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10021,
+  "TraitEffectType": "CoreRoleByEquipNum",
+  "TraitEffectJson": "",
+  "TraitEffectIconPath": "SpriteOutput/GridFight/TraitBuff/GridFig..."
+}
+```
+
 ### ElationBasicLevelDamage.json (0.01 MB, 101 条)
 
 **字段** (2): `ElationBasicLevelDamage, Level`
@@ -3619,6 +4088,50 @@
   "ElationBasicLevelDamage": {
     "Value": 108
   }
+}
+```
+
+### FiveDimFluteConfig.json (0.01 MB, 29 条)
+
+**字段** (13): `AutoPlayChangeGPFailTextmapKey, Code, ContainerID, EntranceID, FiveDimAnchorID, GPName, GPValue, GroupID, ID, KeepContentIDList, TeleAnchorID, TeleAreaName, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1050001,
+  "Type": "Teleport",
+  "Code": "89681231",
+  "EntranceID": 1050101,
+  "GroupID": 570,
+  "TeleAnchorID": 1,
+  "ContainerID": 110001,
+  "FiveDimAnchorID": 17,
+  "GPName": "",
+  "TeleAreaName": {
+    "Hash": 13088770917174101698
+  },
+  "KeepContentIDList": []
+}
+```
+
+### GridFightNpcConfig.json (0.01 MB, 28 条)
+
+**字段** (7): `ID, Icon, NpcDesc, NpcName, NpcType, PositionRegion, RoundIcon`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "NpcType": 1,
+  "NpcName": {
+    "Hash": 1588884086553304121
+  },
+  "NpcDesc": {
+    "Hash": 3519899702110441244
+  },
+  "Icon": "SpriteOutput/AvatarIcon/NPC/3015.png",
+  "RoundIcon": "SpriteOutput/AvatarRoundIcon/3015.png",
+  "PositionRegion": "Back"
 }
 ```
 
@@ -3644,6 +4157,25 @@
     }
   ],
   "BELPGNDDELK": "SpriteOutput/AvatarShopIcon/Avatar/1221...."
+}
+```
+
+### GridFightDivisionLevelShow.json (0.01 MB, 20 条)
+
+**字段** (9): `DivisionAbbr, DivisionIcon, DivisionLevel, DivisionName, DivisionNameWithNum, DivisionRewardQuest, DivisionSPRewardQuest, DivisionShowPic, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "SeasonID": 1,
+  "DivisionIcon": "",
+  "DivisionShowPic": "",
+  "DivisionName": {
+    "Hash": 18432933150825449103
+  },
+  "DivisionNameWithNum": {
+    "Hash": 90175006323261507
+  }
 }
 ```
 
@@ -3674,40 +4206,141 @@
 }
 ```
 
-### GridFightRoleAutoWeight.json (0.01 MB, 77 条)
+### GridFightEquipMazebuff.json (0.01 MB, 14 条)
 
-**字段** (3): `IsDamageEnhancedByEquip, OverWriteDamageCarry, RoleID`
+**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1001,
-  "OverWriteDamageCarry": {
-    "Value": -1
+  "ID": 3570352302,
+  "BuffSeries": 1,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_3570352302",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "GridFight_Equipment_SilverWolf999_352302",
+  "ParamList": [
+    {
+      "Value": 0.35
+    }
+  ],
+  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
+  "BuffName": {
+    "Hash": 817162084146098338
+  },
+  "BuffDesc": {
+    "Hash": 5343609481178583837
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
+}
+```
+
+### GridFightRoleSpecSkillRem.json (0.01 MB, 39 条)
+
+**字段** (7): `ActivateType, Desc, Params, RoleID, SkillID, SkillTag, SkillType`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 140902,
+  "SkillID": 1409029701,
+  "ActivateType": "TraitActivate",
+  "SkillTag": "Summon",
+  "Params": [
+    200602
+  ],
+  "Desc": {
+    "Hash": 14047893805944914078
   }
 }
 ```
 
-### FiveDimFluteConfig.json (0.01 MB, 26 条)
+### GridFightTraitBonus.json (0.01 MB, 42 条)
 
-**字段** (13): `AutoPlayChangeGPFailTextmapKey, Code, ContainerID, EntranceID, FiveDimAnchorID, GPName, GPValue, GroupID, ID, KeepContentIDList, TeleAnchorID, TeleAreaName, Type`
+**字段** (5): `BonusParamList, BonusThreshold, BonusType, ID, TraitBonusParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1050001,
-  "Type": "Teleport",
-  "Code": "89681231",
-  "EntranceID": 1050101,
-  "GroupID": 570,
-  "TeleAnchorID": 1,
-  "ContainerID": 110001,
-  "FiveDimAnchorID": 17,
-  "GPName": "",
-  "TeleAreaName": {
-    "Hash": 13088770917174101698
+  "ID": 10031,
+  "BonusThreshold": 6,
+  "BonusType": "Bonus",
+  "TraitBonusParamList": [
+    {
+      "Value": 23031
+    }
+  ],
+  "BonusParamList": [
+    23031
+  ]
+}
+```
+
+### GridFightPetPal.json (0.01 MB, 12 条)
+
+**字段** (10): `Desc, EffIDList, FigureDown, FigureUp, HeadImage, ID, Icon, Name, SmallIcon, Sort`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "HeadImage": "SpriteOutput/GridFight/Season2/Partner/G...",
+  "Icon": "SpriteOutput/GridFight/Season2/PartnerMi...",
+  "SmallIcon": "SpriteOutput/AvatarRoundIcon/GridFightNp...",
+  "FigureUp": "SpriteOutput/GridFight/Season2/PartnerPa...",
+  "FigureDown": "SpriteOutput/GridFight/Season2/PartnerPa...",
+  "Name": {
+    "Hash": 15187515698883610240
   },
-  "KeepContentIDList": []
+  "EffIDList": [],
+  "Sort": 1
+}
+```
+
+### GridFightSeasonTraitShow.json (0.01 MB, 48 条)
+
+**字段** (5): `Priority, QuestList, SeasonID, StandardQuestList, TraitID`
+
+**首条记录摘要**:
+```json
+{
+  "TraitID": 1001,
+  "SeasonID": 1,
+  "QuestList": [
+    7300201,
+    7300224
+  ],
+  "StandardQuestList": [
+    7300247
+  ],
+  "Priority": 6
+}
+```
+
+### GridFightSubTraitBasicInfo.json (0.01 MB, 19 条)
+
+**字段** (8): `BaseDescParamList, FatherTraitID, ID, SubTraitName, TraitBaseDesc, TraitBaseSimpleDesc, TraitEffectList, TraitSearchKey`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2501,
+  "FatherTraitID": 1010,
+  "SubTraitName": {
+    "Hash": 1923860435107655659
+  },
+  "TraitEffectList": [],
+  "TraitBaseDesc": {
+    "Hash": 1375034122455326284
+  },
+  "TraitBaseSimpleDesc": {
+    "Hash": 2100990914266137899
+  },
+  "BaseDescParamList": [],
+  "TraitSearchKey": "Origin_2501"
 }
 ```
 
@@ -3738,41 +4371,34 @@
 }
 ```
 
-### GridFightNpcConfig.json (0.01 MB, 24 条)
+### GridFightBonfireEvent.json (0.01 MB, 38 条)
 
-**字段** (7): `ID, Icon, NpcDesc, NpcName, NpcType, PositionRegion, RoundIcon`
+**字段** (5): `DialogID, EventCardDesc, EventCardTitle, ID, PetPalID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 1,
-  "NpcType": 1,
-  "NpcName": {
-    "Hash": 1588884086553304121
+  "ID": 10600301,
+  "PetPalID": 6,
+  "EventCardTitle": {
+    "Hash": 16184354250465526255
   },
-  "NpcDesc": {
-    "Hash": 3519899702110441244
+  "EventCardDesc": {
+    "Hash": 15481829476116958067
   },
-  "Icon": "SpriteOutput/AvatarIcon/NPC/3015.png",
-  "RoundIcon": "SpriteOutput/AvatarRoundIcon/3015.png",
-  "PositionRegion": "Back"
+  "DialogID": 1060030101
 }
 ```
 
-### GridFightCraftConfig.json (0.01 MB, 57 条)
+### GridFightSeasonPortal.json (0.01 MB, 157 条)
 
-**字段** (4): `CostEquipList, CraftEquipID, CraftID, ID`
+**字段** (2): `PortalID, SeasonID`
 
 **首条记录摘要**:
 ```json
 {
-  "CraftID": 1,
-  "ID": 35030101,
-  "CraftEquipID": 35030101,
-  "CostEquipList": [
-    350201,
-    350201
-  ]
+  "PortalID": 101,
+  "SeasonID": 1
 }
 ```
 
@@ -3945,6 +4571,18 @@
 }
 ```
 
+### GridFightRoleConfig_Index_SeasonID.json (0.01 MB, 2 条)
+
+**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
+
+**首条记录摘要**:
+```json
+{
+  "PNPJBPCMINL": 1,
+  "MGNHKOHFLPO": "<list[77]>"
+}
+```
+
 ### FinalityBattleRole.json (0.01 MB, 5 条)
 
 **字段** (10): `AvatarEnglishName, AvatarFeverDesc, AvatarFeverSimpleDesc, ID, ParamList_ModifiedSkill, ParamList_Stage, SpecialAvatarID, StageFeverCond, StageFeverDesc, StageFeverSimpleDesc`
@@ -4051,24 +4689,26 @@
 }
 ```
 
-### GridFightTraitBonus.json (0.01 MB, 32 条)
+### GridFightPhanionUniqueTrait.json (0.01 MB, 18 条)
 
-**字段** (5): `BonusParamList, BonusThreshold, BonusType, ID, TraitBonusParamList`
+**字段** (9): `AllMemberPropertyList, MaxStarBonusID, OwnerPropertyList, Rarity, SavedValueAddList, SpecialAllMemberPropertyList, SpecialOwnerPropertyList, SpecialSavedValueAddList, Star`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 10031,
-  "BonusThreshold": 6,
-  "BonusType": "Bonus",
-  "TraitBonusParamList": [
-    {
-      "Value": 23031
-    }
-  ],
-  "BonusParamList": [
-    23031
-  ]
+  "Rarity": 1,
+  "Star": 1,
+  "SavedValueAddList": {
+    "GP_Avatar_S2_Phainon_00": 2
+  },
+  "SpecialSavedValueAddList": {
+    "GP_Avatar_S2_Phainon_00": 3
+  },
+  "OwnerPropertyList": {},
+  "AllMemberPropertyList": {},
+  "SpecialOwnerPropertyList": {},
+  "SpecialAllMemberPropertyList": {},
+  "MaxStarBonusID": 306
 }
 ```
 
@@ -4106,30 +4746,6 @@
 }
 ```
 
-### GridFightSubTraitBasicInfo.json (0.01 MB, 16 条)
-
-**字段** (8): `BaseDescParamList, FatherTraitID, ID, SubTraitName, TraitBaseDesc, TraitBaseSimpleDesc, TraitEffectList, TraitSearchKey`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2501,
-  "FatherTraitID": 1010,
-  "SubTraitName": {
-    "Hash": 1923860435107655659
-  },
-  "TraitEffectList": [],
-  "TraitBaseDesc": {
-    "Hash": 1375034122455326284
-  },
-  "TraitBaseSimpleDesc": {
-    "Hash": 2100990914266137899
-  },
-  "BaseDescParamList": [],
-  "TraitSearchKey": "Origin_2501"
-}
-```
-
 ### GridFightTutorialStageNode.json (0.01 MB, 32 条)
 
 **字段** (6): `ChapterID, DivisionID, FunctionList, SectionID, Unlock, UnlockTutorialTask`
@@ -4141,19 +4757,6 @@
   "ChapterID": 1,
   "SectionID": 1,
   "FunctionList": "<list[8]>"
-}
-```
-
-### GridFightRoleGameRefScore.json (0.01 MB, 77 条)
-
-**字段** (3): `RoleID, RoleInGameRefScore, SeasonID`
-
-**首条记录摘要**:
-```json
-{
-  "RoleID": 1001,
-  "SeasonID": 1,
-  "RoleInGameRefScore": 3
 }
 ```
 
@@ -4209,35 +4812,6 @@
 }
 ```
 
-### GFTraitBEOverrideConfig.json (0.01 MB, 4 条)
-
-**字段** (9): `AbilityName, OneWordDesc, OneWordDescSimple, OverrideBEProperty, OverrideSkillIDList, SpecialIconPath, TraitID, TraitLayer, TraitTitleDesc`
-
-**首条记录摘要**:
-```json
-{
-  "TraitID": 2012,
-  "TraitLayer": 3,
-  "OverrideBEProperty": "<list[8]>",
-  "OverrideSkillIDList": [
-    20120101,
-    20120201,
-    20120301
-  ],
-  "AbilityName": "StageAbility_GridFight_Origin_2012_Trait...",
-  "TraitTitleDesc": {
-    "Hash": 4748922567390602214
-  },
-  "OneWordDesc": {
-    "Hash": 11459212831199823686
-  },
-  "OneWordDescSimple": {
-    "Hash": 4288701258675993229
-  },
-  "SpecialIconPath": "SpriteOutput/SkillIcons/Com/SkillIcon_Pr..."
-}
-```
-
 ### FateConstValueCommon.json (0.01 MB, 38 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -4262,6 +4836,38 @@
   "PlayerLevel": 1,
   "MaxHealPool": 1000,
   "RecoverTime": 1800
+}
+```
+
+### GridFightTraitEquipTemplate.json (0.01 MB, 40 条)
+
+**字段** (4): `EquipList, TemplateID, TraitID, Weight`
+
+**首条记录摘要**:
+```json
+{
+  "TraitID": 100802,
+  "TemplateID": 100802001,
+  "Weight": 100,
+  "EquipList": [
+    35030203,
+    47030102,
+    47030108
+  ]
+}
+```
+
+### GridFightFrontSpecialSP.json (0.01 MB, 55 条)
+
+**字段** (4): `MaxSpecialSP, RoleID, SpecialSPType, Star`
+
+**首条记录摘要**:
+```json
+{
+  "RoleID": 1407,
+  "Star": 1,
+  "SpecialSPType": "MaxSP",
+  "MaxSpecialSP": 150000
 }
 ```
 
@@ -4299,6 +4905,125 @@
     "Hash": 7512617610515537341
   },
   "ImgPath": "SpriteOutput/UI/Friend/TabEmoji/TabEmoji..."
+}
+```
+
+### GridFightTraitConstValueS2.json (0.01 MB, 7 条)
+
+**字段** (2): `ConstValueName, Value`
+
+**首条记录摘要**:
+```json
+{
+  "ConstValueName": "GridFight_PhanionEffectSpecialRoleIDList",
+  "Value": "<dict[1]>"
+}
+```
+
+### GridFightSpotLightTag.json (0.01 MB, 51 条)
+
+**字段** (3): `ID, Name, TagColor`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Name": {
+    "Hash": 11530048895714655406
+  },
+  "TagColor": "#474aae"
+}
+```
+
+### GridFightTraitGameRef.json (0.01 MB, 48 条)
+
+**字段** (5): `BasicScore, BonusScore, PenaltyScore, Season, TraitID`
+
+**首条记录摘要**:
+```json
+{
+  "TraitID": 1001,
+  "Season": 1,
+  "BasicScore": 4,
+  "BonusScore": 20,
+  "PenaltyScore": 200
+}
+```
+
+### GridFightRoleGlobalModifier.json (0.00 MB, 20 条)
+
+**字段** (5): `EffectParamList, JsonPath, PerformParamList, Roleid, SavedValueName`
+
+**首条记录摘要**:
+```json
+{
+  "Roleid": 1501,
+  "JsonPath": "Config/Level/GridFight/Role/GridFightRol...",
+  "EffectParamList": "<list[9]>",
+  "SavedValueName": "GP_Avatar_Sparxie_00",
+  "PerformParamList": [
+    30,
+    90,
+    180
+  ]
+}
+```
+
+### GridFightSeasonCraft.json (0.00 MB, 114 条)
+
+**字段** (2): `CraftID, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "CraftID": 1,
+  "SeasonID": 1
+}
+```
+
+### GridFightJadeUniqueTrait.json (0.00 MB, 40 条)
+
+**字段** (6): `BonusID, CostParam, CostType, ID, JadeGoodName, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10001,
+  "ParamList": [],
+  "BonusID": 2,
+  "CostType": "Gold",
+  "CostParam": 3
+}
+```
+
+### GridFightEhanceMazebuff.json (0.00 MB, 10 条)
+
+**字段** (13): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 35800301,
+  "BuffRarity": 1,
+  "Lv": 1,
+  "LvMax": 1,
+  "ModifierName": "ADV_StageAbility_35800301",
+  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
+  "InBattleBindingKey": "StageAbility_GridFight_SpecialGoods_3580...",
+  "ParamList": [
+    {
+      "Value": 0.12
+    }
+  ],
+  "BuffIcon": "",
+  "BuffName": {
+    "Hash": 13013349132478528449
+  },
+  "BuffDesc": {
+    "Hash": 13013349132478528449
+  },
+  "BuffEffect": "",
+  "MazeBuffType": "Level"
 }
 ```
 
@@ -4393,6 +5118,18 @@
 }
 ```
 
+### ElationSkill.json (0.00 MB, 73 条)
+
+**字段** (2): `ElationSkillID, PriorityValue`
+
+**首条记录摘要**:
+```json
+{
+  "ElationSkillID": 150120,
+  "PriorityValue": 144
+}
+```
+
 ### FateBroadcast.json (0.00 MB, 22 条)
 
 **字段** (6): `BCNBKEAJDNG, CIMMEBGNABD, FFCBLPDHCFO, JGAICIJPHNO, LOAGIPDPLFM, PKGJBPODCOG`
@@ -4433,22 +5170,16 @@
 }
 ```
 
-### GridFightDivisionLevelShow.json (0.00 MB, 10 条)
+### GridFightTraitThreshold.json (0.00 MB, 38 条)
 
-**字段** (9): `DivisionAbbr, DivisionIcon, DivisionLevel, DivisionName, DivisionNameWithNum, DivisionRewardQuest, DivisionSPRewardQuest, DivisionShowPic, SeasonID`
+**字段** (3): `ID, IconPath, Level`
 
 **首条记录摘要**:
 ```json
 {
-  "SeasonID": 1,
-  "DivisionIcon": "",
-  "DivisionShowPic": "",
-  "DivisionName": {
-    "Hash": 18432933150825449103
-  },
-  "DivisionNameWithNum": {
-    "Hash": 90175006323261507
-  }
+  "ID": 10031,
+  "Level": 1,
+  "IconPath": "SpriteOutput/GridFight/BuffItem/GridFigh..."
 }
 ```
 
@@ -4488,6 +5219,21 @@
 }
 ```
 
+### GridFightPlayerLevel.json (0.00 MB, 11 条)
+
+**字段** (9): `AvatarMaxNumber, GeneralPropertyList, LevelUpExp, PlayerLevel, Rarity1Weight, Rarity2Weight, Rarity3Weight, Rarity4Weight, Rarity5Weight`
+
+**首条记录摘要**:
+```json
+{
+  "PlayerLevel": 1,
+  "LevelUpExp": 2,
+  "AvatarMaxNumber": 1,
+  "Rarity1Weight": 100,
+  "GeneralPropertyList": "<list[2]>"
+}
+```
+
 ### EndmostChronicleMissionPack.json (0.00 MB, 32 条)
 
 **字段** (2): `MainMissionIdList, MissionPack`
@@ -4519,35 +5265,17 @@
 }
 ```
 
-### GridFightSeasonTraitShow.json (0.00 MB, 25 条)
+### GridFightEquipTag.json (0.00 MB, 45 条)
 
-**字段** (5): `Priority, QuestList, SeasonID, StandardQuestList, TraitID`
-
-**首条记录摘要**:
-```json
-{
-  "TraitID": 1001,
-  "SeasonID": 1,
-  "QuestList": [
-    7300201,
-    7300224
-  ],
-  "StandardQuestList": [
-    7300247
-  ],
-  "Priority": 6
-}
-```
-
-### GridFightSeasonPortal.json (0.00 MB, 83 条)
-
-**字段** (2): `PortalID, SeasonID`
+**字段** (2): `EquipTagDesc, TagID`
 
 **首条记录摘要**:
 ```json
 {
-  "PortalID": 101,
-  "SeasonID": 1
+  "TagID": 1,
+  "EquipTagDesc": {
+    "Hash": 16237398910470728219
+  }
 }
 ```
 
@@ -4562,20 +5290,6 @@
   "Value": {
     "IntValue": 5
   }
-}
-```
-
-### GridFightTraitEffect.json (0.00 MB, 24 条)
-
-**字段** (4): `ID, TraitEffectIconPath, TraitEffectJson, TraitEffectType`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10021,
-  "TraitEffectType": "CoreRoleByEquipNum",
-  "TraitEffectJson": "",
-  "TraitEffectIconPath": "SpriteOutput/GridFight/TraitBuff/GridFig..."
 }
 ```
 
@@ -4632,65 +5346,6 @@
 }
 ```
 
-### GridFightPlayerLevel.json (0.00 MB, 10 条)
-
-**字段** (9): `AvatarMaxNumber, GeneralPropertyList, LevelUpExp, PlayerLevel, Rarity1Weight, Rarity2Weight, Rarity3Weight, Rarity4Weight, Rarity5Weight`
-
-**首条记录摘要**:
-```json
-{
-  "PlayerLevel": 1,
-  "LevelUpExp": 2,
-  "AvatarMaxNumber": 1,
-  "Rarity1Weight": 100,
-  "GeneralPropertyList": "<list[2]>"
-}
-```
-
-### GridFightEquipMazebuff.json (0.00 MB, 6 条)
-
-**字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 3570352302,
-  "BuffSeries": 1,
-  "BuffRarity": 1,
-  "Lv": 1,
-  "LvMax": 1,
-  "ModifierName": "ADV_StageAbility_3570352302",
-  "InBattleBindingType": "StageAbilityBeforeCharacterBorn",
-  "InBattleBindingKey": "GridFight_Equipment_SilverWolf999_352302",
-  "ParamList": [
-    {
-      "Value": 0.35
-    }
-  ],
-  "BuffIcon": "SpriteOutput/AvatarProfessionTattoo/Prof...",
-  "BuffName": {
-    "Hash": 817162084146098338
-  },
-  "BuffDesc": {
-    "Hash": 5343609481178583837
-  },
-  "BuffEffect": "",
-  "MazeBuffType": "Level"
-}
-```
-
-### GridFightSeasonCraft.json (0.00 MB, 80 条)
-
-**字段** (2): `CraftID, SeasonID`
-
-**首条记录摘要**:
-```json
-{
-  "CraftID": 1,
-  "SeasonID": 1
-}
-```
-
 ### GridFightPortalMazebuff.json (0.00 MB, 6 条)
 
 **字段** (14): `BuffDesc, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
@@ -4719,19 +5374,7 @@
 }
 ```
 
-### GridFightRoleConfig_Index_SeasonID.json (0.00 MB, 1 条)
-
-**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
-
-**首条记录摘要**:
-```json
-{
-  "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "<list[77]>"
-}
-```
-
-### GroupSystemUnlockData.json (0.00 MB, 54 条)
+### GroupSystemUnlockData.json (0.00 MB, 55 条)
 
 **字段** (2): `GroupSystemUnlockID, UnlockID`
 
@@ -4740,6 +5383,23 @@
 {
   "GroupSystemUnlockID": 9916,
   "UnlockID": 9916
+}
+```
+
+### GridFightConsumables.json (0.00 MB, 18 条)
+
+**字段** (6): `ConsumableDesc, ConsumableParamList, ConsumableRule, ID, IfConsume, IfStack`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 350101,
+  "ConsumableParamList": [],
+  "IfStack": true,
+  "IfConsume": true,
+  "ConsumableDesc": {
+    "Hash": 15298412367088846627
+  }
 }
 ```
 
@@ -4785,6 +5445,21 @@
   "BMAJPBPJNGD": 10102,
   "ILPOIGJFLFM": "SpriteOutput/Collaboration/Fate/BattleSc...",
   "JHPNHNFJAJJ": "SpriteOutput/Collaboration/Fate/BattleSc..."
+}
+```
+
+### GridFightTraitVideo.json (0.00 MB, 30 条)
+
+**字段** (3): `Description, TraitID, VideoID`
+
+**首条记录摘要**:
+```json
+{
+  "TraitID": 1001,
+  "VideoID": 17001,
+  "Description": {
+    "Hash": 14207447682659426092
+  }
 }
 ```
 
@@ -4835,6 +5510,18 @@
 }
 ```
 
+### GridFightTraitBaseConfig_Index_SeasonID.json (0.00 MB, 2 条)
+
+**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
+
+**首条记录摘要**:
+```json
+{
+  "PNPJBPCMINL": 1,
+  "MGNHKOHFLPO": "<list[33]>"
+}
+```
+
 ### GridFightSelectEnhance.json (0.00 MB, 7 条)
 
 **字段** (10): `Cost, EffectParamList, EnhanceDesc, EnhanceName, EnhanceSimpleDesc, ID, IconPath, ParamList, SelectCondition, TraitEffectID`
@@ -4878,16 +5565,30 @@
 }
 ```
 
-### GridFightTraitThreshold.json (0.00 MB, 27 条)
+### GridFightLevelBaseValue.json (0.00 MB, 23 条)
 
-**字段** (3): `ID, IconPath, Level`
+**字段** (5): `ChapterID, LevelBaseAttack, LevelBaseCounter, LevelBaseHP, SectionID`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 10031,
-  "Level": 1,
-  "IconPath": "SpriteOutput/GridFight/BuffItem/GridFigh..."
+  "ChapterID": 1,
+  "SectionID": 1,
+  "LevelBaseAttack": 5600,
+  "LevelBaseHP": 16000,
+  "LevelBaseCounter": 4000
+}
+```
+
+### GridFightEquipUpgrade.json (0.00 MB, 53 条)
+
+**字段** (2): `PreID, UpgradeID`
+
+**首条记录摘要**:
+```json
+{
+  "PreID": 35030101,
+  "UpgradeID": 35040101
 }
 ```
 
@@ -4928,6 +5629,28 @@
   "FunTitleDesc": {
     "Hash": 1548234941186645741
   }
+}
+```
+
+### GridFightTutorialStage.json (0.00 MB, 2 条)
+
+**字段** (15): `DivisionID, ForbiddenAutoOpenShopNodeList, ForbiddenBattleFail, ForbiddenSellRoleBeforeChapterId, ForbiddenSellRoleBeforeSectionId, ForbiddenSellRoleList, IsAlltrial, IsBossToastShow, IsEquipRecommendShow, IsInitialSupply, IsPortal, IsRouteShow, JsonPath, RewardQuest, TutorialStageName`
+
+**首条记录摘要**:
+```json
+{
+  "DivisionID": 1,
+  "RewardQuest": 7303101,
+  "TutorialStageName": {
+    "Hash": 17835817723450284223
+  },
+  "IsAlltrial": 1,
+  "ForbiddenBattleFail": 1,
+  "ForbiddenSellRoleBeforeChapterId": 1,
+  "ForbiddenSellRoleBeforeSectionId": 7,
+  "ForbiddenSellRoleList": "<list[8]>",
+  "ForbiddenAutoOpenShopNodeList": "<list[7]>",
+  "JsonPath": "Config/Level/GridFight/Tutorial/GridFigh..."
 }
 ```
 
@@ -4979,6 +5702,29 @@
 }
 ```
 
+### GridFightForge.json (0.00 MB, 11 条)
+
+**字段** (7): `EquipCategory, EquipNum, ForgeDesc, ForgeTypeDesc, FuncType, ID, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 99999,
+  "EquipCategory": "Basic",
+  "EquipNum": 4,
+  "ForgeDesc": {
+    "Hash": 4771493019422090940
+  },
+  "FuncType": "Equip",
+  "ParamList": [
+    1
+  ],
+  "ForgeTypeDesc": {
+    "Hash": 12254417321308275778
+  }
+}
+```
+
 ### GridFightBinaryNodeRule.json (0.00 MB, 44 条)
 
 **字段** (3): `ID, PerformLevel, Quality`
@@ -4989,27 +5735,6 @@
   "ID": 1,
   "Quality": 1,
   "PerformLevel": 1
-}
-```
-
-### GridFightTutorialStage.json (0.00 MB, 2 条)
-
-**字段** (14): `DivisionID, ForbiddenAutoOpenShopNodeList, ForbiddenBattleFail, ForbiddenSellRoleBeforeChapterId, ForbiddenSellRoleBeforeSectionId, ForbiddenSellRoleList, IsAlltrial, IsBossToastShow, IsEquipRecommendShow, IsInitialSupply, IsPortal, IsRouteShow, RewardQuest, TutorialStageName`
-
-**首条记录摘要**:
-```json
-{
-  "DivisionID": 1,
-  "RewardQuest": 7303101,
-  "TutorialStageName": {
-    "Hash": 17835817723450284223
-  },
-  "IsAlltrial": 1,
-  "ForbiddenBattleFail": 1,
-  "ForbiddenSellRoleBeforeChapterId": 1,
-  "ForbiddenSellRoleBeforeSectionId": 7,
-  "ForbiddenSellRoleList": "<list[8]>",
-  "ForbiddenAutoOpenShopNodeList": "<list[7]>"
 }
 ```
 
@@ -5027,16 +5752,18 @@
 }
 ```
 
-### GridFightEquipTag.json (0.00 MB, 32 条)
+### GridFightRoleChoose.json (0.00 MB, 26 条)
 
-**字段** (2): `EquipTagDesc, TagID`
+**字段** (5): `ChooseDesc, Parameter, SubTraitID, TraitID, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "TagID": 1,
-  "EquipTagDesc": {
-    "Hash": 16237398910470728219
+  "TraitID": 1010,
+  "Parameter": 1301,
+  "SubTraitID": 2501,
+  "ChooseDesc": {
+    "Hash": 2039529428112320282
   }
 }
 ```
@@ -5058,21 +5785,6 @@
   },
   "SkillIconPath": "SpriteOutput/SkillIcons/Heliobus/Heliobu...",
   "SkillEffect": "AoEAttack"
-}
-```
-
-### GridFightTraitGameRef.json (0.00 MB, 25 条)
-
-**字段** (5): `BasicScore, BonusScore, PenaltyScore, Season, TraitID`
-
-**首条记录摘要**:
-```json
-{
-  "TraitID": 1001,
-  "Season": 1,
-  "BasicScore": 4,
-  "BonusScore": 20,
-  "PenaltyScore": 200
 }
 ```
 
@@ -5109,29 +5821,6 @@
     "Hash": 9397042811744567852
   },
   "BuffDataIsPercentage": true
-}
-```
-
-### GridFightForge.json (0.00 MB, 10 条)
-
-**字段** (7): `EquipCategory, EquipNum, ForgeDesc, ForgeTypeDesc, FuncType, ID, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 99999,
-  "EquipCategory": "Basic",
-  "EquipNum": 4,
-  "ForgeDesc": {
-    "Hash": 4771493019422090940
-  },
-  "FuncType": "Equip",
-  "ParamList": [
-    1
-  ],
-  "ForgeTypeDesc": {
-    "Hash": 12254417321308275778
-  }
 }
 ```
 
@@ -5242,31 +5931,15 @@
 }
 ```
 
-### GridFightLevelBaseValue.json (0.00 MB, 23 条)
+### GridFightSeasonTrait_Index_SeasonID.json (0.00 MB, 2 条)
 
-**字段** (4): `ChapterID, LevelBaseAttack, LevelBaseHP, SectionID`
-
-**首条记录摘要**:
-```json
-{
-  "ChapterID": 1,
-  "SectionID": 1,
-  "LevelBaseAttack": 16000,
-  "LevelBaseHP": 16000
-}
-```
-
-### GridFightFrontSpecialSP.json (0.00 MB, 24 条)
-
-**字段** (4): `MaxSpecialSP, RoleID, SpecialSPType, Star`
+**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1407,
-  "Star": 1,
-  "SpecialSPType": "MaxSP",
-  "MaxSpecialSP": 150000
+  "PNPJBPCMINL": 1,
+  "MGNHKOHFLPO": "<list[25]>"
 }
 ```
 
@@ -5283,31 +5956,26 @@
 }
 ```
 
-### GridFightRoleChoose.json (0.00 MB, 16 条)
+### GridFightTraitAstropolis.json (0.00 MB, 6 条)
 
-**字段** (5): `ChooseDesc, Parameter, SubTraitID, TraitID, Type`
+**字段** (6): `DetailDesc, EffectParamList, JsonPath, SimpleDesc, ThreeStarNum, TraitQuality`
 
 **首条记录摘要**:
 ```json
 {
-  "TraitID": 1010,
-  "Parameter": 1301,
-  "SubTraitID": 2501,
-  "ChooseDesc": {
-    "Hash": 2039529428112320282
+  "ThreeStarNum": 1,
+  "JsonPath": "Config/Level/GridFight/TraitEffect/Astro...",
+  "EffectParamList": [
+    {
+      "Value": 1
+    }
+  ],
+  "SimpleDesc": {
+    "Hash": 6966887564525636974
+  },
+  "DetailDesc": {
+    "Hash": 3124150431188503540
   }
-}
-```
-
-### ElationSkill.json (0.00 MB, 35 条)
-
-**字段** (2): `ElationSkillID, PriorityValue`
-
-**首条记录摘要**:
-```json
-{
-  "ElationSkillID": 150120,
-  "PriorityValue": 144
 }
 ```
 
@@ -5322,6 +5990,21 @@
   "StageMergedID": 424000,
   "TutorialID": "6005",
   "Season": "SecondChapter"
+}
+```
+
+### GridFightSPSilverWolfChoose.json (0.00 MB, 21 条)
+
+**字段** (3): `EquipID, SimpleDesc, Star`
+
+**首条记录摘要**:
+```json
+{
+  "Star": 1,
+  "EquipID": 353301,
+  "SimpleDesc": {
+    "Hash": 16290286451506131639
+  }
 }
 ```
 
@@ -5380,6 +6063,21 @@
 }
 ```
 
+### GridFightEquipCategoryInfo.json (0.00 MB, 18 条)
+
+**字段** (3): `CategoryName, EquipCategory, EquipCount`
+
+**首条记录摘要**:
+```json
+{
+  "EquipCategory": "Basic",
+  "CategoryName": {
+    "Hash": 2072718879487809846
+  },
+  "EquipCount": 1
+}
+```
+
 ### EvoBdSCForgeMaterial.json (0.00 MB, 14 条)
 
 **字段** (3): `CostGearList, ForgeGearID, MaterialGearList`
@@ -5395,18 +6093,6 @@
   "CostGearList": [
     3113001
   ]
-}
-```
-
-### GridFightEquipUpgrade.json (0.00 MB, 37 条)
-
-**字段** (2): `PreID, UpgradeID`
-
-**首条记录摘要**:
-```json
-{
-  "PreID": 35030101,
-  "UpgradeID": 35040101
 }
 ```
 
@@ -5450,21 +6136,6 @@
 ```json
 {
   "Quality": "Silver"
-}
-```
-
-### GridFightTraitVideo.json (0.00 MB, 18 条)
-
-**字段** (3): `Description, TraitID, VideoID`
-
-**首条记录摘要**:
-```json
-{
-  "TraitID": 1001,
-  "VideoID": 17001,
-  "Description": {
-    "Hash": 14207447682659426092
-  }
 }
 ```
 
@@ -5548,6 +6219,23 @@
   },
   "CostGearList": [
     3106001
+  ]
+}
+```
+
+### GFTraitElationRecEquip.json (0.00 MB, 13 条)
+
+**字段** (4): `EquipID, FirstRecommendEquip, SeasonIDList, SecondRecommendEquip`
+
+**首条记录摘要**:
+```json
+{
+  "EquipID": 350204,
+  "FirstRecommendEquip": 35030407,
+  "SecondRecommendEquip": 35030204,
+  "SeasonIDList": [
+    1,
+    2
   ]
 }
 ```
@@ -5668,21 +6356,6 @@
 }
 ```
 
-### GridFightEquipCategoryInfo.json (0.00 MB, 14 条)
-
-**字段** (3): `CategoryName, EquipCategory, EquipCount`
-
-**首条记录摘要**:
-```json
-{
-  "EquipCategory": "Basic",
-  "CategoryName": {
-    "Hash": 2072718879487809846
-  },
-  "EquipCount": 1
-}
-```
-
 ### FateDiffPassProgress.json (0.00 MB, 8 条)
 
 **字段** (4): `FMCNCMENCFF, GAOMJHOKMMG, IODFDGLGOJI, JIDGCHINCKC`
@@ -5779,15 +6452,18 @@
 {}
 ```
 
-### GridFightTraitBaseConfig_Index_SeasonID.json (0.00 MB, 1 条)
+### GridFightRoleRemark.json (0.00 MB, 13 条)
 
-**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
+**字段** (4): `ParamList, RoleID, RoleRemark, SkillType`
 
 **首条记录摘要**:
 ```json
 {
-  "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "<list[33]>"
+  "RoleID": 1404,
+  "RoleRemark": {
+    "Hash": 14344086811640825811
+  },
+  "ParamList": []
 }
 ```
 
@@ -6065,6 +6741,25 @@
 }
 ```
 
+### GridFightShopPrice.json (0.00 MB, 6 条)
+
+**字段** (9): `BuyGoldStar1, BuyGoldStar2, BuyGoldStar3, BuyGoldStar4, Rarity, SellGoldStar1, SellGoldStar2, SellGoldStar3, SellGoldStar4`
+
+**首条记录摘要**:
+```json
+{
+  "Rarity": 1,
+  "SellGoldStar1": 1,
+  "SellGoldStar2": 3,
+  "SellGoldStar3": 9,
+  "SellGoldStar4": 27,
+  "BuyGoldStar1": 1,
+  "BuyGoldStar2": 3,
+  "BuyGoldStar3": 9,
+  "BuyGoldStar4": 27
+}
+```
+
 ### EvolveGearTypeConfig.json (0.00 MB, 3 条)
 
 **字段** (8): `FontColor, ID, MixDetailPropsInfoBg, Name, Season, TypeImg, TypeImgColor, WeaponToastEffectBg`
@@ -6082,20 +6777,15 @@
 }
 ```
 
-### GridFightConsumables.json (0.00 MB, 7 条)
+### GridFightRarityWeight.json (0.00 MB, 11 条)
 
-**字段** (6): `ConsumableDesc, ConsumableParamList, ConsumableRule, ID, IfConsume, IfStack`
+**字段** (6): `PlayerLevel, Rarity1Weight, Rarity2Weight, Rarity3Weight, Rarity4Weight, Rarity5Weight`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 350101,
-  "ConsumableParamList": [],
-  "IfStack": true,
-  "IfConsume": true,
-  "ConsumableDesc": {
-    "Hash": 15298412367088846627
-  }
+  "PlayerLevel": 1,
+  "Rarity1Weight": 100
 }
 ```
 
@@ -6144,6 +6834,19 @@
 }
 ```
 
+### GridFightElationGoods.json (0.00 MB, 14 条)
+
+**字段** (4): `ID, Icon, Type, UpgradeMark`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Type": "ElationGoodRandomBasicEquip",
+  "Icon": ""
+}
+```
+
 ### GuideChallengeTab.json (0.00 MB, 5 条)
 
 **字段** (7): `GuideType, ID, IconPath, IntroDataID, Name, Priority, ResBarKey`
@@ -6175,18 +6878,6 @@
 }
 ```
 
-### GridFightSeasonTrait_Index_SeasonID.json (0.00 MB, 1 条)
-
-**字段** (2): `MGNHKOHFLPO, PNPJBPCMINL`
-
-**首条记录摘要**:
-```json
-{
-  "PNPJBPCMINL": 1,
-  "MGNHKOHFLPO": "<list[25]>"
-}
-```
-
 ### HeliobusReward.json (0.00 MB, 16 条)
 
 **字段** (3): `IncomeTarget, Level, RewardQuestID`
@@ -6207,7 +6898,7 @@
   "IsLargeBtn": true,
   "FirstWorldText": "Store",
   "ActivityModuleIDList": [
-    5003601
+    5012701
   ],
   "ControlRightHud": true,
   "OverrideIconPath": "SpriteOutput/PhoneAPPIcon/ShopActivityIc...",
@@ -6271,37 +6962,24 @@
 }
 ```
 
-### GridFightRarityWeight.json (0.00 MB, 10 条)
-
-**字段** (6): `PlayerLevel, Rarity1Weight, Rarity2Weight, Rarity3Weight, Rarity4Weight, Rarity5Weight`
-
-**首条记录摘要**:
-```json
-{
-  "PlayerLevel": 1,
-  "Rarity1Weight": 100
-}
-```
-
 ### GFActivityResidentConfig.json (0.00 MB, 1 条)
 
-**字段** (12): `ActivityID, ActivityModuleID, ActivityTagList, DisplayItemList, IntroGuideImg, IsShowRemainTime, RelatedActivityPanelID, ResidentBrief, ResidentDesc, ResidentName, SortWeight, TitleIconPath`
+**字段** (11): `ActivityID, ActivityModuleID, ActivityTagList, DisplayItemList, IntroGuideImg, RelatedActivityPanelID, ResidentBrief, ResidentDesc, ResidentName, SortWeight, TitleIconPath`
 
 **首条记录摘要**:
 ```json
 {
-  "ActivityID": 201,
-  "ActivityModuleID": 7100501,
-  "RelatedActivityPanelID": 71002,
-  "IsShowRemainTime": true,
+  "ActivityID": 202,
+  "ActivityModuleID": 7110101,
+  "RelatedActivityPanelID": 71101,
   "ResidentName": {
-    "Hash": 16901324935405054266
+    "Hash": 18095625689778196237
   },
   "ResidentBrief": {
-    "Hash": 6611891108986718712
+    "Hash": 11033959348211795500
   },
   "ResidentDesc": {
-    "Hash": 8013962817586461325
+    "Hash": 4788246566265831019
   },
   "TitleIconPath": "SpriteOutput/Quest/TabIcon/PermanentActi...",
   "DisplayItemList": "<list[13]>",
@@ -6313,22 +6991,30 @@
 }
 ```
 
-### GridFightShopPrice.json (0.00 MB, 5 条)
+### GridFightAugmentRemark.json (0.00 MB, 11 条)
 
-**字段** (9): `BuyGoldStar1, BuyGoldStar2, BuyGoldStar3, BuyGoldStar4, Rarity, SellGoldStar1, SellGoldStar2, SellGoldStar3, SellGoldStar4`
+**字段** (2): `AugmentID, AugmentRemark`
 
 **首条记录摘要**:
 ```json
 {
-  "Rarity": 1,
-  "SellGoldStar1": 1,
-  "SellGoldStar2": 3,
-  "SellGoldStar3": 9,
-  "SellGoldStar4": 27,
-  "BuyGoldStar1": 1,
-  "BuyGoldStar2": 3,
-  "BuyGoldStar3": 9,
-  "BuyGoldStar4": 27
+  "AugmentID": 200801,
+  "AugmentRemark": {
+    "Hash": 619877460824267569
+  }
+}
+```
+
+### GridFightChimeraShopPool.json (0.00 MB, 17 条)
+
+**字段** (3): `ID, Param, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Type": "Chimera",
+  "Param": 505
 }
 ```
 
@@ -6413,20 +7099,6 @@
 }
 ```
 
-### GridFightAugmentRemark.json (0.00 MB, 10 条)
-
-**字段** (2): `AugmentID, AugmentRemark`
-
-**首条记录摘要**:
-```json
-{
-  "AugmentID": 200801,
-  "AugmentRemark": {
-    "Hash": 619877460824267569
-  }
-}
-```
-
 ### GridFightAssistantMessage.json (0.00 MB, 4 条)
 
 **字段** (8): `AssistantMessageType, Description, EndDivisionID, ExclusiveID, ID, Interval, Priority, TypePara`
@@ -6445,6 +7117,20 @@
     "Hash": 11040980322662104204
   },
   "EndDivisionID": 10701
+}
+```
+
+### GridFightGamePlayResource.json (0.00 MB, 6 条)
+
+**字段** (4): `Desc, ID, IconPath, Name`
+
+**首条记录摘要**:
+```json
+{
+  "ID": "Exp",
+  "Name": "ResourceName_1",
+  "Desc": "ResourceDesc_1",
+  "IconPath": "SpriteOutput/GridFight/GridItem/281034.p..."
 }
 ```
 
@@ -6473,15 +7159,22 @@
 }
 ```
 
-### GridFightSkinCutin.json (0.00 MB, 7 条)
+### GridFightSpotLightRemark.json (0.00 MB, 6 条)
 
-**字段** (2): `CutinPath, SkinID`
+**字段** (3): `ParamList, SpotLightID, SpotLightRemark`
 
 **首条记录摘要**:
 ```json
 {
-  "SkinID": 1100101,
-  "CutinPath": "SpriteOutput/AvatarSpecialActionFigures/..."
+  "SpotLightID": 100100,
+  "SpotLightRemark": {
+    "Hash": 4772608816268782476
+  },
+  "ParamList": [
+    {
+      "Value": 0.01
+    }
+  ]
 }
 ```
 
@@ -6539,9 +7232,25 @@
 }
 ```
 
-### GridFightSeasonModule.json (0.00 MB, 4 条)
+### GridFightTraitSPBattleArea.json (0.00 MB, 8 条)
 
-**字段** (7): `ActivityModuleID, ActivityQuestConfigID, GirlHeroSpecialAvatarId, MaxRewardExp, OfferingID, SeasonID, SubSeasonID`
+**字段** (3): `BattleAreaNumList, ID, TraitLayer`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2004,
+  "TraitLayer": 3,
+  "BattleAreaNumList": [
+    1,
+    5
+  ]
+}
+```
+
+### GridFightSeasonModule.json (0.00 MB, 5 条)
+
+**字段** (6): `ActivityModuleID, ActivityQuestConfigID, MaxRewardExp, OfferingID, SeasonID, SubSeasonID`
 
 **首条记录摘要**:
 ```json
@@ -6551,8 +7260,7 @@
   "ActivityModuleID": 7100201,
   "MaxRewardExp": 48000,
   "OfferingID": 11,
-  "ActivityQuestConfigID": 71001,
-  "GirlHeroSpecialAvatarId": 3708008
+  "ActivityQuestConfigID": 71001
 }
 ```
 
@@ -6580,6 +7288,59 @@
   "ID": "SeasonExpLine",
   "UnlockID": 1001,
   "UnlockShowType": "Hide"
+}
+```
+
+### GridFightBackRoleExRank.json (0.00 MB, 1 条)
+
+**字段** (11): `Comment, Desc, DescParamList, ExRankID, ExtraEffectIDList, IconPath, Name, ParamList, RankAbility, RoleID, TriggerKey`
+
+**首条记录摘要**:
+```json
+{
+  "ExRankID": 120401,
+  "RoleID": 120402,
+  "TriggerKey": {
+    "Hash": 1475409642
+  },
+  "Comment": "ExRankID from AvatarExRankConfig.txt",
+  "Name": {
+    "Hash": 3771174827548909102
+  },
+  "Desc": {
+    "Hash": 13449389734794624293
+  },
+  "ExtraEffectIDList": [],
+  "DescParamList": [
+    1,
+    2,
+    6,
+    12,
+    4,
+    20
+  ],
+  "RankAbility": [
+    "BE_GridFight_S2_JingYuan_00_ExRank01"
+  ],
+  "ParamList": "<list[6]>",
+  "IconPath": "SpriteOutput/SkillIcons/Avatar/1204/Skil..."
+}
+```
+
+### GridFightTraitEquipEffect.json (0.00 MB, 2 条)
+
+**字段** (5): `EffectParamList, EquipType, ExtraDesc, ID, JsonPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ExtraDesc": {
+    "Hash": 9940833620221726474
+  },
+  "EquipType": "Attack",
+  "JsonPath": "Config/Level/GridFight/TraitEffect/Trait...",
+  "EffectParamList": "<list[3]>"
 }
 ```
 
@@ -6630,6 +7391,34 @@
 }
 ```
 
+### GridFightTreasuryInfo.json (0.00 MB, 5 条)
+
+**字段** (4): `ID, RefreshCost, RefreshMaxNum, TreasuryTitle`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "TreasuryTitle": {
+    "Hash": 18159796525347979699
+  },
+  "RefreshMaxNum": 1,
+  "RefreshCost": 1
+}
+```
+
+### GridFightHandBookReward.json (0.00 MB, 4 条)
+
+**字段** (2): `HandBookType, QuestList`
+
+**首条记录摘要**:
+```json
+{
+  "HandBookType": "HandBookAugment",
+  "QuestList": "<list[6]>"
+}
+```
+
 ### GridFightPortalRemark.json (0.00 MB, 7 条)
 
 **字段** (2): `PortalID, PortalRemark`
@@ -6653,6 +7442,20 @@
 {
   "PropertyType": "ExtraFrontPowerAddedRatio1",
   "ExtraEffectID": 80000101
+}
+```
+
+### GridFightSummonBEOverride.json (0.00 MB, 3 条)
+
+**字段** (4): `BEID, BackJsonOverride, FrontJsonOverride, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "SeasonID": 1,
+  "BEID": 11222,
+  "FrontJsonOverride": "Config/ConfigCharacter/GridFight/3.5/Ava...",
+  "BackJsonOverride": ""
 }
 ```
 
@@ -6715,23 +7518,6 @@
 }
 ```
 
-### GridFightRoleGlobalModifier.json (0.00 MB, 6 条)
-
-**字段** (3): `PerformParamList, Roleid, SavedValueName`
-
-**首条记录摘要**:
-```json
-{
-  "Roleid": 1501,
-  "SavedValueName": "GP_Avatar_Sparxie_00",
-  "PerformParamList": [
-    30,
-    90,
-    180
-  ]
-}
-```
-
 ### ElationBattleConstCommon.json (0.00 MB, 5 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -6746,17 +7532,24 @@
 }
 ```
 
-### GridFightRoleRemark.json (0.00 MB, 6 条)
+### GridFightNodePlugInShow.json (0.00 MB, 2 条)
 
-**字段** (2): `RoleID, RoleRemark`
+**字段** (5): `Desc, DetailName, IconPath, Name, NodePlugInType`
 
 **首条记录摘要**:
 ```json
 {
-  "RoleID": 1404,
-  "RoleRemark": {
-    "Hash": 14344086811640825811
-  }
+  "NodePlugInType": "Hex",
+  "Name": {
+    "Hash": 14324332188204935624
+  },
+  "DetailName": {
+    "Hash": 2662197861563609414
+  },
+  "Desc": {
+    "Hash": 18093274677106851839
+  },
+  "IconPath": ""
 }
 ```
 
@@ -6812,6 +7605,20 @@
 ```json
 {
   "ELJPCBHPKJK": "<list[5]>"
+}
+```
+
+### GridFightFormationWave.json (0.00 MB, 6 条)
+
+**字段** (4): `Ability, ID, MaxTeammateCount, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 5,
+  "MaxTeammateCount": 5,
+  "Ability": "",
+  "ParamList": []
 }
 ```
 
@@ -6881,22 +7688,6 @@
 }
 ```
 
-### GridFightTraitSPBattleArea.json (0.00 MB, 4 条)
-
-**字段** (3): `BattleAreaNumList, ID, TraitLayer`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2004,
-  "TraitLayer": 3,
-  "BattleAreaNumList": [
-    1,
-    5
-  ]
-}
-```
-
 ### HeliobusChallengeGroup.json (0.00 MB, 4 条)
 
 **字段** (2): `ChallengeGroupID, ChallengeStageList`
@@ -6928,16 +7719,21 @@
 }
 ```
 
-### GridFightFormationWave.json (0.00 MB, 5 条)
+### GridFightAhaMaxStar.json (0.00 MB, 2 条)
 
-**字段** (4): `Ability, ID, MaxTeammateCount, ParamList`
+**字段** (5): `Desc, ID, IconPath, Name, ParamList`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 5,
-  "MaxTeammateCount": 5,
-  "Ability": "",
+  "ID": 1,
+  "Name": {
+    "Hash": 12559570901466642401
+  },
+  "IconPath": "SpriteOutput/GridFight/MainCharacterBuff...",
+  "Desc": {
+    "Hash": 965392241008265993
+  },
   "ParamList": []
 }
 ```
@@ -7011,17 +7807,27 @@
 }
 ```
 
-### GridFightSummonBEOverride.json (0.00 MB, 2 条)
+### GridFightSkinCutin.json (0.00 MB, 3 条)
 
-**字段** (4): `BEID, BackJsonOverride, FrontJsonOverride, SeasonID`
+**字段** (2): `CutinPath, SkinID`
 
 **首条记录摘要**:
 ```json
 {
-  "SeasonID": 1,
-  "BEID": 11222,
-  "FrontJsonOverride": "Config/ConfigCharacter/GridFight/3.5/Ava...",
-  "BackJsonOverride": ""
+  "SkinID": 1100101,
+  "CutinPath": "SpriteOutput/AvatarSpecialActionFigures/..."
+}
+```
+
+### GridFightTraitBonusAddRule.json (0.00 MB, 4 条)
+
+**字段** (3): `ID, ParamList, TraitBonusType`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10031,
+  "ParamList": []
 }
 ```
 
@@ -7034,6 +7840,22 @@
 {
   "GoldBonus": 1,
   "ExtraGroupID": 2
+}
+```
+
+### GiftDanmuContent.json (0.00 MB, 3 条)
+
+**字段** (4): `Content, ID, Rarity, SenderID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 105470101,
+  "Content": {
+    "Hash": 18157537706186338019
+  },
+  "Rarity": 1,
+  "SenderID": 107
 }
 ```
 
@@ -7139,18 +7961,6 @@
 }
 ```
 
-### GridFightHandBookReward.json (0.00 MB, 2 条)
-
-**字段** (2): `HandBookType, QuestList`
-
-**首条记录摘要**:
-```json
-{
-  "HandBookType": "HandBookAugment",
-  "QuestList": "<list[6]>"
-}
-```
-
 ### FateAvatarDescription.json (0.00 MB, 2 条)
 
 **字段** (3): `ACCJKGEKHKP, GPNOCGKJJCG, MDEBFIFOKHH`
@@ -7211,20 +8021,6 @@
 }
 ```
 
-### GridFightGamePlayResource.json (0.00 MB, 2 条)
-
-**字段** (4): `Desc, ID, IconPath, Name`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "Name": "ResourceName_1",
-  "Desc": "ResourceDesc_1",
-  "IconPath": "SpriteOutput/GridFight/GridItem/281034.p..."
-}
-```
-
 ### FateMiscDisplay.json (0.00 MB, 3 条)
 
 **字段** (2): `FNBIFDIHIJH, LOEPLBPFMEN`
@@ -7256,15 +8052,36 @@
 }
 ```
 
-### GridFightTraitBonusAddRule.json (0.00 MB, 3 条)
+### GridFightSpecialProperty.json (0.00 MB, 1 条)
 
-**字段** (3): `ID, ParamList, TraitBonusType`
+**字段** (4): `IconPath, MiniIconPath, Name, VariableName`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 10031,
-  "ParamList": []
+  "VariableName": "ExtraSummonPower",
+  "Name": {
+    "Hash": 12148261910796139293
+  },
+  "IconPath": "SpriteOutput/GridFight/AttributeIcon/Nor...",
+  "MiniIconPath": "SpriteOutput/GridFight/AttributeIcon/Tex..."
+}
+```
+
+### GachaShowToastData.json (0.00 MB, 1 条)
+
+**字段** (7): `GachaID, GotoBGMState, LoopBGMState, LoopVideoID, RoleID, ShowVideoID, TransitionVideoID`
+
+**首条记录摘要**:
+```json
+{
+  "GachaID": 2142,
+  "RoleID": 1511,
+  "ShowVideoID": 41,
+  "LoopVideoID": 1862,
+  "TransitionVideoID": 42,
+  "LoopBGMState": "State_Menu_Get_Avatar_Nihilux",
+  "GotoBGMState": "State_Menu_Get_Avatar_Nihilux_Transition"
 }
 ```
 
@@ -7277,6 +8094,20 @@
 {
   "GachaID": 5001,
   "ActivityModule": 1011001
+}
+```
+
+### GridFightSeasonGuideQuest.json (0.00 MB, 1 条)
+
+**字段** (4): `ChapterAimQuest, ChapterID, QuestList, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "ChapterID": 1,
+  "ChapterAimQuest": 7300041,
+  "QuestList": "<list[8]>",
+  "SeasonID": 2
 }
 ```
 
@@ -7380,6 +8211,39 @@
 }
 ```
 
+### GridFightClaraLinkRelation.json (0.00 MB, 1 条)
+
+**字段** (3): `EnhanceConvert, ID, ValidEnhanceList`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 3001,
+  "EnhanceConvert": [
+    3002,
+    3003,
+    3004
+  ],
+  "ValidEnhanceList": [
+    3005,
+    3006,
+    3007
+  ]
+}
+```
+
+### GridFightBonfireHeal.json (0.00 MB, 3 条)
+
+**字段** (2): `ChapterID, HealNum`
+
+**首条记录摘要**:
+```json
+{
+  "ChapterID": 1,
+  "HealNum": 20
+}
+```
+
 ### GridFightModuleSubTrait.json (0.00 MB, 2 条)
 
 **字段** (3): `ModuleID, SubTraitID, TraitID`
@@ -7419,6 +8283,18 @@
 }
 ```
 
+### GridFightSeasonTutorial.json (0.00 MB, 2 条)
+
+**字段** (3): `ID, IsAllowSelectDifficult, SeasonID`
+
+**首条记录摘要**:
+```json
+{
+  "SeasonID": 2,
+  "ID": 1
+}
+```
+
 ### GridFightModuleBanRole.json (0.00 MB, 2 条)
 
 **字段** (2): `ModuleId, RoleId`
@@ -7446,10 +8322,6 @@
 ### GMAccountItemConfig.json (0.00 MB, 0 条)
 
 ### GMAccountRelicConfig.json (0.00 MB, 0 条)
-
-### GachaShowToastData.json (0.00 MB, 0 条)
-
-### GiftDanmuContent.json (0.00 MB, 0 条)
 
 ### GridFightAugmentExpired.json (0.00 MB, 0 条)
 

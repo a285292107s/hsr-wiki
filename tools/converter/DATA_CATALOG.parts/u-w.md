@@ -4,7 +4,7 @@
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### VoiceConfig.json (8.39 MB, 90,284 条)
+### VoiceConfig.json (8.59 MB, 92,131 条)
 
 **字段** (4): `IsPlayerInvolved, VoiceID, VoicePath, VoiceType`
 
@@ -18,7 +18,7 @@
 }
 ```
 
-### VoiceAtlas.json (1.36 MB, 5,445 条)
+### VoiceAtlas.json (1.39 MB, 5,555 条)
 
 **字段** (10): `AudioEvent, AudioID, AvatarID, IsBattleVoice, ReplaceID, SortID, Unlock, VoiceID, VoiceTitle, Voice_M`
 
@@ -55,7 +55,7 @@
 }
 ```
 
-### UIRedDot.json (0.19 MB, 1,246 条)
+### UIRedDot.json (0.19 MB, 1,272 条)
 
 **字段** (6): `RedDot, RedDotChildren, RedDotID, Type, UnlockID, Weight`
 
@@ -91,7 +91,7 @@
 }
 ```
 
-### VideoConfig.json (0.05 MB, 351 条)
+### VideoConfig.json (0.05 MB, 363 条)
 
 **字段** (4): `CaptionPath, IsPlayerInvolved, VideoID, VideoPath`
 
@@ -105,7 +105,7 @@
 }
 ```
 
-### VideoEncryptionConfig.json (0.02 MB, 351 条)
+### VideoEncryptionConfig.json (0.02 MB, 363 条)
 
 **字段** (3): `Encryption, EncryptionMethod, VideoID`
 
@@ -157,7 +157,7 @@
 }
 ```
 
-### VersionReviewMission.json (0.00 MB, 17 条)
+### VersionReviewMission.json (0.00 MB, 18 条)
 
 **字段** (4): `PreMainMissionID, ReviewMainMissionID, StoryPerformanceID, StoryStartEntranceID`
 
@@ -282,7 +282,7 @@
 }
 ```
 
-### World3DMapEntranceConfig.json (0.00 MB, 9 条)
+### World3DMapEntranceConfig.json (0.00 MB, 10 条)
 
 **字段** (6): `Anchor, ConditionParamInt, ConditionType, FormID, ID, Priority`
 

@@ -1,10 +1,10 @@
 # DATA_CATALOG 分片：文件名首字母 R
 
-> 本文件由 `gen_catalog.py` 自动生成，是 [DATA_CATALOG.md](../DATA_CATALOG.md) 总索引的分片 r（共 302 个文件）。
+> 本文件由 `gen_catalog.py` 自动生成，是 [DATA_CATALOG.md](../DATA_CATALOG.md) 总索引的分片 r（共 303 个文件）。
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### RogueMazeBuff.json (1.20 MB, 1,852 条)
+### RogueMazeBuff.json (1.20 MB, 1,853 条)
 
 **字段** (17): `BuffDesc, BuffDescBattle, BuffDescParamByAvatarSkillID, BuffEffect, BuffIcon, BuffName, BuffRarity, BuffSeries, BuffSimpleDesc, ID, InBattleBindingKey, InBattleBindingType, Lv, LvMax, MazeBuffType, ModifierName, ParamList`
 
@@ -45,7 +45,7 @@
 }
 ```
 
-### RewardData.json (1.01 MB, 9,515 条)
+### RewardData.json (1.04 MB, 9,885 条)
 
 **字段** (27): `Count_1, Count_2, Count_3, Count_4, Count_5, Count_6, Hcoin, IsSpecial, ItemID_1, ItemID_2, ItemID_3, ItemID_4, ItemID_5, ItemID_6, Level_1, Level_2, Level_3, Level_4, Level_5, Level_6, Rank_1, Rank_2, Rank_3, Rank_4, Rank_5, Rank_6, RewardID`
 
@@ -120,7 +120,7 @@
 }
 ```
 
-### RaidConfig.json (0.23 MB, 322 条)
+### RaidConfig.json (0.23 MB, 325 条)
 
 **字段** (35): `AutoObtainDamageType, BuffDesc, BuffParamList, DamageType, DifficultyAdjustmentType, DisplayEventID, EnterType, EntrancePageBGImagePath, FinishEntranceID, HardLevel, IsEntryByProp, IsHiddenAreaMap, LimitIDList, LockCaptain, LockCaptainAvatarID, MainMissionIDAfter, MainMissionIDBefore, MainMissionIDList, MappingInfoID, MonsterHideList, MonsterList, RaidDesc, RaidID, RaidName, RaidTagList, RaidTargetID, RecoverType, RewardList, SkipJoinLineup, SkipRewardOnFinish, TeamLimitIDList, TeamType, TrialAvatarList, Type, UnlockWorldLevel`
 
@@ -197,20 +197,7 @@
 }
 ```
 
-### RogueMonster.json (0.19 MB, 2,016 条)
-
-**字段** (4): `EventID, MonsterDropType, NpcMonsterID, RogueMonsterID`
-
-**首条记录摘要**:
-```json
-{
-  "RogueMonsterID": 9001,
-  "NpcMonsterID": 1003010,
-  "EventID": 89999001
-}
-```
-
-### RelicConfig.json (0.19 MB, 774 条)
+### RelicConfig.json (0.19 MB, 790 条)
 
 **字段** (11): `CoinCost, ExpProvide, ExpType, ID, MainAffixGroup, MaxLevel, Mode, Rarity, SetID, SubAffixGroup, Type`
 
@@ -228,6 +215,19 @@
   "ExpProvide": 300,
   "CoinCost": 450,
   "Mode": "BASIC"
+}
+```
+
+### RogueMonster.json (0.19 MB, 2,016 条)
+
+**字段** (4): `EventID, MonsterDropType, NpcMonsterID, RogueMonsterID`
+
+**首条记录摘要**:
+```json
+{
+  "RogueMonsterID": 9001,
+  "NpcMonsterID": 1003010,
+  "EventID": 89999001
 }
 ```
 
@@ -579,38 +579,7 @@
 }
 ```
 
-### RogueMap.json (0.07 MB, 615 条)
-
-**字段** (6): `IsStart, NextSiteIDList, PosX, PosY, RogueMapID, SiteID`
-
-**首条记录摘要**:
-```json
-{
-  "RogueMapID": 1,
-  "SiteID": 1,
-  "IsStart": true,
-  "PosX": 100,
-  "PosY": -360,
-  "NextSiteIDList": []
-}
-```
-
-### RogueTournWeeklyDisplay.json (0.07 MB, 295 条)
-
-**字段** (3): `DescParams, WeeklyDisplayContent, WeeklyDisplayID`
-
-**首条记录摘要**:
-```json
-{
-  "WeeklyDisplayID": 1001,
-  "WeeklyDisplayContent": {
-    "Hash": 16523463738176474651
-  },
-  "DescParams": []
-}
-```
-
-### RogueTournCocoonConfig.json (0.07 MB, 70 条)
+### RogueTournCocoonConfig.json (0.08 MB, 75 条)
 
 **字段** (15): `Difficulty, DisplayID, DisplayItemList, DisplayMonsterMap, DropList, EventID, ID, MaxChallengeCnt, NpcMonsterID, PicPath, RecommendDamageTypes, RecommendLevel, RogueKeyCost, StaminaCost, WorldLevel`
 
@@ -639,7 +608,38 @@
 }
 ```
 
-### RogueTournBuffGroup.json (0.07 MB, 458 条)
+### RogueMap.json (0.07 MB, 615 条)
+
+**字段** (6): `IsStart, NextSiteIDList, PosX, PosY, RogueMapID, SiteID`
+
+**首条记录摘要**:
+```json
+{
+  "RogueMapID": 1,
+  "SiteID": 1,
+  "IsStart": true,
+  "PosX": 100,
+  "PosY": -360,
+  "NextSiteIDList": []
+}
+```
+
+### RogueTournWeeklyDisplay.json (0.07 MB, 306 条)
+
+**字段** (3): `DescParams, WeeklyDisplayContent, WeeklyDisplayID`
+
+**首条记录摘要**:
+```json
+{
+  "WeeklyDisplayID": 1001,
+  "WeeklyDisplayContent": {
+    "Hash": 16523463738176474651
+  },
+  "DescParams": []
+}
+```
+
+### RogueTournBuffGroup.json (0.07 MB, 459 条)
 
 **字段** (3): `RogueBuffDrop, RogueBuffGroupID, TournMode`
 
@@ -651,7 +651,7 @@
 }
 ```
 
-### RetCodeError.json (0.07 MB, 847 条)
+### RetCodeError.json (0.07 MB, 852 条)
 
 **字段** (3): `ErrorID, IsPileToastCenter, Text`
 
@@ -678,7 +678,7 @@
 }
 ```
 
-### RelicDataInfo.json (0.07 MB, 192 条)
+### RelicDataInfo.json (0.07 MB, 196 条)
 
 **字段** (8): `BGStoryContent, BGStoryTitle, IconPath, ItemBGDesc, ItemFigureIconPath, RelicName, SetID, Type`
 
@@ -711,23 +711,7 @@
 }
 ```
 
-### RogueTournFormulaDisplay.json (0.06 MB, 324 条)
-
-**字段** (4): `ExtraEffect, FormulaDisplayID, FormulaStory, HandbookUnlockDisplayID`
-
-**首条记录摘要**:
-```json
-{
-  "FormulaDisplayID": 10114000,
-  "FormulaStory": {
-    "Hash": 5706619527573856621
-  },
-  "ExtraEffect": [],
-  "HandbookUnlockDisplayID": 808
-}
-```
-
-### RogueTournWeeklyChallenge.json (0.05 MB, 114 条)
+### RogueTournWeeklyChallenge.json (0.06 MB, 120 条)
 
 **字段** (9): `ChallengeID, DisplayFinalMonsterGroups, DisplayMonsterGroups1, DisplayMonsterGroups2, DisplayMonsterGroups3, RewardID, WeeklyContentDetailList, WeeklyContentList, WeeklyName`
 
@@ -762,6 +746,22 @@
   "DisplayMonsterGroups3": {
     "0": 300402
   }
+}
+```
+
+### RogueTournFormulaDisplay.json (0.06 MB, 324 条)
+
+**字段** (4): `ExtraEffect, FormulaDisplayID, FormulaStory, HandbookUnlockDisplayID`
+
+**首条记录摘要**:
+```json
+{
+  "FormulaDisplayID": 10114000,
+  "FormulaStory": {
+    "Hash": 5706619527573856621
+  },
+  "ExtraEffect": [],
+  "HandbookUnlockDisplayID": 808
 }
 ```
 
@@ -961,6 +961,31 @@
 }
 ```
 
+### RechargeConfig.json (0.03 MB, 141 条)
+
+**字段** (10): `FirstCharge, FirstRechangeConfirm, GiftImage, GiftName, GiftType, ListOrder, NormalCharge, NormalRechargeConfirm, ProductID, TierID`
+
+**首条记录摘要**:
+```json
+{
+  "ProductID": "rpgchncoin60tier1",
+  "TierID": "Tier_1",
+  "GiftType": 1,
+  "FirstCharge": 60,
+  "ListOrder": 1,
+  "GiftName": {
+    "Hash": 8571471899151841129
+  },
+  "GiftImage": "SpriteOutput/ItemFigures/3-t1.png",
+  "FirstRechangeConfirm": {
+    "Hash": 16675377132639930049
+  },
+  "NormalRechargeConfirm": {
+    "Hash": 11629888359110689337
+  }
+}
+```
+
 ### RogueMagicScepter.json (0.03 MB, 72 条)
 
 **字段** (11): `EffectTypeList, FuncType, LimitRangeType, LockMagicUnit, ScepterBasicPower, ScepterID, ScepterLevel, StaffMazeBuffID, StyleType, TrenchCount, UnlockID`
@@ -990,32 +1015,7 @@
 }
 ```
 
-### RechargeConfig.json (0.03 MB, 138 条)
-
-**字段** (10): `FirstCharge, FirstRechangeConfirm, GiftImage, GiftName, GiftType, ListOrder, NormalCharge, NormalRechargeConfirm, ProductID, TierID`
-
-**首条记录摘要**:
-```json
-{
-  "ProductID": "rpgchncoin60tier1",
-  "TierID": "Tier_1",
-  "GiftType": 1,
-  "FirstCharge": 60,
-  "ListOrder": 1,
-  "GiftName": {
-    "Hash": 8571471899151841129
-  },
-  "GiftImage": "SpriteOutput/ItemFigures/3-t1.png",
-  "FirstRechangeConfirm": {
-    "Hash": 16675377132639930049
-  },
-  "NormalRechargeConfirm": {
-    "Hash": 11629888359110689337
-  }
-}
-```
-
-### RelicSetSkillConfig.json (0.03 MB, 96 条)
+### RelicSetSkillConfig.json (0.03 MB, 98 条)
 
 **字段** (6): `AbilityName, AbilityParamList, PropertyList, RequireNum, SetID, SkillDesc`
 
@@ -1407,6 +1407,30 @@
 }
 ```
 
+### RelicSetConfig.json (0.02 MB, 64 条)
+
+**字段** (10): `DisplayItemID, DisplayItemIDRarity4, IsPlanarSuit, Release, ReleaseVersion, SetID, SetIconFigurePath, SetIconPath, SetName, SetSkillList`
+
+**首条记录摘要**:
+```json
+{
+  "SetID": 101,
+  "SetSkillList": [
+    2,
+    4
+  ],
+  "SetIconPath": "SpriteOutput/ItemIcon/71000.png",
+  "SetIconFigurePath": "SpriteOutput/ItemFigures/71000.png",
+  "SetName": {
+    "Hash": 17317659818484992751
+  },
+  "DisplayItemID": 81014,
+  "DisplayItemIDRarity4": 81013,
+  "Release": true,
+  "ReleaseVersion": "1.0"
+}
+```
+
 ### RogueMiracleGroup.json (0.02 MB, 100 条)
 
 **字段** (2): `MiracleWeight, RogueMiracleGroupID`
@@ -1439,30 +1463,6 @@
       "Value": 0.12
     }
   ]
-}
-```
-
-### RelicSetConfig.json (0.02 MB, 62 条)
-
-**字段** (10): `DisplayItemID, DisplayItemIDRarity4, IsPlanarSuit, Release, ReleaseVersion, SetID, SetIconFigurePath, SetIconPath, SetName, SetSkillList`
-
-**首条记录摘要**:
-```json
-{
-  "SetID": 101,
-  "SetSkillList": [
-    2,
-    4
-  ],
-  "SetIconPath": "SpriteOutput/ItemIcon/71000.png",
-  "SetIconFigurePath": "SpriteOutput/ItemFigures/71000.png",
-  "SetName": {
-    "Hash": 17317659818484992751
-  },
-  "DisplayItemID": 81014,
-  "DisplayItemIDRarity4": 81013,
-  "Release": true,
-  "ReleaseVersion": "1.0"
 }
 ```
 
@@ -1541,7 +1541,7 @@
 }
 ```
 
-### RelicMainAffixAvatarValue.json (0.02 MB, 98 条)
+### RelicMainAffixAvatarValue.json (0.02 MB, 99 条)
 
 **字段** (12): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, DamageAddedRatio, Defence, HP, HealRatio, SPRatio, Speed, StatusProbability`
 
@@ -1648,7 +1648,7 @@
 }
 ```
 
-### RelicSubAffixAvatarValue.json (0.02 MB, 98 条)
+### RelicSubAffixAvatarValue.json (0.02 MB, 99 条)
 
 **字段** (10): `Attack, AvatarID, BreakDamage, CriticalChance, CriticalDamage, Defence, HP, Speed, StatusProbability, StatusResistance`
 
@@ -1897,7 +1897,7 @@
 }
 ```
 
-### ResourceOverallConfig.json (0.01 MB, 179 条)
+### ResourceOverallConfig.json (0.01 MB, 182 条)
 
 **字段** (2): `CurrencyIDList, PageKey`
 
@@ -3124,6 +3124,18 @@
 }
 ```
 
+### RogueTournAvatar.json (0.01 MB, 85 条)
+
+**字段** (2): `AvatarID, SpecialAvatarID`
+
+**首条记录摘要**:
+```json
+{
+  "AvatarID": 1002,
+  "SpecialAvatarID": 3711002
+}
+```
+
 ### RestaurantTradeOrderConfig.json (0.00 MB, 21 条)
 
 **字段** (6): `CostProductMap, CustomerID, Detail, OrderID, RewardProductMap, UnlockIDList`
@@ -3148,19 +3160,7 @@
 }
 ```
 
-### RogueTournAvatar.json (0.00 MB, 83 条)
-
-**字段** (2): `AvatarID, SpecialAvatarID`
-
-**首条记录摘要**:
-```json
-{
-  "AvatarID": 1002,
-  "SpecialAvatarID": 3711002
-}
-```
-
-### RogueTournRole.json (0.00 MB, 98 条)
+### RogueTournRole.json (0.00 MB, 99 条)
 
 **字段** (2): `AvatarID, BuffID`
 
@@ -3343,7 +3343,7 @@
 }
 ```
 
-### RogueTournFormulaRandom.json (0.00 MB, 141 条)
+### RogueTournFormulaRandom.json (0.00 MB, 142 条)
 
 **字段** (1): `RandomID`
 
@@ -3365,6 +3365,19 @@
   "EventType": "CleanTable",
   "BuffName": "",
   "DynamicValues": []
+}
+```
+
+### RecolorConfig.json (0.00 MB, 47 条)
+
+**字段** (3): `DefaultColor, ID, WhiteBGColor`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1001,
+  "DefaultColor": "#ffffffff",
+  "WhiteBGColor": "#ffffffff"
 }
 ```
 
@@ -3405,19 +3418,6 @@
   "FOList": [
     101
   ]
-}
-```
-
-### RecolorConfig.json (0.00 MB, 45 条)
-
-**字段** (3): `DefaultColor, ID, WhiteBGColor`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1001,
-  "DefaultColor": "#ffffffff",
-  "WhiteBGColor": "#ffffffff"
 }
 ```
 
@@ -3938,6 +3938,18 @@
 }
 ```
 
+### RechargeBenefitData.json (0.00 MB, 26 条)
+
+**字段** (4): `BenefitID, ConsumeNum, GiftName, Reward`
+
+**首条记录摘要**:
+```json
+{
+  "BenefitID": 1001,
+  "Reward": 10301
+}
+```
+
 ### RogueDLCMainStoryBranch.json (0.00 MB, 34 条)
 
 **字段** (3): `AeonID, MainStoryBranchID, RogueNPCID`
@@ -3994,23 +4006,6 @@
   "RogueNPCID": 131,
   "QuestID": 6014121,
   "StoryGroup": 1
-}
-```
-
-### RecommendConfig.json (0.00 MB, 10 条)
-
-**字段** (9): `ActivityModuleID, GoodsID, HideAfterSell, ID, ImagePath, NameText, Order, OrderAfterSell, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 3,
-  "Order": 30,
-  "OrderAfterSell": 130,
-  "Type": 15,
-  "ImagePath": "SpriteOutput/TabIcon/Shop/AnniversaryGif...",
-  "NameText": "ShopRecommend_3",
-  "GoodsID": []
 }
 ```
 
@@ -4112,18 +4107,6 @@
 }
 ```
 
-### RechargeBenefitData.json (0.00 MB, 24 条)
-
-**字段** (4): `BenefitID, ConsumeNum, GiftName, Reward`
-
-**首条记录摘要**:
-```json
-{
-  "BenefitID": 1001,
-  "Reward": 10301
-}
-```
-
 ### RestaurantFieldConfig.json (0.00 MB, 6 条)
 
 **字段** (8): `BigCropsConfigID, BigCropsReplaceConfigIDList, ConfigIDList, FieldID, Price, PropConfigIDList, PropGroupIDList, UnlockIDList`
@@ -4156,6 +4139,25 @@
     300007
   ],
   "UnlockIDList": []
+}
+```
+
+### RecommendConfig.json (0.00 MB, 8 条)
+
+**字段** (12): `ActivityModuleID, GoodsID, HideAfterSell, ID, ImagePath, NameText, Order, OrderAfterSell, RechargeBenefitID, TabType, TagText, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Order": 3,
+  "OrderAfterSell": 103,
+  "Type": 1,
+  "ImagePath": "SpriteOutput/UI/Shop/ShopIterate/PromoSh...",
+  "TabType": "SmallBanner",
+  "NameText": "ShopRecommend_1",
+  "TagText": "ShopRecommend_Tag1",
+  "GoodsID": []
 }
 ```
 
@@ -4294,6 +4296,22 @@
 }
 ```
 
+### RechargeGiftConfig.json (0.00 MB, 13 条)
+
+**字段** (5): `Discount, DiscountForFiat, GiftIDList, GiftType, IsRedDotHide`
+
+**首条记录摘要**:
+```json
+{
+  "GiftType": 15,
+  "GiftIDList": [
+    10010
+  ],
+  "Discount": 570,
+  "DiscountForFiat": []
+}
+```
+
 ### RogueNousStoryReward.json (0.00 MB, 29 条)
 
 **字段** (3): `IsImportant, MainStoryReward, QuestID`
@@ -4303,6 +4321,20 @@
 {
   "MainStoryReward": 1,
   "QuestID": 6014301
+}
+```
+
+### RogueTournMiscDisplay.json (0.00 MB, 18 条)
+
+**字段** (2): `DisplayContent, DisplayID`
+
+**首条记录摘要**:
+```json
+{
+  "DisplayID": 101,
+  "DisplayContent": {
+    "Hash": 4363364653664122176
+  }
 }
 ```
 
@@ -4386,20 +4418,6 @@
 }
 ```
 
-### RogueTournMiscDisplay.json (0.00 MB, 17 条)
-
-**字段** (2): `DisplayContent, DisplayID`
-
-**首条记录摘要**:
-```json
-{
-  "DisplayID": 101,
-  "DisplayContent": {
-    "Hash": 4363364653664122176
-  }
-}
-```
-
 ### RogueTournKeywordParam.json (0.00 MB, 9 条)
 
 **字段** (2): `KeywordID, ParamList`
@@ -4440,22 +4458,6 @@
   "RefreshTime": [
     0
   ]
-}
-```
-
-### RechargeGiftConfig.json (0.00 MB, 12 条)
-
-**字段** (4): `Discount, DiscountForFiat, GiftIDList, GiftType`
-
-**首条记录摘要**:
-```json
-{
-  "GiftType": 15,
-  "GiftIDList": [
-    10010
-  ],
-  "Discount": 570,
-  "DiscountForFiat": []
 }
 ```
 
@@ -4505,6 +4507,21 @@
     109003
   ],
   "DeleteIDList": []
+}
+```
+
+### RecommendDisplay.json (0.00 MB, 7 条)
+
+**字段** (5): `EnvironmentProfilePath, ID, IntroID, UI3DPrefab, UIPrefab`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 10,
+  "UIPrefab": "",
+  "UI3DPrefab": "UI/UI3D/ShopActivity/UI3D_ShopGiftPack2_...",
+  "EnvironmentProfilePath": "",
+  "IntroID": 204
 }
 ```
 
@@ -4574,6 +4591,19 @@
 }
 ```
 
+### RechargeGiftData.json (0.00 MB, 20 条)
+
+**字段** (6): `Days, GiftID, McoinFree, McoinPay, RewardsFree, RewardsPay`
+
+**首条记录摘要**:
+```json
+{
+  "GiftID": 10010,
+  "RewardsPay": 10101,
+  "RewardsFree": 10102
+}
+```
+
 ### RogueDestroyProp.json (0.00 MB, 10 条)
 
 **字段** (4): `GameTime, ParamGroupID, PrepareTime, ScoreRange`
@@ -4592,19 +4622,6 @@
 }
 ```
 
-### RechargeGiftData.json (0.00 MB, 19 条)
-
-**字段** (6): `Days, GiftID, McoinFree, McoinPay, RewardsFree, RewardsPay`
-
-**首条记录摘要**:
-```json
-{
-  "GiftID": 10010,
-  "RewardsPay": 10101,
-  "RewardsFree": 10102
-}
-```
-
 ### RogueArcade.json (0.00 MB, 10 条)
 
 **字段** (4): `AdventureType, ArcadeID, ArcadeRoomID, ParamGroupID`
@@ -4616,21 +4633,6 @@
   "ArcadeID": 1,
   "AdventureType": "RogueCaptureMonster",
   "ParamGroupID": 301001
-}
-```
-
-### RecommendDisplay.json (0.00 MB, 6 条)
-
-**字段** (5): `EnvironmentProfilePath, ID, IntroID, UI3DPrefab, UIPrefab`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 10,
-  "UIPrefab": "",
-  "UI3DPrefab": "UI/UI3D/ShopActivity/UI3D_ShopGiftPack2_...",
-  "EnvironmentProfilePath": "",
-  "IntroID": 204
 }
 ```
 
@@ -4971,6 +4973,20 @@
 }
 ```
 
+### RechargeBenefitConfig.json (0.00 MB, 4 条)
+
+**字段** (4): `ActivityModuleID, BenefitIDList, ID, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "Type": "SecondAnniversary",
+  "ActivityModuleID": 5003801,
+  "BenefitIDList": "<list[8]>"
+}
+```
+
 ### RestaurantFOConfig.json (0.00 MB, 6 条)
 
 **字段** (3): `AvatarID, FOID, IMGPath`
@@ -5124,20 +5140,6 @@
 {
   "RaidType": "Mission",
   "FinishType": "RaidMissionFinish"
-}
-```
-
-### RechargeBenefitConfig.json (0.00 MB, 3 条)
-
-**字段** (4): `ActivityModuleID, BenefitIDList, ID, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "Type": "SecondAnniversary",
-  "ActivityModuleID": 5003801,
-  "BenefitIDList": "<list[8]>"
 }
 ```
 
@@ -5443,6 +5445,18 @@
       "Value": 4
     }
   ]
+}
+```
+
+### RealityShowFriend.json (0.00 MB, 5 条)
+
+**字段** (2): `NPCID, Record`
+
+**首条记录摘要**:
+```json
+{
+  "NPCID": 1,
+  "Record": 5
 }
 ```
 

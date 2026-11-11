@@ -16,7 +16,7 @@
 }
 ```
 
-### TalkSentenceConfig.json (39.73 MB, 244,380 条)
+### TalkSentenceConfig.json (40.46 MB, 248,809 条)
 
 **字段** (4): `TalkSentenceID, TalkSentenceText, TextmapTalkSentenceName, VoiceID`
 
@@ -30,7 +30,7 @@
 }
 ```
 
-### StageConfig.json (24.59 MB, 29,515 条)
+### StageConfig.json (24.83 MB, 29,776 条)
 
 **字段** (21): `BattleScoringGroup, EliteGroup, ForbidAutoBattle, ForbidExitBattle, ForbidViewMode, HardLevelGroup, Level, LevelGraphPath, LevelLoseCondition, LevelWinCondition, MonsterList, MonsterWarningRatio, Release, ResetBattleSpeed, StageAbilityConfig, StageConfigData, StageID, StageName, StageType, SubLevelGraphs, TrialAvatarList`
 
@@ -59,7 +59,7 @@
 }
 ```
 
-### SpecialAvatarRelic.json (4.07 MB, 11,534 条)
+### SpecialAvatarRelic.json (4.08 MB, 11,612 条)
 
 **字段** (3): `Comment2, RelicIDList, RelicPropertyType`
 
@@ -72,9 +72,9 @@
 }
 ```
 
-### SpecialAvatar.json (3.30 MB, 4,925 条)
+### SpecialAvatar.json (3.61 MB, 5,213 条)
 
-**字段** (34): `AIPath, AbilityNameList, AnchorName, AvatarID, CustomSkillTreeKey, EnhancedID, EquipmentID, EquipmentLevel, EquipmentPromotion, EquipmentRank, HasJoinHint, HasLeaveHint, HaveActionDelay, IsAutoBattle, IsProtected, IsUseWorldLevel, JsonPath, Level, LevelAreaPrefab, LockBattleInfo, LockMazeSkill, OverrideProperty, PlayerID, PlayerJsonPath, Promotion, Rank, RelicMainValue, RelicPropertyType, RelicPropertyTypeExtra, RelicSubValue, SkillTreeTemplate, SpecialAvatarID, Type, WorldLevel`
+**字段** (35): `AIPath, AbilityNameList, AnchorName, AvatarID, CustomSkillTreeKey, EnhancedID, EquipmentID, EquipmentLevel, EquipmentPromotion, EquipmentRank, ExRankIDList, HasJoinHint, HasLeaveHint, HaveActionDelay, IsAutoBattle, IsProtected, IsUseWorldLevel, JsonPath, Level, LevelAreaPrefab, LockBattleInfo, LockMazeSkill, OverrideProperty, PlayerID, PlayerJsonPath, Promotion, Rank, RelicMainValue, RelicPropertyType, RelicPropertyTypeExtra, RelicSubValue, SkillTreeTemplate, SpecialAvatarID, Type, WorldLevel`
 
 **首条记录摘要**:
 ```json
@@ -90,6 +90,7 @@
   "AnchorName": "",
   "Level": 40,
   "Promotion": 2,
+  "ExRankIDList": [],
   "OverrideProperty": [],
   "HaveActionDelay": true,
   "SkillTreeTemplate": "TYPE_CUSTOM",
@@ -120,7 +121,7 @@
 }
 ```
 
-### SubMission.json (1.70 MB, 14,897 条)
+### SubMission.json (1.65 MB, 15,014 条)
 
 **字段** (3): `DescrptionText, SubMissionID, TargetText`
 
@@ -137,7 +138,7 @@
 }
 ```
 
-### StageInfiniteMonsterGroup.json (1.37 MB, 1,714 条)
+### StageInfiniteMonsterGroup.json (1.40 MB, 1,764 条)
 
 **字段** (3): `EliteGroup, InfiniteMonsterGroupID, MonsterList`
 
@@ -150,7 +151,7 @@
 }
 ```
 
-### StatusConfig.json (1.11 MB, 2,457 条)
+### StatusConfig.json (1.30 MB, 2,851 条)
 
 **字段** (11): `CanDispel, ModifierName, ReadParamList, StatusDesc, StatusEffect, StatusID, StatusIconPath, StatusIconPathHighSize, StatusName, StatusType, TagList`
 
@@ -176,7 +177,7 @@
 }
 ```
 
-### StageTestConfig.json (0.59 MB, 829 条)
+### StageTestConfig.json (0.59 MB, 839 条)
 
 **字段** (19): `BattleScoringGroup, EliteGroup, ForbidAutoBattle, ForbidExitBattle, HardLevelGroup, Level, LevelGraphPath, LevelLoseCondition, LevelWinCondition, MonsterList, MonsterWarningRatio, Release, StageAbilityConfig, StageConfigData, StageID, StageName, StageType, SubLevelGraphs, TrialAvatarList`
 
@@ -203,7 +204,7 @@
 }
 ```
 
-### StageInfiniteWaveConfig.json (0.53 MB, 1,778 条)
+### StageInfiniteWaveConfig.json (0.55 MB, 1,828 条)
 
 **字段** (7): `Ability, ClearPreviousAbility, InfiniteWaveID, MaxMonsterCount, MaxTeammateCount, MonsterGroupIDList, ParamList`
 
@@ -223,7 +224,7 @@
 }
 ```
 
-### TutorialData.json (0.46 MB, 1,283 条)
+### TutorialData.json (0.47 MB, 1,302 条)
 
 **字段** (7): `CanInterrupt, FinishTriggerParams, Priority, RestoreType, TriggerParams, TutorialID, TutorialJsonPath`
 
@@ -238,7 +239,7 @@
 }
 ```
 
-### TutorialGuideTalkData.json (0.42 MB, 2,764 条)
+### TutorialGuideTalkData.json (0.44 MB, 2,880 条)
 
 **字段** (3): `AvatarHeadIcon, ID, TalkDataText`
 
@@ -250,7 +251,7 @@
 }
 ```
 
-### StoryCharacter.json (0.39 MB, 1,721 条)
+### StoryCharacter.json (0.39 MB, 1,735 条)
 
 **字段** (5): `CharacterID, ConfigEntityPath, JsonPath, StoryCharacterID, SubType`
 
@@ -264,7 +265,7 @@
 }
 ```
 
-### ShopGoodsConfig.json (0.33 MB, 900 条)
+### ShopGoodsConfig.json (0.34 MB, 922 条)
 
 **字段** (27): `ActivityModuleID, CurrencyCostList, CurrencyList, CycleDays, GoodsID, GoodsSortID, IsLimitedTimePurchase, IsNew, IsOnSale, ItemCount, ItemGroupID, ItemID, Level, LimitTimes, LimitType1, LimitValue1List, LimitValue2List, OnShelfType1, OnShelfType2, OnShelfValue1List, OnShelfValue2List, Rank, RefreshType, ScheduleDataID, ShopID, TagParam, TagType`
 
@@ -290,7 +291,7 @@
 }
 ```
 
-### TutorialGuideGroup.json (0.32 MB, 871 条)
+### TutorialGuideGroup.json (0.32 MB, 886 条)
 
 **字段** (10): `CanReview, FinishTriggerParams, GroupID, MessageText, Order, RewardID, TriggerParams, TutorialGuideIDList, TutorialShowType, TutorialType`
 
@@ -314,7 +315,7 @@
 }
 ```
 
-### TutorialGuideData.json (0.23 MB, 1,569 条)
+### TutorialGuideData.json (0.24 MB, 1,600 条)
 
 **字段** (4): `DescText, ID, ImagePath, PlatformType`
 
@@ -356,7 +357,7 @@
 }
 ```
 
-### TalkSentenceMultiVoice.json (0.10 MB, 1,044 条)
+### TalkSentenceMultiVoice.json (0.10 MB, 1,047 条)
 
 **字段** (2): `TalkSentenceID, VoiceIDList`
 
@@ -371,7 +372,7 @@
 }
 ```
 
-### ScheduleDataShop.json (0.10 MB, 983 条)
+### ScheduleDataShop.json (0.10 MB, 1,001 条)
 
 **字段** (3): `BeginTime, EndTime, ID`
 
@@ -384,7 +385,7 @@
 }
 ```
 
-### StoryProp.json (0.09 MB, 377 条)
+### StoryProp.json (0.09 MB, 409 条)
 
 **字段** (6): `ConfigEntityPath, JsonPath, PropID, StoryCharacterID, StoryCharacterModelPath, StoryCharacterUniqueName`
 
@@ -418,7 +419,7 @@
 }
 ```
 
-### StageInfiniteGroup.json (0.06 MB, 620 条)
+### StageInfiniteGroup.json (0.07 MB, 639 条)
 
 **字段** (2): `WaveGroupID, WaveIDList`
 
@@ -448,7 +449,7 @@
 }
 ```
 
-### TeamBuildConfig.json (0.06 MB, 135 条)
+### TeamBuildConfig.json (0.06 MB, 138 条)
 
 **字段** (10): `AvatarID, BackupGroupList1, BackupGroupList2, BackupGroupList3, BackupList1, BackupList2, BackupList3, MemberList, Position, TeamID`
 
@@ -506,7 +507,7 @@
 }
 ```
 
-### TeleportConfig.json (0.06 MB, 482 条)
+### TeleportConfig.json (0.06 MB, 491 条)
 
 **字段** (6): `ConfigID, FloorID, GroupID, ID, InitialEnable, PlaneID`
 
@@ -521,7 +522,7 @@
 }
 ```
 
-### StoryAtlas.json (0.05 MB, 461 条)
+### StoryAtlas.json (0.05 MB, 466 条)
 
 **字段** (6): `AvatarID, ReplaceID, SortID, Story, StoryID, Unlock`
 
@@ -596,7 +597,7 @@
 }
 ```
 
-### TextJoinItem.json (0.05 MB, 559 条)
+### TextJoinItem.json (0.05 MB, 574 条)
 
 **字段** (2): `TextJoinItemID, TextJoinText`
 
@@ -708,6 +709,19 @@
 }
 ```
 
+### ScheduleDataQuest.json (0.03 MB, 294 条)
+
+**字段** (3): `BeginTime, EndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 21001801,
+  "BeginTime": "2022-04-25 04:00:00",
+  "EndTime": "2022-06-21 04:00:00"
+}
+```
+
 ### TutorialSubGuideGroup.json (0.03 MB, 83 条)
 
 **字段** (9): `BHHPLHIGOHE, FLBGELFEBCK, HNLJKFJOACC, JMDGIBDPMJF, JMLNPBDIHDG, JNDOMOJHOEF, LLDCHLHNADA, LPBKPCCKFJG, ODEKADIBFAO`
@@ -728,19 +742,6 @@
     "Hash": 18212868757188547349
   },
   "ODEKADIBFAO": 90006
-}
-```
-
-### ScheduleDataQuest.json (0.03 MB, 287 条)
-
-**字段** (3): `BeginTime, EndTime, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 21001801,
-  "BeginTime": "2022-04-25 04:00:00",
-  "EndTime": "2022-06-21 04:00:00"
 }
 ```
 
@@ -775,7 +776,7 @@
 }
 ```
 
-### TextJoinConfig.json (0.02 MB, 191 条)
+### TextJoinConfig.json (0.03 MB, 203 条)
 
 **字段** (5): `DefaultItem, IsOverride, TextJoinID, TextJoinItemList, Type`
 
@@ -990,7 +991,7 @@
 }
 ```
 
-### SummonUnitData.json (0.02 MB, 74 条)
+### SummonUnitData.json (0.02 MB, 76 条)
 
 **字段** (9): `DestroyOnEnterBattle, ID, IsClient, IsTeamSummon, JsonPath, MaxSummonCount, RemoveMazeBuffOnDestroy, SummonerType, UniqueGroup`
 
@@ -1003,6 +1004,18 @@
   "RemoveMazeBuffOnDestroy": true,
   "MaxSummonCount": 1,
   "UniqueGroup": "TeamField"
+}
+```
+
+### TextSpriteConfig.json (0.02 MB, 135 条)
+
+**字段** (2): `SpriteName, SpritePath`
+
+**首条记录摘要**:
+```json
+{
+  "SpriteName": "ActivityChimeraATK",
+  "SpritePath": "SpriteOutput/UI/Quest/Chimera/ChimeraTex..."
 }
 ```
 
@@ -1034,18 +1047,6 @@
   "PJHMJKEIGOA": {
     "Hash": 6636153336510038151
   }
-}
-```
-
-### TextSpriteConfig.json (0.02 MB, 131 条)
-
-**字段** (2): `SpriteName, SpritePath`
-
-**首条记录摘要**:
-```json
-{
-  "SpriteName": "ActivityChimeraATK",
-  "SpritePath": "SpriteOutput/UI/Quest/Chimera/ChimeraTex..."
 }
 ```
 
@@ -1535,7 +1536,7 @@
 }
 ```
 
-### SysMailConfig.json (0.01 MB, 37 条)
+### SysMailConfig.json (0.01 MB, 38 条)
 
 **字段** (6): `MailDetail, MailID, MailLifeTime, MailSender, MailTitle, Type`
 
@@ -1556,6 +1557,23 @@
 }
 ```
 
+### SpecialNPCData.json (0.01 MB, 26 条)
+
+**字段** (5): `ConfigEntityPath, ID, JsonPath, MazeSkillIdList, PrefabPath`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 12113,
+  "PrefabPath": "Characters/CharacterPrefabs/FakePlayer/W...",
+  "ConfigEntityPath": "",
+  "JsonPath": "Config/ConfigCharacter/FakePlayer/FakePl...",
+  "MazeSkillIdList": [
+    1211201
+  ]
+}
+```
+
 ### TreasureDungeonAvatar.json (0.01 MB, 45 条)
 
 **字段** (5): `AvatarPickID, Dialogue1, FigureDiff, FigureScale, SpecialAvataID`
@@ -1573,6 +1591,19 @@
     126
   ],
   "FigureScale": 1.3
+}
+```
+
+### StageInvasionConfig.json (0.01 MB, 30 条)
+
+**字段** (3): `InvasionID, MonsterInvasionList, StageID`
+
+**首条记录摘要**:
+```json
+{
+  "StageID": 30509012,
+  "InvasionID": 2,
+  "MonsterInvasionList": "<list[2]>"
 }
 ```
 
@@ -1609,23 +1640,6 @@
 }
 ```
 
-### SpecialNPCData.json (0.01 MB, 24 条)
-
-**字段** (5): `ConfigEntityPath, ID, JsonPath, MazeSkillIdList, PrefabPath`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 12113,
-  "PrefabPath": "Characters/CharacterPrefabs/FakePlayer/W...",
-  "ConfigEntityPath": "",
-  "JsonPath": "Config/ConfigCharacter/FakePlayer/FakePl...",
-  "MazeSkillIdList": [
-    1211201
-  ]
-}
-```
-
 ### TeamTowersBoss.json (0.01 MB, 16 条)
 
 **字段** (10): `BDACPPLKLGL, CBBDEODGNDG, DBIHGLJEGPO, FBKAMIHGLFK, GFLGOBHOKHI, HAEDMJHMJHC, KKJHBCAHFAO, NMAHGFAPENI, OENAMINOLLF, PHFMCACHFIJ`
@@ -1650,7 +1664,7 @@
 }
 ```
 
-### SpecialMappingInfo.json (0.01 MB, 114 条)
+### SpecialMappingInfo.json (0.01 MB, 117 条)
 
 **字段** (2): `ID, ParamList`
 
@@ -1947,6 +1961,60 @@
 }
 ```
 
+### SpecialNPCSkillConfig.json (0.01 MB, 5 条)
+
+**字段** (30): `AttackType, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, RelatedExRankIDList, SPMultipleRatio, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
+
+**首条记录摘要**:
+```json
+{
+  "SkillID": 1211206,
+  "SkillName": {
+    "Hash": 7167396225780900216
+  },
+  "SkillTag": {
+    "Hash": 16752756560315677817
+  },
+  "SkillTypeDesc": {
+    "Hash": 3601902557209832706
+  },
+  "Level": 1,
+  "MaxLevel": 1,
+  "SkillTriggerKey": "",
+  "SkillIcon": "SpriteOutput/SkillIcons/AetherDivide/Ski...",
+  "UltraSkillIcon": "",
+  "LevelUpCostList": [],
+  "SkillDesc": {
+    "Hash": 6612596470888090439
+  },
+  "RatedSkillTreeID": [],
+  "RatedRankID": [],
+  "RelatedExRankIDList": [],
+  "ExtraEffectIDList": [],
+  "SimpleExtraEffectIDList": [],
+  "ShowStanceList": "<list[3]>",
+  "ShowDamageList": [],
+  "ShowHealList": [],
+  "InitCoolDown": -1,
+  "CoolDown": -1,
+  "StanceDamageDisplay": 10,
+  "SPMultipleRatio": {
+    "Value": 0.5
+  },
+  "BPNeed": {
+    "Value": -1
+  },
+  "DelayRatio": {
+    "Value": 1
+  },
+  "ParamList": [],
+  "SimpleParamList": [],
+  "StanceDamageType": "Physical",
+  "AttackType": "MazeNormal",
+  "SkillEffect": "MazeAttack"
+}
+```
+
 ### SwordTrainingExam.json (0.01 MB, 12 条)
 
 **字段** (12): `BattleAreaID, EnemyImage, EnemyName, EnemyPower, ExamID, ExcellentCommentList, FailPerformID, IsLastExam, NormalCommentList, PrePerformID, StageID, SuccessPerformID`
@@ -1980,59 +2048,6 @@
 }
 ```
 
-### SpecialNPCSkillConfig.json (0.01 MB, 5 条)
-
-**字段** (29): `AttackType, BPNeed, CoolDown, DelayRatio, ExtraEffectIDList, InitCoolDown, Level, LevelUpCostList, MaxLevel, ParamList, RatedRankID, RatedSkillTreeID, SPMultipleRatio, ShowDamageList, ShowHealList, ShowStanceList, SimpleExtraEffectIDList, SimpleParamList, SkillDesc, SkillEffect, SkillID, SkillIcon, SkillName, SkillTag, SkillTriggerKey, SkillTypeDesc, StanceDamageDisplay, StanceDamageType, UltraSkillIcon`
-
-**首条记录摘要**:
-```json
-{
-  "SkillID": 1211206,
-  "SkillName": {
-    "Hash": 7167396225780900216
-  },
-  "SkillTag": {
-    "Hash": 16752756560315677817
-  },
-  "SkillTypeDesc": {
-    "Hash": 3601902557209832706
-  },
-  "Level": 1,
-  "MaxLevel": 1,
-  "SkillTriggerKey": "",
-  "SkillIcon": "SpriteOutput/SkillIcons/AetherDivide/Ski...",
-  "UltraSkillIcon": "",
-  "LevelUpCostList": [],
-  "SkillDesc": {
-    "Hash": 6612596470888090439
-  },
-  "RatedSkillTreeID": [],
-  "RatedRankID": [],
-  "ExtraEffectIDList": [],
-  "SimpleExtraEffectIDList": [],
-  "ShowStanceList": "<list[3]>",
-  "ShowDamageList": [],
-  "ShowHealList": [],
-  "InitCoolDown": -1,
-  "CoolDown": -1,
-  "StanceDamageDisplay": 10,
-  "SPMultipleRatio": {
-    "Value": 0.5
-  },
-  "BPNeed": {
-    "Value": -1
-  },
-  "DelayRatio": {
-    "Value": 1
-  },
-  "ParamList": [],
-  "SimpleParamList": [],
-  "StanceDamageType": "Physical",
-  "AttackType": "MazeNormal",
-  "SkillEffect": "MazeAttack"
-}
-```
-
 ### TrainVisitorConfig.json (0.01 MB, 39 条)
 
 **字段** (8): `AvatarID, LockMissionID, MessageCome, MessageLeave, MessageResident, MissionID, ToastFinishMainMission, VisitorID`
@@ -2049,7 +2064,7 @@
 }
 ```
 
-### TeamLimitCondition.json (0.01 MB, 49 条)
+### TeamLimitCondition.json (0.01 MB, 50 条)
 
 **字段** (5): `ID, LimitDesc, LimitType, ParamInt1, ParamIntList`
 
@@ -2322,19 +2337,6 @@
 }
 ```
 
-### StageInvasionConfig.json (0.00 MB, 14 条)
-
-**字段** (3): `InvasionID, MonsterInvasionList, StageID`
-
-**首条记录摘要**:
-```json
-{
-  "StageID": 30509012,
-  "InvasionID": 2,
-  "MonsterInvasionList": "<list[2]>"
-}
-```
-
 ### TrainPartyGridConfig.json (0.00 MB, 24 条)
 
 **字段** (4): `GridID, GridIconPath, GridType, ParamList`
@@ -2478,6 +2480,17 @@
 }
 ```
 
+### StageInvasionMaterialWhite.json (0.00 MB, 110 条)
+
+**字段** (1): `MonsterID`
+
+**首条记录摘要**:
+```json
+{
+  "MonsterID": 1002020
+}
+```
+
 ### TrackPhotoStage.json (0.00 MB, 6 条)
 
 **字段** (17): `ActivityModuleID, DisLimit, Fov, ImagePath, JunkNumList, MainMissionID, MaxScore, RaidID, StageDesc, StageID, StageLocation, StageName, StarList, TotalTrashCanNum, TrackMoveSpeed, UnlockSubMissionID, XYRange`
@@ -2532,17 +2545,6 @@
   "StageID": 83000991,
   "InvasionID": 3,
   "MonsterInvasionList": "<list[1]>"
-}
-```
-
-### StageInvasionMaterialWhite.json (0.00 MB, 108 条)
-
-**字段** (1): `MonsterID`
-
-**首条记录摘要**:
-```json
-{
-  "MonsterID": 1002020
 }
 ```
 
@@ -2685,6 +2687,20 @@
 }
 ```
 
+### TextDanmuContent.json (0.00 MB, 35 条)
+
+**字段** (2): `Content, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 105440000,
+  "Content": {
+    "Hash": 17236653353538695838
+  }
+}
+```
+
 ### TrainPartyPassengerDiary.json (0.00 MB, 34 条)
 
 **字段** (2): `DiaryID, DiaryText`
@@ -2757,6 +2773,19 @@
 }
 ```
 
+### ScheduleDataChallengeStory.json (0.00 MB, 28 条)
+
+**字段** (3): `BeginTime, EndTime, ID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 202001,
+  "BeginTime": "2024-01-08 04:00:00",
+  "EndTime": "2024-02-19 04:00:00"
+}
+```
+
 ### SwordTrainingPartner.json (0.00 MB, 7 条)
 
 **字段** (5): `AvatarID, PartnerAbilityIDList, PartnerID, PartnerImage, PartnerName`
@@ -2788,16 +2817,30 @@
 }
 ```
 
-### ScheduleDataChallengeStory.json (0.00 MB, 27 条)
+### SpecialAvatarLD.json (0.00 MB, 6 条)
 
-**字段** (3): `BeginTime, EndTime, ID`
+**字段** (17): `AIPath, AbilityNameList, AnchorName, AvatarID, CustomSkillTreeKey, ExRankIDList, HaveActionDelay, JsonPath, Level, LevelAreaPrefab, OverrideProperty, PlayerID, PlayerJsonPath, Promotion, SkillTreeTemplate, SpecialAvatarID, Type`
 
 **首条记录摘要**:
 ```json
 {
-  "ID": 202001,
-  "BeginTime": "2024-01-08 04:00:00",
-  "EndTime": "2024-02-19 04:00:00"
+  "SpecialAvatarID": 6036001,
+  "PlayerID": 1014,
+  "AvatarID": 6036,
+  "Type": "TYPE_TRIAL",
+  "LevelAreaPrefab": "",
+  "AnchorName": "",
+  "Level": 80,
+  "Promotion": 6,
+  "ExRankIDList": [],
+  "OverrideProperty": [],
+  "HaveActionDelay": true,
+  "SkillTreeTemplate": "TYPE_CUSTOM",
+  "CustomSkillTreeKey": "None",
+  "AbilityNameList": [],
+  "PlayerJsonPath": "",
+  "JsonPath": "",
+  "AIPath": ""
 }
 ```
 
@@ -2894,32 +2937,6 @@
 }
 ```
 
-### SpecialAvatarLD.json (0.00 MB, 6 条)
-
-**字段** (16): `AIPath, AbilityNameList, AnchorName, AvatarID, CustomSkillTreeKey, HaveActionDelay, JsonPath, Level, LevelAreaPrefab, OverrideProperty, PlayerID, PlayerJsonPath, Promotion, SkillTreeTemplate, SpecialAvatarID, Type`
-
-**首条记录摘要**:
-```json
-{
-  "SpecialAvatarID": 6036001,
-  "PlayerID": 1014,
-  "AvatarID": 6036,
-  "Type": "TYPE_TRIAL",
-  "LevelAreaPrefab": "",
-  "AnchorName": "",
-  "Level": 80,
-  "Promotion": 6,
-  "OverrideProperty": [],
-  "HaveActionDelay": true,
-  "SkillTreeTemplate": "TYPE_CUSTOM",
-  "CustomSkillTreeKey": "None",
-  "AbilityNameList": [],
-  "PlayerJsonPath": "",
-  "JsonPath": "",
-  "AIPath": ""
-}
-```
-
 ### TarotWikiUnlockConditions.json (0.00 MB, 15 条)
 
 **字段** (3): `Conditions, ShowCondition, UnlockID`
@@ -2948,7 +2965,7 @@
 }
 ```
 
-### ScheduleDataChallengeBoss.json (0.00 MB, 22 条)
+### ScheduleDataChallengeBoss.json (0.00 MB, 23 条)
 
 **字段** (3): `BeginTime, EndTime, ID`
 
@@ -3165,20 +3182,6 @@
   "ConstValueName": "TeamTowers_AchievementMaxNum",
   "Value": {
     "IntValue": 3
-  }
-}
-```
-
-### TextDanmuContent.json (0.00 MB, 20 条)
-
-**字段** (2): `Content, ID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 105440000,
-  "Content": {
-    "Hash": 17236653353538695838
   }
 }
 ```
@@ -3539,6 +3542,22 @@
 }
 ```
 
+### StageInvasionNPCMonster.json (0.00 MB, 8 条)
+
+**字段** (6): `FloorID, GroupID, ID, InstanceID, InvasionID, PlaneID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2054131,
+  "InvasionID": 2,
+  "PlaneID": 20541,
+  "FloorID": 20541001,
+  "GroupID": 261,
+  "InstanceID": 200001
+}
+```
+
 ### TrainPartyMTCategoryConfig.json (0.00 MB, 5 条)
 
 **字段** (4): `CategoryDesc, CategoryID, CategoryName, CategoryTableName`
@@ -3670,6 +3689,18 @@
   "MessageTitle": {
     "Hash": 15165646382604923628
   }
+}
+```
+
+### StageMonsterInvasionParam.json (0.00 MB, 4 条)
+
+**字段** (2): `InvasionID, ParamList`
+
+**首条记录摘要**:
+```json
+{
+  "InvasionID": 1,
+  "ParamList": "<list[5]>"
 }
 ```
 
@@ -3813,18 +3844,6 @@
 }
 ```
 
-### StageMonsterInvasionParam.json (0.00 MB, 3 条)
-
-**字段** (2): `InvasionID, ParamList`
-
-**首条记录摘要**:
-```json
-{
-  "InvasionID": 1,
-  "ParamList": "<list[5]>"
-}
-```
-
 ### TarotBookCommonConstValue.json (0.00 MB, 6 条)
 
 **字段** (2): `ConstValueName, Value`
@@ -3858,6 +3877,18 @@
   "EHFGLKJOING": 17,
   "FIMNPJLNLEE": 10000003,
   "FFLDMJCEMDC": 11001
+}
+```
+
+### StageInvasionRogueConfig.json (0.00 MB, 13 条)
+
+**字段** (2): `ChallengeID, InvasionID`
+
+**首条记录摘要**:
+```json
+{
+  "ChallengeID": 108,
+  "InvasionID": 3
 }
 ```
 
@@ -3993,6 +4024,21 @@
 }
 ```
 
+### StageInvasionBuff.json (0.00 MB, 4 条)
+
+**字段** (3): `InvasionDesc, InvasionID, MazeBuffID`
+
+**首条记录摘要**:
+```json
+{
+  "InvasionID": 1,
+  "MazeBuffID": 3034001,
+  "InvasionDesc": {
+    "Hash": 16261953196955435628
+  }
+}
+```
+
 ### TutorialSubGuideConfig.json (0.00 MB, 2 条)
 
 **字段** (6): `FIFINLKGEAC, HBEDCNGOIMI, IECMJPALEOA, LBJFALJAINI, OENAMINOLLF, OPFOHDKJNJI`
@@ -4115,22 +4161,6 @@
 }
 ```
 
-### StageInvasionNPCMonster.json (0.00 MB, 3 条)
-
-**字段** (6): `FloorID, GroupID, ID, InstanceID, InvasionID, PlaneID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2054131,
-  "InvasionID": 2,
-  "PlaneID": 20541,
-  "FloorID": 20541001,
-  "GroupID": 261,
-  "InstanceID": 200001
-}
-```
-
 ### TeamTowersDepartment.json (0.00 MB, 3 条)
 
 **字段** (3): `NOIDBOIGBFM, OENAMINOLLF, PHFMCACHFIJ`
@@ -4207,18 +4237,6 @@
 }
 ```
 
-### StageInvasionRogueConfig.json (0.00 MB, 7 条)
-
-**字段** (2): `ChallengeID, InvasionID`
-
-**首条记录摘要**:
-```json
-{
-  "ChallengeID": 108,
-  "InvasionID": 3
-}
-```
-
 ### StageInvasionMaterial.json (0.00 MB, 3 条)
 
 **字段** (3): `FarmTypeList, InvasionID, MaterialType`
@@ -4229,21 +4247,6 @@
   "MaterialType": 1,
   "FarmTypeList": "<list[4]>",
   "InvasionID": 1
-}
-```
-
-### StageInvasionBuff.json (0.00 MB, 3 条)
-
-**字段** (3): `InvasionDesc, InvasionID, MazeBuffID`
-
-**首条记录摘要**:
-```json
-{
-  "InvasionID": 1,
-  "MazeBuffID": 3034001,
-  "InvasionDesc": {
-    "Hash": 16261953196955435628
-  }
 }
 ```
 

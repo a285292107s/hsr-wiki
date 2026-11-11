@@ -4,7 +4,7 @@
 > `fields` 为全部记录字段的并集（官方数据中可选字段可能仅出现在部分记录）。
 > 只需要某一两张表时，优先 `python query.py <文件名> --schema`，不必读本分片。
 
-### PlaneEvent.json (11.16 MB, 79,030 条)
+### PlaneEvent.json (11.37 MB, 80,458 条)
 
 **字段** (7): `DisplayItemList, DropList, EventID, IsUseMonsterDrop, Reward, StageID, WorldLevel`
 
@@ -17,7 +17,7 @@
 }
 ```
 
-### PerformanceE.json (2.59 MB, 12,585 条)
+### PerformanceE.json (2.61 MB, 12,676 条)
 
 **字段** (11): `ChangePlayerType, EndBlack, EndWithCrack, FloorID, IsIntroDialogue, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -30,7 +30,7 @@
 }
 ```
 
-### PerformanceSkipFlagE.json (1.44 MB, 12,404 条)
+### PerformanceSkipFlagE.json (1.45 MB, 12,482 条)
 
 **字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
 
@@ -42,25 +42,7 @@
 }
 ```
 
-### PerformanceDS.json (1.24 MB, 5,042 条)
-
-**字段** (10): `EndBlack, EndWithCrack, FloorID, GroupID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
-
-**首条记录摘要**:
-```json
-{
-  "PerformanceID": 103010102,
-  "PerformancePath": "Story/Discussion/Mission/1030101/DS10301...",
-  "IsSkip": "AfterSeen",
-  "PerformanceCharacter": "",
-  "StartBlack": "Full",
-  "EndBlack": "Full",
-  "PlaneID": 10000,
-  "FloorID": 10000000
-}
-```
-
-### QuestData.json (1.22 MB, 5,783 条)
+### QuestData.json (1.28 MB, 6,063 条)
 
 **字段** (10): `FinishWayID, GotoID, ImagePath, QuestDisplay, QuestID, QuestTitle, QuestType, RewardID, UnlockParamList, UnlockType`
 
@@ -81,7 +63,25 @@
 }
 ```
 
-### PerformanceSkipFlagD.json (1.13 MB, 6,872 条)
+### PerformanceDS.json (1.27 MB, 5,159 条)
+
+**字段** (10): `EndBlack, EndWithCrack, FloorID, GroupID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
+
+**首条记录摘要**:
+```json
+{
+  "PerformanceID": 103010102,
+  "PerformancePath": "Story/Discussion/Mission/1030101/DS10301...",
+  "IsSkip": "AfterSeen",
+  "PerformanceCharacter": "",
+  "StartBlack": "Full",
+  "EndBlack": "Full",
+  "PlaneID": 10000,
+  "FloorID": 10000000
+}
+```
+
+### PerformanceSkipFlagD.json (1.15 MB, 6,991 条)
 
 **字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
 
@@ -106,7 +106,7 @@
 }
 ```
 
-### PerformanceSkipOverride.json (0.64 MB, 4,102 条)
+### PerformanceSkipOverride.json (0.66 MB, 4,191 条)
 
 **字段** (9): `Desc, IsConfirmRequiredToSkipFlag, IsOverrideCharacter, IsOverrideImportantFlag, OverrideCharacterList, OverrideImportantFlag, PackID, PerformanceID, PerformanceType`
 
@@ -122,7 +122,7 @@
 }
 ```
 
-### NPCData.json (0.58 MB, 2,044 条)
+### NPCData.json (0.58 MB, 2,060 条)
 
 **字段** (7): `ConfigEntityPath, DefaultNPCName, DefaultNPCTitle, ID, JsonPath, SeriesID, SubType`
 
@@ -136,7 +136,7 @@
 }
 ```
 
-### PerformanceD.json (0.43 MB, 1,860 条)
+### PerformanceD.json (0.43 MB, 1,862 条)
 
 **字段** (11): `ChangePlayerType, EndBlack, EndWithCrack, FloorID, GroupID, IsSkip, PerformanceCharacter, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -173,7 +173,7 @@
 }
 ```
 
-### PerformanceC.json (0.16 MB, 750 条)
+### PerformanceC.json (0.17 MB, 764 条)
 
 **字段** (8): `EndBlack, EndWithCrack, FloorID, IsSkip, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -208,7 +208,7 @@
 }
 ```
 
-### PerformanceRecallData.json (0.15 MB, 295 条)
+### PerformanceRecallData.json (0.15 MB, 300 条)
 
 **字段** (13): `CategoryID, ID, ImgHeightSize, ImgPath, ImgPathWall, ImgPathWall_F, ImgPath_F, Name, PerformanceID, ShowInPlayerRoom, UnlockCondition, WorldID, isVideo`
 
@@ -232,7 +232,7 @@
 }
 ```
 
-### NPCMonsterData.json (0.14 MB, 298 条)
+### NPCMonsterData.json (0.14 MB, 303 条)
 
 **字段** (10): `ConfigEntityPath, DefaultAIPath, ID, IsMazeLink, JsonPath, MappingInfoID, MiniMapIconType, NPCName, PrototypeID, Rank`
 
@@ -254,7 +254,7 @@
 }
 ```
 
-### PerformanceSkipFlagC.json (0.14 MB, 750 条)
+### PerformanceSkipFlagC.json (0.14 MB, 764 条)
 
 **字段** (4): `ActorList, ContainImportBranch, PerformanceID, Skippable`
 
@@ -267,7 +267,25 @@
 }
 ```
 
-### PossessionConfig.json (0.09 MB, 240 条)
+### ProgramGroupConfig.json (0.09 MB, 354 条)
+
+**字段** (8): `Asset, Duration, ID, IfAnAsset, Order, PlayType, ProgramGroupID, SoundEvent`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ProgramGroupID": 99,
+  "Order": 1,
+  "PlayType": 2,
+  "Asset": "Chap01_Eff_Dual_A_01.usm",
+  "IfAnAsset": "SpriteOutput/PicTalkCG/Common/PicChap01_...",
+  "Duration": 2,
+  "SoundEvent": ""
+}
+```
+
+### PossessionConfig.json (0.09 MB, 241 条)
 
 **字段** (7): `AttachPoint, IsEffect, LocalPosition, LocalRotation, LocalScale, PossessionName, PossessionPrefabPath`
 
@@ -295,25 +313,7 @@
 }
 ```
 
-### ProgramGroupConfig.json (0.09 MB, 340 条)
-
-**字段** (8): `Asset, Duration, ID, IfAnAsset, Order, PlayType, ProgramGroupID, SoundEvent`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "ProgramGroupID": 99,
-  "Order": 1,
-  "PlayType": 2,
-  "Asset": "Chap01_Eff_Dual_A_01.usm",
-  "IfAnAsset": "SpriteOutput/PicTalkCG/Common/PicChap01_...",
-  "Duration": 2,
-  "SoundEvent": ""
-}
-```
-
-### PerformanceVideo.json (0.08 MB, 332 条)
+### PerformanceVideo.json (0.08 MB, 340 条)
 
 **字段** (8): `EndBlack, EndWithCrack, FloorID, IsSkip, PerformanceID, PerformancePath, PlaneID, StartBlack`
 
@@ -388,20 +388,7 @@
 }
 ```
 
-### NPCMonsterMark.json (0.06 MB, 797 条)
-
-**字段** (3): `GroupID, ID, InstanceID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 2000101,
-  "GroupID": 3,
-  "InstanceID": 200005
-}
-```
-
-### PerformanceReplayLOverride.json (0.05 MB, 183 条)
+### PerformanceReplayLOverride.json (0.06 MB, 208 条)
 
 **字段** (19): `IsOverrideBranchFlag, IsOverrideDeactiveGroupFlag, IsOverrideEndBlackTypeFlag, IsOverrideMissionAudioStateFlag, IsOverrideMissionLGDisableFlag, IsOverridePerformancePriorityFlag, IsOverridePropStateFlag, OverrideActiveGroup, OverrideDeactiveGroup, OverrideEndBlackType, OverrideIntent, OverrideIsBranch, OverrideMissionAudioState, OverrideMissionLGDisable, OverridePerformancePriority, OverridePropState, PatchLevelGraph, PerformanceID, PerformanceType`
 
@@ -417,6 +404,33 @@
   "OverridePropState": [],
   "OverrideMissionAudioState": "",
   "PatchLevelGraph": ""
+}
+```
+
+### OfferingLevelConfig.json (0.06 MB, 682 条)
+
+**字段** (6): `ItemCost, Level, RewardID, Type, TypeID, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "TypeID": 1,
+  "Level": 1,
+  "RewardID": 119001,
+  "ItemCost": 300
+}
+```
+
+### NPCMonsterMark.json (0.06 MB, 805 条)
+
+**字段** (3): `GroupID, ID, InstanceID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 2000101,
+  "GroupID": 3,
+  "InstanceID": 200005
 }
 ```
 
@@ -436,20 +450,6 @@
   "ParamItemList": [],
   "Progress": 1,
   "IsBackTrack": true
-}
-```
-
-### OfferingLevelConfig.json (0.05 MB, 584 条)
-
-**字段** (6): `ItemCost, Level, RewardID, Type, TypeID, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "TypeID": 1,
-  "Level": 1,
-  "RewardID": 119001,
-  "ItemCost": 300
 }
 ```
 
@@ -494,7 +494,7 @@
 }
 ```
 
-### PerformanceReplayOverride.json (0.04 MB, 313 条)
+### PerformanceReplayOverride.json (0.04 MB, 321 条)
 
 **字段** (3): `Desc, PerformanceID, PerformanceType`
 
@@ -534,7 +534,7 @@
 }
 ```
 
-### PerformanceSkipCharacter.json (0.03 MB, 257 条)
+### PerformanceSkipCharacter.json (0.03 MB, 262 条)
 
 **字段** (2): `IconPath, TalkSentenceName`
 
@@ -639,6 +639,60 @@
 }
 ```
 
+### PlayerRoomDynamicConfig.json (0.02 MB, 83 条)
+
+**字段** (7): `DisplayTaglist, ID, IconPath, IsActivity, PrefabPath, Taglist, UseLowLight`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 291001,
+  "IconPath": "SpriteOutput/ItemIcon/FurnitureIconNoBox...",
+  "Taglist": [
+    2,
+    5
+  ],
+  "PrefabPath": "Stages/OriginalResPos/Chapter00/Prefab/C...",
+  "IsActivity": 1,
+  "DisplayTaglist": []
+}
+```
+
+### NounAtlas.json (0.02 MB, 103 条)
+
+**字段** (8): `ID, IsIntroPage, NounDesc, NounTitle, RelatedTerms, SortID, Type, Unlock`
+
+**首条记录摘要**:
+```json
+{
+  "Type": 1,
+  "NounTitle": {
+    "Hash": 2702432903392642343
+  },
+  "NounDesc": {
+    "Hash": 2336704873428742309
+  },
+  "RelatedTerms": [],
+  "IsIntroPage": true
+}
+```
+
+### PlayerIcon.json (0.02 MB, 126 条)
+
+**字段** (6): `ID, ImagePath, IsVisible, Sort, SortType, Type`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 200001,
+  "ImagePath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
+  "IsVisible": true,
+  "Type": "Default",
+  "SortType": 1,
+  "Sort": 71
+}
+```
+
 ### PixAirEnemyDisplayConfig.json (0.02 MB, 52 条)
 
 **字段** (7): `EnemyDeadTalk, EnemyDesc, EnemyDisplayID, EnemyIcon, EnemyName, EnemyTrashTalk, PrefabPath`
@@ -664,25 +718,6 @@
 }
 ```
 
-### PlayerRoomDynamicConfig.json (0.02 MB, 79 条)
-
-**字段** (7): `DisplayTaglist, ID, IconPath, IsActivity, PrefabPath, Taglist, UseLowLight`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 291001,
-  "IconPath": "SpriteOutput/ItemIcon/FurnitureIconNoBox...",
-  "Taglist": [
-    2,
-    5
-  ],
-  "PrefabPath": "Stages/OriginalResPos/Chapter00/Prefab/C...",
-  "IsActivity": 1,
-  "DisplayTaglist": []
-}
-```
-
 ### PetMarbleTalk.json (0.02 MB, 121 条)
 
 **字段** (6): `FBPKGPODAJE, HGAOKKFGLBF, IBGNNBCPHFO, LMFCOMHHEIG, NNDOABPFDMI, PBLDLDIEFNC`
@@ -698,25 +733,6 @@
   },
   "FBPKGPODAJE": 1.5,
   "HGAOKKFGLBF": "Ev_vo_haibao_text_02"
-}
-```
-
-### NounAtlas.json (0.02 MB, 100 条)
-
-**字段** (8): `ID, IsIntroPage, NounDesc, NounTitle, RelatedTerms, SortID, Type, Unlock`
-
-**首条记录摘要**:
-```json
-{
-  "Type": 1,
-  "NounTitle": {
-    "Hash": 2702432903392642343
-  },
-  "NounDesc": {
-    "Hash": 2336704873428742309
-  },
-  "RelatedTerms": [],
-  "IsIntroPage": true
 }
 ```
 
@@ -758,23 +774,7 @@
 }
 ```
 
-### PlayerIcon.json (0.02 MB, 119 条)
-
-**字段** (6): `ID, ImagePath, IsVisible, Sort, SortType, Type`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 200001,
-  "ImagePath": "SpriteOutput/AvatarRoundIcon/UI_Message_...",
-  "IsVisible": true,
-  "Type": "Default",
-  "SortType": 1,
-  "Sort": 71
-}
-```
-
-### PlayerReturnConfig.json (0.02 MB, 29 条)
+### PlayerReturnConfig.json (0.02 MB, 30 条)
 
 **字段** (20): `ActivityModuleID, AssistGroupID, BpExpExtraRatio, DailyDoubleTime, DispatchLink, ExtraHcoinConfigID, ExtraHcoinTime, ExtraMultipleDropList, FarmMultipleDropID, KeyPointID, LimitTime, LoginReward, PlayerReturnID, QuestGroupID, RecommendActivity, RecommendAvatar, RecommendMission, ReturnRewardIDList, TotalDoubleTime, ValidityPeriod`
 
@@ -821,21 +821,7 @@
 }
 ```
 
-### NPCMonsterTrackConfig.json (0.02 MB, 76 条)
-
-**字段** (4): `ID, MapEntranceID, NPCMonsterMarkList, SortID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 111001,
-  "MapEntranceID": 2010101,
-  "NPCMonsterMarkList": "<list[6]>",
-  "SortID": 4
-}
-```
-
-### OverrideFloorConfig.json (0.02 MB, 148 条)
+### OverrideFloorConfig.json (0.02 MB, 161 条)
 
 **字段** (5): `ContentID, DimensionID, EnableCondition, FloorID, IsHideInNavMapSubTab`
 
@@ -846,6 +832,20 @@
   "FloorID": 10304001,
   "DimensionID": 1001,
   "EnableCondition": ""
+}
+```
+
+### NPCMonsterTrackConfig.json (0.02 MB, 77 条)
+
+**字段** (4): `ID, MapEntranceID, NPCMonsterMarkList, SortID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 111001,
+  "MapEntranceID": 2010101,
+  "NPCMonsterMarkList": "<list[6]>",
+  "SortID": 4
 }
 ```
 
@@ -898,7 +898,7 @@
 }
 ```
 
-### PSObjectMissionMap.json (0.01 MB, 194 条)
+### PSObjectMissionMap.json (0.02 MB, 211 条)
 
 **字段** (2): `MissionIDList, ObjectID`
 
@@ -912,7 +912,7 @@
 }
 ```
 
-### NavMapSubTab.json (0.01 MB, 82 条)
+### NavMapSubTab.json (0.01 MB, 84 条)
 
 **字段** (4): `FloorID, MenuSortID, NavMapTabID, UnlockConditionExpression`
 
@@ -1042,7 +1042,7 @@
 }
 ```
 
-### NavMapTab.json (0.01 MB, 80 条)
+### NavMapTab.json (0.01 MB, 82 条)
 
 **字段** (7): `Desc, ID, MapSpaceType, MenuIconID, Name, SortID, WorldID`
 
@@ -1062,7 +1062,7 @@
 }
 ```
 
-### PerformanceReplayExclude.json (0.01 MB, 168 条)
+### PerformanceReplayExclude.json (0.01 MB, 170 条)
 
 **字段** (2): `PerformanceID, PerformanceType`
 
@@ -1207,6 +1207,19 @@
 }
 ```
 
+### PlayerOutfitDetail.json (0.01 MB, 58 条)
+
+**字段** (3): `JsonPath, OutfitID, TargetGenderType`
+
+**首条记录摘要**:
+```json
+{
+  "OutfitID": 1000,
+  "TargetGenderType": "TARGET_GENDER_MAN",
+  "JsonPath": "Config/ConfigPlayerOutfit/PlayerBoy_Char..."
+}
+```
+
 ### ParkourLevelConfig.json (0.01 MB, 13 条)
 
 **字段** (18): `BGMIDList, Desc, FinishDisplay, GameAssetPath, GameAssetPathOnClear, ID, LapCount, LevelRegionState, MinimapAngle, MinimapResPath, Name, NextStorySubMissionID, RailBallLimit, StoryLevel, TargetRank, TriggerCarTaskUnlock, UnlockParam, UnlockType`
@@ -1334,16 +1347,28 @@
 }
 ```
 
-### PlayerOutfitDetail.json (0.01 MB, 48 条)
+### PsActivity.json (0.01 MB, 18 条)
 
-**字段** (3): `JsonPath, OutfitID, TargetGenderType`
+**字段** (5): `ActivityID, ObjectIDList, description, name, task`
 
 **首条记录摘要**:
 ```json
 {
-  "OutfitID": 1000,
-  "TargetGenderType": "TARGET_GENDER_MAN",
-  "JsonPath": "Config/ConfigPlayerOutfit/PlayerBoy_Char..."
+  "ActivityID": 1,
+  "ObjectIDList": [
+    1000101,
+    1000203,
+    1000300
+  ],
+  "name": {
+    "Hash": 15344922488414949004
+  },
+  "description": {
+    "Hash": 1605177514783006610
+  },
+  "task": {
+    "Hash": 14453569066108792740
+  }
 }
 ```
 
@@ -1372,31 +1397,6 @@
   "PGFBFDJIDLM": 22,
   "FELDBBKJCHO": 6,
   "AMMPNOLLCIN": 60
-}
-```
-
-### PsActivity.json (0.01 MB, 17 条)
-
-**字段** (5): `ActivityID, ObjectIDList, description, name, task`
-
-**首条记录摘要**:
-```json
-{
-  "ActivityID": 1,
-  "ObjectIDList": [
-    1000101,
-    1000203,
-    1000300
-  ],
-  "name": {
-    "Hash": 15344922488414949004
-  },
-  "description": {
-    "Hash": 1605177514783006610
-  },
-  "task": {
-    "Hash": 14453569066108792740
-  }
 }
 ```
 
@@ -1689,6 +1689,23 @@
 }
 ```
 
+### PlayerPersonalCard.json (0.00 MB, 8 条)
+
+**字段** (8): `CardID, CardPrefabPath, ChatPrefabPath, FriendPrefabPath, ReplaceIconPath, ShowParam, ShowType, SupportPrefabPath`
+
+**首条记录摘要**:
+```json
+{
+  "CardID": 253000,
+  "ReplaceIconPath": "SpriteOutput/PlayerInfo/Card/PlayerInfoi...",
+  "CardPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
+  "FriendPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
+  "SupportPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
+  "ChatPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
+  "ShowType": "Always"
+}
+```
+
 ### PhoneThemeConfig.json (0.00 MB, 14 条)
 
 **字段** (6): `ID, PhoneThemeApp, PhoneThemeItem, PhoneThemeMain, ShowParam, ShowType`
@@ -1848,23 +1865,6 @@
 }
 ```
 
-### PlayerPersonalCard.json (0.00 MB, 6 条)
-
-**字段** (8): `CardID, CardPrefabPath, ChatPrefabPath, FriendPrefabPath, ReplaceIconPath, ShowParam, ShowType, SupportPrefabPath`
-
-**首条记录摘要**:
-```json
-{
-  "CardID": 253000,
-  "ReplaceIconPath": "SpriteOutput/PlayerInfo/Card/PlayerInfoi...",
-  "CardPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
-  "FriendPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
-  "SupportPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
-  "ChatPrefabPath": "UI/PlayerInfo/PersonalCard/253000/Person...",
-  "ShowType": "Always"
-}
-```
-
 ### PixAirEventConfig.json (0.00 MB, 35 条)
 
 **字段** (2): `ContentID, EventDesc`
@@ -2007,6 +2007,20 @@
 }
 ```
 
+### PlayerOutfitBase.json (0.00 MB, 29 条)
+
+**字段** (3): `ItemID, OutfitID, SlotTypeList`
+
+**首条记录摘要**:
+```json
+{
+  "OutfitID": 1000,
+  "SlotTypeList": [
+    "HeadDecor"
+  ]
+}
+```
+
 ### PixAirStageConfig.json (0.00 MB, 7 条)
 
 **字段** (9): `AreaIDList, IconPath, MechanismTip, Name, PreStageList, RewardTip, StageID, Type, UnlockScore`
@@ -2121,17 +2135,29 @@
 }
 ```
 
-### PlayerOutfitBase.json (0.00 MB, 24 条)
+### PetConfig.json (0.00 MB, 5 条)
 
-**字段** (3): `ItemID, OutfitID, SlotTypeList`
+**字段** (8): `ACJDHMPPCCI, EGBGCKNLHDH, FNBGMDDOHEA, HHDHIDNHCBI, KBHANONLIKP, KHDOMCOJDMI, OLJDOBFJLOM, PBLDLDIEFNC`
 
 **首条记录摘要**:
 ```json
 {
-  "OutfitID": 1000,
-  "SlotTypeList": [
-    "HeadDecor"
-  ]
+  "PBLDLDIEFNC": 1001,
+  "HHDHIDNHCBI": 251001,
+  "FNBGMDDOHEA": 24001,
+  "EGBGCKNLHDH": "Characters/CharacterPrefabs/Manikin/Pet/...",
+  "KHDOMCOJDMI": [
+    0,
+    0,
+    0
+  ],
+  "KBHANONLIKP": [
+    0,
+    0.05,
+    0
+  ],
+  "OLJDOBFJLOM": "Config/ConfigCharacter/Manikin/Pet/Manik...",
+  "ACJDHMPPCCI": "Idle_Show_02"
 }
 ```
 
@@ -2160,27 +2186,6 @@
   "ConfigEntityPath": "Config/ConfigEntity/NPC/Special/NPC_Spec...",
   "JsonPath": "Config/ConfigCharacter/NPC/Special/NPC_S...",
   "ManikinPrefab": "Characters/CharacterPrefabs/Manikin/Spec..."
-}
-```
-
-### PetConfig.json (0.00 MB, 5 条)
-
-**字段** (7): `ACJDHMPPCCI, EGBGCKNLHDH, FNBGMDDOHEA, HHDHIDNHCBI, KHDOMCOJDMI, OLJDOBFJLOM, PBLDLDIEFNC`
-
-**首条记录摘要**:
-```json
-{
-  "PBLDLDIEFNC": 1001,
-  "HHDHIDNHCBI": 251001,
-  "FNBGMDDOHEA": 24001,
-  "EGBGCKNLHDH": "Characters/CharacterPrefabs/Manikin/Pet/...",
-  "KHDOMCOJDMI": [
-    0,
-    0,
-    0
-  ],
-  "OLJDOBFJLOM": "Config/ConfigCharacter/Manikin/Pet/Manik...",
-  "ACJDHMPPCCI": "Idle_Show_02"
 }
 ```
 
@@ -2330,6 +2335,20 @@
 }
 ```
 
+### OfferingTypeConfig.json (0.00 MB, 16 条)
+
+**字段** (7): `ActivityModuleID, ID, IsAutoOffer, ItemID, LongTailLimit, MaxLevel, UnlockID`
+
+**首条记录摘要**:
+```json
+{
+  "ID": 1,
+  "ItemID": 120003,
+  "MaxLevel": 50,
+  "UnlockID": 9937
+}
+```
+
 ### PlanetFesGachaBasic.json (0.00 MB, 7 条)
 
 **字段** (7): `CostGemNum, CostItemID, GachaID, GachaType, MultiGachaCount, MultiGachaUnlockIDList, UnlockIDList`
@@ -2375,20 +2394,6 @@
   "MaxMoodPoint": 100,
   "PerformanceID": 501020121,
   "EmotionClipPath": "Characters/EmotionClip/Special/Pam_00/Em..."
-}
-```
-
-### OfferingTypeConfig.json (0.00 MB, 15 条)
-
-**字段** (7): `ActivityModuleID, ID, IsAutoOffer, ItemID, LongTailLimit, MaxLevel, UnlockID`
-
-**首条记录摘要**:
-```json
-{
-  "ID": 1,
-  "ItemID": 120003,
-  "MaxLevel": 50,
-  "UnlockID": 9937
 }
 ```
 
@@ -2527,6 +2532,20 @@
 }
 ```
 
+### PSTrophyGroup.json (0.00 MB, 11 条)
+
+**字段** (2): `PSTrophyGroup, TrophyGroup`
+
+**首条记录摘要**:
+```json
+{
+  "PSTrophyGroup": 10000,
+  "TrophyGroup": {
+    "Hash": 9205083260363982318
+  }
+}
+```
+
 ### PlayerRoomTagConfig.json (0.00 MB, 14 条)
 
 **字段** (2): `ID, Name`
@@ -2656,20 +2675,6 @@
 }
 ```
 
-### PSTrophyGroup.json (0.00 MB, 10 条)
-
-**字段** (2): `PSTrophyGroup, TrophyGroup`
-
-**首条记录摘要**:
-```json
-{
-  "PSTrophyGroup": 10000,
-  "TrophyGroup": {
-    "Hash": 9205083260363982318
-  }
-}
-```
-
 ### PlayerReturnJourneyItem.json (0.00 MB, 3 条)
 
 **字段** (9): `ActivityModuleID, BgPath, ExtraDesc, ID, IsHideInBeta, Name, Sort, Title, Type`
@@ -2747,6 +2752,18 @@
 }
 ```
 
+### OptionalRewardQuest.json (0.00 MB, 13 条)
+
+**字段** (2): `OptionalGiftItemID, QuestID`
+
+**首条记录摘要**:
+```json
+{
+  "QuestID": 6023502,
+  "OptionalGiftItemID": 309001
+}
+```
+
 ### PlayerReturnConstValue.json (0.00 MB, 8 条)
 
 **字段** (2): `PlayerReturnConstValueName, Value`
@@ -2789,18 +2806,6 @@
 }
 ```
 
-### OptionalRewardQuest.json (0.00 MB, 12 条)
-
-**字段** (2): `OptionalGiftItemID, QuestID`
-
-**首条记录摘要**:
-```json
-{
-  "QuestID": 6023502,
-  "OptionalGiftItemID": 309001
-}
-```
-
 ### PhoneCaseConfig.json (0.00 MB, 2 条)
 
 **字段** (7): `CaseID, IconPath, ImagePath, ItemFigurePath, PrefabPath, ShowParam, ShowType`
@@ -2817,6 +2822,20 @@
 }
 ```
 
+### NounAtlasChangeInfo.json (0.00 MB, 11 条)
+
+**字段** (2): `ChangeNounIDList, NounID`
+
+**首条记录摘要**:
+```json
+{
+  "NounID": 23,
+  "ChangeNounIDList": [
+    24
+  ]
+}
+```
+
 ### PlanetFesBonusMascot.json (0.00 MB, 8 条)
 
 **字段** (2): `ID, SourcePath`
@@ -2826,6 +2845,42 @@
 {
   "ID": 101,
   "SourcePath": "UI/Quest/PlanetFes/MiniEvent/MiniEventWe..."
+}
+```
+
+### PlayerReturnExtraHcoin.json (0.00 MB, 2 条)
+
+**字段** (6): `ConfigID, ExtraHcoinNumList, ExtraHcoinUIProgressRatioList, ExtraRewardIDList, HcoinThresholdList, OfflineDays`
+
+**首条记录摘要**:
+```json
+{
+  "ConfigID": 1,
+  "OfflineDays": 90,
+  "HcoinThresholdList": [
+    100,
+    300,
+    700,
+    1600
+  ],
+  "ExtraHcoinNumList": [
+    100,
+    200,
+    400,
+    900
+  ],
+  "ExtraRewardIDList": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "ExtraHcoinUIProgressRatioList": [
+    2,
+    2,
+    3,
+    4
+  ]
 }
 ```
 
@@ -2911,20 +2966,6 @@
   "PHFMCACHFIJ": 101,
   "LLDCHLHNADA": 1,
   "DOPHFLLNGPJ": "SpriteOutput/Emoji/20001.png"
-}
-```
-
-### NounAtlasChangeInfo.json (0.00 MB, 9 条)
-
-**字段** (2): `ChangeNounIDList, NounID`
-
-**首条记录摘要**:
-```json
-{
-  "NounID": 23,
-  "ChangeNounIDList": [
-    24
-  ]
 }
 ```
 
@@ -3238,33 +3279,17 @@
 }
 ```
 
-### PlayerReturnExtraHcoin.json (0.00 MB, 1 条)
+### PreAvatarTextmapConfig.json (0.00 MB, 3 条)
 
-**字段** (5): `ConfigID, ExtraHcoinNumList, ExtraHcoinUIProgressRatioList, HcoinThresholdList, OfflineDays`
+**字段** (2): `PreAvatarID, PreAvatarName`
 
 **首条记录摘要**:
 ```json
 {
-  "ConfigID": 1,
-  "OfflineDays": 90,
-  "HcoinThresholdList": [
-    100,
-    300,
-    700,
-    1600
-  ],
-  "ExtraHcoinNumList": [
-    100,
-    200,
-    400,
-    900
-  ],
-  "ExtraHcoinUIProgressRatioList": [
-    2,
-    2,
-    3,
-    4
-  ]
+  "PreAvatarID": 1511,
+  "PreAvatarName": {
+    "Hash": 5660079937402905393
+  }
 }
 ```
 
@@ -3322,20 +3347,6 @@
   "RuleID": 1,
   "Default": 2,
   "iOS": 1
-}
-```
-
-### PreAvatarTextmapConfig.json (0.00 MB, 2 条)
-
-**字段** (2): `PreAvatarID, PreAvatarName`
-
-**首条记录摘要**:
-```json
-{
-  "PreAvatarID": 1503,
-  "PreAvatarName": {
-    "Hash": 2879264902344106593
-  }
 }
 ```
 
@@ -3417,9 +3428,9 @@
 **首条记录摘要**:
 ```json
 {
-  "ID": 440,
+  "ID": 470,
   "ActivityModuleID": 1012601,
-  "APILabel": "4.4",
+  "APILabel": "4.7",
   "DisplayRewardItems": {
     "1": 60
   }
