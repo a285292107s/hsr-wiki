@@ -10,6 +10,10 @@ test.describe('布局验收：货币战争主题', () => {
   const normalizeDesc = (s: string): string =>
     s.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
 
+  const traitIdOfHref = (href: string): number => Number((href.match(/\/currency\/trait\/(\d+)$/) ?? [])[1]);
+
+  const traitCardHref = (id: number): string => `/currency/trait/${id}`;
+
   test('/currency：赛季账头计数 = 分区卡数、两分区结构与入口对齐、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/currency');
@@ -106,14 +110,15 @@ test.describe('布局验收：货币战争主题', () => {
     ).roles;
     const traitRows = await traitCards.evaluateAll((els) =>
       els.map((el) => ({
+        href: el.getAttribute('href') ?? '',
         name: (el.querySelector('.nkcwtrait__name')?.textContent ?? '').trim(),
         carriers: (el.querySelector('.nkcwtrait__carriers')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
         layers: (el.querySelector('.nkcwtrait__layers')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
       })),
     );
     for (const row of traitRows) {
-      const trait = traitData.find((t) => t.name === row.name);
-      expect(trait, `${row.name}：应能在 currency/traits.json 里按名字定位`).toBeTruthy();
+      const trait = traitData.find((t) => t.id === traitIdOfHref(row.href));
+      expect(trait, `${row.name}（${row.href}）：应能在 currency/traits.json 里按 id 定位`).toBeTruthy();
       const holders = roleData
         .filter((r) => r.traits.some((t) => t.id === trait!.id))
         .map((r) => r.name);
@@ -240,11 +245,12 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency');
     const section = page.locator('.nk-hub-release__section[data-kind="trait"]');
     await expect(section).toBeVisible();
-    const traits = readJson<{ traits: { name: string; simple_desc: string }[] }>(
+    const traits = readJson<{ traits: { id: number; name: string; simple_desc: string }[] }>(
       'public/data/cn/currency/traits.json',
     ).traits;
     const rows = await section.locator('a.nkcwtrait').evaluateAll((cards) =>
       cards.map((c) => ({
+        href: c.getAttribute('href') ?? '',
         name: (c.querySelector('.nkcwtrait__name')?.textContent ?? '').trim(),
         desc: (c.querySelector('.nkcwtrait__desc')?.textContent ?? '').trim(),
         title: c.getAttribute('title') ?? '',
@@ -252,7 +258,7 @@ test.describe('布局验收：货币战争主题', () => {
     );
     expect(rows.length, '本赛季新增羁绊卡应在带内渲染').toBeGreaterThanOrEqual(1);
     for (const r of rows) {
-      const full = normalizeDesc(traits.find((t) => t.name === r.name)?.simple_desc ?? '');
+      const full = normalizeDesc(traits.find((t) => t.id === traitIdOfHref(r.href))?.simple_desc ?? '');
       expect(full, `${r.name}：数据里应有 simple_desc`).toBeTruthy();
       expect(
         r.title.includes(full),
@@ -292,7 +298,7 @@ test.describe('布局验收：货币战争主题', () => {
       .toBeGreaterThan(0);
     const expectedHrefs = expectedHolders.map((id) => `/currency/role/${id}`);
 
-    const traitCard = page.locator('a.nkcwtrait').filter({ hasText: target.name }).first();
+    const traitCard = page.locator(`a.nkcwtrait[href$="${traitCardHref(target.id)}"]`).first();
     await traitCard.scrollIntoViewIfNeeded();
     await traitCard.hover();
     const hlHrefs = await page.locator('a.nk-cwrole[data-hl]').evaluateAll((els) =>

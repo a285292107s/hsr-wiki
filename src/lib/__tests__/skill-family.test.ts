@@ -46,7 +46,7 @@ describe('技能族（真实数据：族序 / 交集过滤）', () => {
     const { fams, fam } = familyOf(1503, 150301);
     expect(fam?.anchor).toBe('Point01');
     expect(fam?.children.map((c) => c.id)).toEqual([150308, 150310]);
-    expect(fams.map((f) => f.main.id)).toEqual([150301, 150302, 150303, 150304, 150320, 150307]);
+    expect(fams.map((f) => f.main.id)).toEqual([150301, 150302, 150303, 150304, 150320, 150329, 150307]);
   });
 
   it('真珠 1503：type_name 为空的 150306 不进任何族', () => {
