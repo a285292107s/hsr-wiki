@@ -51,7 +51,7 @@ test.describe('应用外壳契约', () => {
   });
 
   test('输入框光标色 = 当前强调色（--primary）', async ({ page }) => {
-    await page.goto('/item');
+    await page.goto('/character');
     await expect(page.locator('.nk-virtual-cell').first()).toBeVisible();
 
     const r = await page.evaluate(() => {
@@ -103,7 +103,7 @@ test.describe('应用外壳契约', () => {
 
     const SURFACE = [
       '.nk-idx-card', '.nk-relic-card__plate', '.nk-crole-card', '.nk-cw-trait-card',
-      '.nk-ach-card', '.nk-cwsc-role', '.nk-cwsc-trait',
+      '.nk-cwsc-role', '.nk-cwsc-trait',
     ];
     const LABEL = ['.nk-idx-card__name', '.nk-mob-card__name', '.nk-relic-card__name', '.nk-lc-card__name'];
     const surf: Array<{ prop: string; dur: number; ease: string; sel: string }> = [];
@@ -206,7 +206,7 @@ test.describe('焦点可见性（键盘 Tab 后元素周边像素必须变化）
     });
   }
 });
-for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/currency', '/voracity']) {
+for (const route of ['/', '/character', '/character/1212', '/endgame/maze', '/currency']) {
   test(`${route}：320px 无横向溢出且无未裁剪越界元素`, { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto(route);

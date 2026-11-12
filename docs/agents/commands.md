@@ -30,7 +30,7 @@ pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 
 pnpm preview   # 预览构建产物
 ```
 
-`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面）/ **社交卡片**（`og:image` 同源 + `twitter:card` + `og:locale` 与 `<html lang>` 一致）/ **JSON-LD `inLanguage` 与 `<html lang>` 同源** / **`Article` 只允许出现在 `/voracity`**（数据条目页必须是 `WebPage` + `mainEntity`），并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面）/ **社交卡片**（`og:image` 同源 + `twitter:card` + `og:locale` 与 `<html lang>` 一致）/ **JSON-LD `inLanguage` 与 `<html lang>` 同源** / **数据条目页必须是 `WebPage` + `mainEntity`（不用 `Article`）**，并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
 
 多语言相关三守卫可单独运行（契约见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md)）：
 

@@ -81,10 +81,6 @@
       "destination": "/prerender/relic/:id.html"
     },
     {
-      "source": "/item",
-      "destination": "/prerender/item.html"
-    },
-    {
       "source": "/monster",
       "destination": "/prerender/monster.html"
     },
@@ -115,10 +111,6 @@
     {
       "source": "/endgame/:mode/:id(\\d+)",
       "destination": "/prerender/endgame/:mode/:id.html"
-    },
-    {
-      "source": "/achievement",
-      "destination": "/prerender/achievement.html"
     },
     {
       "source": "/currency",
@@ -153,14 +145,6 @@
       "destination": "/prerender/currency/trait/:id.html"
     },
     {
-      "source": "/voracity",
-      "destination": "/prerender/voracity.html"
-    },
-    {
-      "source": "/formula",
-      "destination": "/prerender/formula.html"
-    },
-    {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)",
       "destination": "/prerender/:lang/home.html"
     },
@@ -175,10 +159,6 @@
     {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/relic",
       "destination": "/prerender/:lang/relic.html"
-    },
-    {
-      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/item",
-      "destination": "/prerender/:lang/item.html"
     },
     {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/monster",
@@ -205,10 +185,6 @@
       "destination": "/prerender/:lang/endgame/peak.html"
     },
     {
-      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/achievement",
-      "destination": "/prerender/:lang/achievement.html"
-    },
-    {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency",
       "destination": "/prerender/:lang/currency.html"
     },
@@ -231,14 +207,6 @@
     {
       "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/currency/trait",
       "destination": "/prerender/:lang/currency/trait.html"
-    },
-    {
-      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/voracity",
-      "destination": "/prerender/:lang/voracity.html"
-    },
-    {
-      "source": "/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)/formula",
-      "destination": "/prerender/:lang/formula.html"
     },
     {
       "source": "/((?!data/|assets/|robots\\.txt|sitemap\\.xml|prerender/_shell\\.html).*)",

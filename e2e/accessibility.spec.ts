@@ -38,8 +38,6 @@ const PAGES = [
     await page.waitForSelector('#egd-peak-board[aria-labelledby="egd-peak-node-tab-hard"]', { state: 'attached', timeout: 15_000 });
   } },
   { path: '/currency', label: '货币战争 Hub', wait: null },
-  { path: '/voracity', label: '贪饕污染', wait: () => (page: Page) => page.waitForSelector('.nk-vor-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },
-  { path: '/formula', label: '战斗公式', wait: () => (page: Page) => page.waitForSelector('.nk-formula-secnav .nk-secnav__btn', { state: 'attached', timeout: 15_000 }) },
 ] as const;
 
 const isKnown = (id: string, target: string): KnownViolation | undefined =>
@@ -138,7 +136,7 @@ test('a11y 扫描：终局赛季页 390×844 + 全部关架子 tab', { tag: '@vi
 });
 
 test.describe('prefers-reduced-motion：动画必须立即结束', () => {
-  const ROUTES = ['/', '/character', '/monster', '/voracity', '/currency/role/1001'] as const;
+  const ROUTES = ['/', '/character', '/monster', '/currency/role/1001'] as const;
 
   for (const route of ROUTES) {
     test(`${route}：无仍在跑的动画`, async ({ page }) => {

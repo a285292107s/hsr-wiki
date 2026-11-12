@@ -49,7 +49,7 @@
 - **小字混色下限**（`__en` 8px / `__hex` 0.58rem≈9.3px，按正文 4.5:1 判）：`.ui-sidebar-link--active .ui-sidebar-link__en` 的 `--metric-val` 混色 ≥92%；`.nk-swatch--on .nk-swatch__hex` ≥80%。改动任一处前须在全部 5 套色板下按 sRGB 合成重测（`accessibility.spec.ts` 只跑缺省色，抓不到其余 4 套与未扫码页）。
 - **同一时刻只有一个强调色相**：主题层（背景/表面/强调）禁止第二色相，全站含货币战争共用同一通道（ADR 0041）；设置页默认即 `DEFAULT_ACCENT`，`--accent` 必须是当前色阶成员（禁止游离色）。
 - **领域色豁免**：星级 / 属性 / 元素 / 技能类型 / 强化角标 / 文本高亮保持游戏内约定色。
-- **机制语境色（[ADR 0027](../adr/0027-机制语境色与贪饕污染色.md)）**：`--eg-*` / `--vor-*` 是机制自己的特征色，在各自子树内局部取代强调位（终局页用 `[data-mode]` 赋 `--eg-color`；`/voracity` 与污染标记消费 `--vor-500` / `--vor-300`）。机制子树内可出现「用户强调色（外壳）+ 语境色（页内强调位）」同屏：**单强调色通道按主题层判定，不按页面判定**。污染族分工是硬约束——`--vor-500` 只承载非文字（边线 / 底纹 / 进度条 / 大面积标识），文字一律 `--vor-300`（已进 `check-contrast.mjs` 正文类清单）。
+- **机制语境色（[ADR 0027](../adr/0027-机制语境色与贪饕污染色.md)）**：`--eg-*` / `--vor-*` 是机制自己的特征色，在各自子树内局部取代强调位（终局页用 `[data-mode]` 赋 `--eg-color`；污染标记消费 `--vor-500` / `--vor-300`）。机制子树内可出现「用户强调色（外壳）+ 语境色（页内强调位）」同屏：**单强调色通道按主题层判定，不按页面判定**。污染族分工是硬约束——`--vor-500` 只承载非文字（边线 / 底纹 / 进度条 / 大面积标识），文字一律 `--vor-300`（已进 `check-contrast.mjs` 正文类清单）。
 - **导航语义豁免（当前无条目）**：`check-colors.mjs` 没有自动豁免表（未接线的预留常量已删除）；跨模式入口由侧栏底部工具组承担（与设置同组，标签是**目的地模式名**，见 [CONTEXT.md](../../CONTEXT.md)「交换」），不构成第三色相。新增豁免须在脚本里实现判定逻辑并同步 ADR。
 - **设置页契约**：区块编号与顺序固定为 01 主题色 / 02 开拓者形态 / 03 语言，不随语境交换；可见文案只写玩家可感知语义，禁止 `data-accent` / `meta.cw` / localStorage 等架构黑话。
 
@@ -86,7 +86,7 @@
 - **报头旧形态（已删除，禁止回改）**：渐变底 + 暗角 scrim + 标题投影 + `__supra` 英文副标 + 210px 品牌带面板。定位行取 `--nk-fs-7`（20px）而非 13px：既是正文可读档，也让 eyebrow 候选上限（标题字号一半且 ≤18px）够不到它。
 - 侧栏「调试台」入口：**仅 dev 构建**（`v-if="IS_DEV"`，生产摇树）；≥768px 显示在工具组首位（跨模式 / 设置之上），<768px 隐藏且不参与底栏折叠测量。
 - **手机底栏槽位数与语言解耦**（[ADR 0054](../adr/0054-底栏槽位数与语言解耦.md)）：折叠分支槽数 = ⌊(可用宽 − 3×`--nk-nav-tool-w` − `--nk-nav-divider-w`) ÷ `--nk-nav-slot-min`⌋，纯视口函数（2 槽下限），**禁止**改回「按文案固有宽逐项累加」。预算两段式：全量放得下就全量平铺（只扣 2×工具位、不预留「更多」槽，CW 6 槽位口径的成立条件）；放不下才走折叠分支（扣 3×工具位，尾部折叠进「更多」抽屉）。手机档工具位（跨模式 / 设置 / 更多）统一为图标档，文案只进 `aria-label` / `title`。
-- **详情/专题页外壳分两类**：`.nk-page--detail`（character / CW role / endgame / lightcone / relic / voracity）为纵向 flex，直接子项**限宽不得只写 `margin: 0 auto`**——flex 列里 auto 横向外边距会顶掉 `align-items: stretch`，盒子塌成内容宽再被居中，须并列 `width: 100% + max-width`。文档流外壳（`.nk-ctrait` / `.nk-mob-page`）用 `--nk-content-offset` 做左避让，不走 flex 拉伸。横向内距与相邻区块容器同值，分界线用同一局部变量内缩，否则线与文本对不齐。坑位见 [memory](../memory/ui-tokens.md)。
+- **详情/专题页外壳分两类**：`.nk-page--detail`（character / CW role / endgame / lightcone / relic）为纵向 flex，直接子项**限宽不得只写 `margin: 0 auto`**——flex 列里 auto 横向外边距会顶掉 `align-items: stretch`，盒子塌成内容宽再被居中，须并列 `width: 100% + max-width`。文档流外壳（`.nk-ctrait` / `.nk-mob-page`）用 `--nk-content-offset` 做左避让，不走 flex 拉伸。横向内距与相邻区块容器同值，分界线用同一局部变量内缩，否则线与文本对不齐。坑位见 [memory](../memory/ui-tokens.md)。
 - **字号与圆角是唯一刻度**：界面/正文 8 档 `--nk-fs-1..8`（8 / 10 / 11.5 / 13.1 / 15 / 17 / 20 / 24px）；标题与特写 7 档 `--nk-fs-title-1..5` + `--nk-fs-hero` + `--nk-fs-hero-lg`（28 / 32 / 36 / 48 / 60 / 72 / 88px）；圆角三档 `--nk-radius-1..3`（2 / 6 / 12px，`--nk-radius-card` = 面板档），`50%` 与胶囊（≥100px）是**形态**不是档位。**新写页面 CSS 禁止字号与圆角字面量**；存量字面量（monster-detail / achievement 等）尚未收口，档数判据只在 [UI质量验收标准](../audit/UI质量验收标准.md) A4.1 / A4.2（现为部分覆盖）。
 
 ## 7. 反 AI 味硬约束（不可回退）
@@ -95,7 +95,7 @@
 
 | 禁令 | 出处 |
 |---|---|
-| 禁 head 渐变填充 / 禁 box-shadow 发光（glow）/ 禁 `backdrop-filter` 徽章胶囊 / 禁虚线分隔（发丝线取代）；hover 只允许边框提亮 + 墨色阴影，**禁位移与 scale**（虚拟滚动中重渲染单元格会抖动） | `src/styles/achievement.css` |
+| 禁 head 渐变填充 / 禁 box-shadow 发光（glow）/ 禁 `backdrop-filter` 徽章胶囊 / 禁虚线分隔（发丝线取代）；hover 只允许边框提亮 + 墨色阴影，**禁位移与 scale**（虚拟滚动中重渲染单元格会抖动） | 通用虚拟滚动规范 |
 | 禁霓虹 glow 阴影（`0 0 Npx`）/ 禁渐变填充徽章；hover 用发丝边框 + 墨色分层阴影 + 2px 抬升 | `src/styles/currency-catalog.css` |
 | CW 详情层不设 glow 变量；阴影以物理黑投影 `rgba(0,0,0,…)` 为主；强调色以纯色 / 淡底 / 发丝线为主（例外：详情进度条 2px `primary→accent` 渐变） | `src/styles/currency-role-*.css`（hero / sections / gear / skills 四拆分块） |
 | 内容区无发光点 / 无药丸胶囊 / 无 box-shadow 堆叠；徽标走文字式（页面级状态胶囊例外，见 [ADR 0034 决策 6](../adr/0034-终局节点详情面板字阶与区块节奏.md)） | `src/styles/endgame-*.css`（frame / mode / levels / monsters / panels / type-scale） |

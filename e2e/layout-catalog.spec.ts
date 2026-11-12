@@ -1,18 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { collectConsoleIssues, readJson } from './helpers';
+import { collectConsoleIssues } from './helpers';
 import { noUnknownOverflow } from './layout.shared';
 
-const VIRTUAL_PAGES = ['/achievement', '/item', '/monster'];
+const VIRTUAL_PAGES = ['/monster'];
 
-test.describe('布局验收：目录引擎 · 虚拟网格', () => {
+test.describe('布局验收：目录引擎 · 卡片渲染', () => {
 
   for (const route of VIRTUAL_PAGES) {
     test(`${route}：卡片内容不得超出单元格（固定行高会静默裁掉溢出内容）`, async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.goto(route);
-      await expect(page.locator('.nk-virtual-cell').first()).toBeVisible();
+      await expect(page.locator('.nk-mob-card').first()).toBeVisible();
 
-      const overflowing = await page.locator('.nk-virtual-cell > *').evaluateAll((els) =>
+      const overflowing = await page.locator('.nk-mob-card').evaluateAll((els) =>
         els
           .map((el) => ({
             card: el.className.split(' ')[0],
@@ -49,11 +49,11 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
     assertNoErrors();
   });
 
-  for (const route of ['/item', '/monster', '/achievement']) {
+  for (const route of ['/monster']) {
     test(`${route}：被截断的卡片文本必须给出完整文本（title / aria-label）`, async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
       await page.goto(route);
-      await expect(page.locator('.nk-virtual-cell').first()).toBeVisible();
+      await expect(page.locator('.nk-mob-card').first()).toBeVisible();
       await page.evaluate(() => {
         const sc = [...document.querySelectorAll('*')].find(
           (e) => e.scrollHeight > e.clientHeight + 100 && /auto|scroll/.test(getComputedStyle(e).overflowY),
@@ -98,56 +98,6 @@ test.describe('布局验收：目录引擎 · 虚拟网格', () => {
       assertNoErrors();
     });
   }
-
-  test('/item：物品描述可检索、且卡片 title 带描述（此前既不显示也不可检索）', async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    const items = readJson<{ name: string; desc?: string }[]>('public/data/cn/items.json');
-    const names = new Set(items.map((i) => i.name));
-    const sample = items
-      .map((i) => ({ item: i, desc: String(i.desc || '') }))
-      .find(({ desc }) =>
-        desc.length >= 16
-        && !desc.slice(0, 8).includes('\\n')
-        && !names.has(desc.slice(6, 12))
-        && !/[「」]/.test(desc.slice(6, 12)));
-    expect(sample, '数据里应存在可用于检索的描述样本').toBeTruthy();
-    const frag = sample!.desc.slice(6, 12);
-
-    await page.goto('/item');
-    await expect(page.locator('.nk-item-card').first()).toBeVisible();
-
-    await page.fill('.nk-cat-search input', frag);
-    await expect(
-      page.locator('.nk-item-card').filter({ hasText: sample!.item.name }).first(),
-      `按描述片段「${frag}」应命中「${sample!.item.name}」`,
-    ).toBeVisible();
-
-    await page.fill('.nk-cat-search input', sample!.item.name);
-    const titled = await page.locator('.nk-item-card').evaluateAll(
-      (els, target) =>
-        els
-          .filter((e) => e.getAttribute('data-name') === target)
-          .map((e) => e.getAttribute('title') || ''),
-      sample!.item.name,
-    );
-    expect(titled.length, '检索到目标卡片').toBe(1);
-    expect(titled[0], '卡片 title 应含描述').toContain(sample!.desc.slice(0, 8));
-    expect(titled[0], '悬浮描述不得把字面 \\n 当正文').not.toContain('\\n');
-
-    const order = await page.locator('.nk-item-card').evaluateAll(
-      (els, q) => els.map((e) => String(e.getAttribute('data-name') || '').toLowerCase().includes(q)),
-      sample!.item.name.toLowerCase(),
-    );
-    const targetIdx = order.indexOf(true);
-    const firstDescOnly = order.indexOf(false);
-    expect(targetIdx, '目标卡片应在结果里').toBeGreaterThanOrEqual(0);
-    if (firstDescOnly >= 0) {
-      expect(targetIdx, '名字命中必须排在仅描述命中之前').toBeLessThan(firstDescOnly);
-    }
-
-    await noUnknownOverflow(page);
-    assertNoErrors();
-  });
 
   test.describe('角色卡副行：任何视口不折行，且信息不因视觉隐藏而丢失', () => {
     for (const locale of ['', '/pt']) {

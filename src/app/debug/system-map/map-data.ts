@@ -117,7 +117,7 @@ export const NODES: MapNode[] = [
   { id: 'catalog', name: '目录引擎', en: 'CATALOG ENGINE', layer: 'engine', gx: 1, gy: 2,
     files: ['src/app/views/CatalogView.vue', 'src/app/catalog/pages.ts', 'src/app/catalog/CatalogPage.vue', 'src/app/catalog/CatalogToolbar.vue', 'src/app/catalog/CatalogFilterSelect.vue', 'src/app/catalog/use-virtual-grid.ts'], desc: '配置驱动：12 个目录注册项 + 虚拟滚动 + 搜索筛选工具条' },
   { id: 'detail', name: '详情页群', en: 'DETAIL VIEWS', layer: 'views', gx: 2, gy: 2,
-    files: ['src/app/views/CharacterView.vue', 'src/app/views/LightconeView.vue', 'src/app/views/RelicView.vue', 'src/app/views/MonsterDetailView.vue', 'src/app/views/EndgameView.vue', 'src/app/views/EndgameModeView.vue', 'src/app/views/VoracityView.vue', 'src/app/views/FormulaView.vue'], desc: '角色/光锥/遗器/敌对/终局（含模式页）/贪饕污染/战斗公式详情编排页（加载编排 + 骨架屏）' },
+    files: ['src/app/views/CharacterView.vue', 'src/app/views/LightconeView.vue', 'src/app/views/RelicView.vue', 'src/app/views/MonsterDetailView.vue', 'src/app/views/EndgameView.vue', 'src/app/views/EndgameModeView.vue'], desc: '角色/光锥/遗器/敌对/终局（含模式页）详情编排页（加载编排 + 骨架屏）' },
   { id: 'cw', name: '货币战争模式', en: 'CURRENCY WAR', layer: 'views', gx: 3, gy: 2,
     files: ['src/app/views/CurrencyHubView.vue', 'src/app/views/CurrencyRoleView.vue', 'src/app/views/CurrencyTraitView.vue'], desc: '独立路由树（/currency/*）+ meta.cw 模式标记（html[data-theme=cw]，当前无 CSS 消费者、不换色；ADR 0041）' },
   { id: 'settings', name: '设置与兜底', en: 'SETTINGS', layer: 'views', gx: 4, gy: 2,

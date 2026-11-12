@@ -60,12 +60,6 @@ const routes: RouteRecordRaw[] = [
     meta: { depth: 3 },
   },
   {
-    path: '/item',
-    name: 'catalog-item',
-    component: () => import('../views/CatalogView.vue'),
-    meta: { depth: 2, catalog: 'item', titleKey: 'nav.item' },
-  },
-  {
     path: '/monster',
     name: 'catalog-monster',
     component: () => import('../views/CatalogView.vue'),
@@ -152,24 +146,6 @@ const routes: RouteRecordRaw[] = [
     name: 'settings-cw',
     component: () => import('../views/SettingsView.vue'),
     meta: { depth: 0, cw: true, titleKey: 'nav.settings' },
-  },
-  {
-    path: '/achievement',
-    name: 'catalog-achievement',
-    component: catalogView('achievement'),
-    meta: { depth: 1, catalog: 'achievement', titleKey: 'nav.achievement' },
-  },
-  {
-    path: '/voracity',
-    name: 'voracity',
-    component: () => import('../views/VoracityView.vue'),
-    meta: { depth: 1, titleKey: 'nav.voracity' },
-  },
-  {
-    path: '/formula',
-    name: 'formula',
-    component: () => import('../views/FormulaView.vue'),
-    meta: { depth: 1, titleKey: 'nav.formula' },
   },
   {
     path: '/settings',

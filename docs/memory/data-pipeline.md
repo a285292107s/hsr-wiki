@@ -42,7 +42,7 @@
 ## 字段透传与登记
 
 - **给接口加可选字段时所有构造点都要逐个核对**：`RELEASE_SOURCES` 声明了 `loadBrief` 而 `load()` 里的对象字面量没带它，TS 不报错、运行时恒 `undefined`、正文静默缺席——「可选」只免除类型检查，不免除构造责任。
-- **目录卡要用的字段必须在映射层显式带出**：映射层只构造 `searchText` 而没带 `desc` 时，`renderCard` 读 `item.desc` 恒为 `undefined`、卡根 `title` 静默为空且无任何报错。加字段 = 映射层 + 卡片模板两处同批改。`src/app/catalog/pages/item.ts`
+- **目录卡要用的字段必须在映射层显式带出**：映射层只构造 `searchText` 而没带 `desc` 时，`renderCard` 读 `item.desc` 恒为 `undefined`、卡根 `title` 静默为空且无任何报错。加字段 = 映射层 + 卡片模板两处同批改。
 - **字段改名必须全量搜旧名、连读点一起改**：`summaryPlain` → `sourceSummary` 时漏改 `summary:` 那一行，导致全部角色详情页渲染成目录页摘要；只改声明处不算改完。
 - **字段透传是双向的显式责任**：聚合记录新增键会被 `endgame` 轻形态按 key 自动带上（`_lean_monster` 的跳过名单是 `wave` / `intro` / `skills` / `debuff_resist`，新键不登记就产物变大且口径漂移）；不在聚合记录里的字段则要在每个组装点显式带出——改共享聚合表前先审计「谁的 payload 会带上它 / 谁需要它」。
 - **别名回退 `{**out[tpl], '_tpl'}` 会把模板的比率与难度组一起复制**：同模板的档位变体正是靠这些值区分的（`1002011 hpR=1` vs `100201101 hpR=0.266667`），变体形态必须显式覆写为自己的 config 记录，否则同模板各档数值相同且不报错——回退只能兜字段缺位，不能兜语义。`monster_common.py` / `load_monsters()`

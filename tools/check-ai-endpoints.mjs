@@ -18,7 +18,7 @@ const PARAM_PLACEHOLDER_RE = /#\d+\[[^\]]*\]/g;
 const BARE_HASH_PAGES = ['currency/item.html', 'currency/augment.html'];
 const BARE_HASH_RE = /#\d+/g;
 const LD_PAGE_NODE_TYPES = new Set(['WebPage', 'CollectionPage', 'Article']);
-const STAT_CATALOG_ROUTES = ['/character', '/lightcone', '/relic', '/item', '/monster', '/achievement'];
+const STAT_CATALOG_ROUTES = ['/character', '/lightcone', '/relic', '/monster'];
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`);
@@ -643,9 +643,7 @@ let sitemapCount = -1;
         return (g['@graph'] || [g]).some((n) => n && n['@type'] === 'Article');
       } catch { return false; }
     })();
-    const isVoracityPage = /(^|\/)voracity\.html$/.test(String(file).split('\\').join('/'));
-    if (hasArticle && !isVoracityPage) add('JSON-LD 用 Article 描述数据条目页（应改用 WebPage + mainEntity）');
-    if (!hasArticle && isVoracityPage) add('/voracity 的 JSON-LD 应为 Article（它是叙述性专题，不是数据条目）');
+    if (hasArticle) add('JSON-LD 用 Article 描述数据条目页（应改用 WebPage + mainEntity）');
 
     if (String(file).includes(`${sep}character${sep}`) && !String(file).includes(`_shell`)) {
       try {
@@ -716,8 +714,6 @@ let sitemapCount = -1;
     const marks = countEntryMarks(html);
     if (DETAIL_ROUTE_PREFIXES.some((p) => relNoExt.startsWith(p))) {
       if (marks > 0) add(`详情页出现 ${marks} 个 nk-snapshot__entry（契约 §3：该类名仅用于目录条目清单）`);
-    } else if (relNoExt === 'voracity' && marks > 0) {
-      add(`专题页出现 ${marks} 个 nk-snapshot__entry（契约 §3：专题页分区不是应用收录条目集合，禁止使用该标记）`);
     }
   }
 
@@ -746,22 +742,18 @@ let sitemapCount = -1;
     ['character', 'character.html', '/character'],
     ['lightcone', 'lightcone.html', '/lightcone'],
     ['relic', 'relic.html', '/relic'],
-    ['item', 'item.html', '/item'],
     ['monster', 'monster.html', '/monster'],
     ['endgame', 'endgame.html', '/endgame'],
     ['endgame/maze', 'endgame/maze.html', '/endgame/maze'],
     ['endgame/story', 'endgame/story.html', '/endgame/story'],
     ['endgame/boss', 'endgame/boss.html', '/endgame/boss'],
     ['endgame/peak', 'endgame/peak.html', '/endgame/peak'],
-    ['achievement', 'achievement.html', '/achievement'],
     ['currency', 'currency.html', '/currency'],
     ['currency/role', 'currency/role.html', '/currency/role'],
     ['currency/item', 'currency/item.html', '/currency/item'],
     ['currency/buff', 'currency/buff.html', '/currency/buff'],
     ['currency/augment', 'currency/augment.html', '/currency/augment'],
     ['currency/trait', 'currency/trait.html', '/currency/trait'],
-    ['voracity', 'voracity.html', '/voracity'],
-    ['formula', 'formula.html', '/formula'],
   ];
 
   const idFamilyDefs = [
@@ -865,10 +857,10 @@ let sitemapCount = -1;
     families.filter((f) => f.kind === 'ids' && f.expected).reduce((n, f) => n + f.expected.size, 0);
   const LAYERED_LOCALES = ['en', 'cht', 'de', 'es', 'fr', 'id', 'jp', 'kr', 'pt', 'ru', 'th', 'vi'];
   const LAYERED_FILES = [
-    'home.html', 'character.html', 'lightcone.html', 'relic.html', 'item.html', 'monster.html',
+    'home.html', 'character.html', 'lightcone.html', 'relic.html', 'monster.html',
     'endgame.html', 'endgame/maze.html', 'endgame/story.html', 'endgame/boss.html', 'endgame/peak.html',
-    'achievement.html', 'currency.html', 'currency/role.html', 'currency/item.html', 'currency/buff.html',
-    'currency/augment.html', 'currency/trait.html', 'voracity.html', 'formula.html',
+    'currency.html', 'currency/role.html', 'currency/item.html', 'currency/buff.html',
+    'currency/augment.html', 'currency/trait.html',
   ];
   const layeredSeen = new Set();
   for (const f of snapshotFiles) {
@@ -947,9 +939,7 @@ let sitemapCount = -1;
   addSpec('character.html', '/character', 'characters.json', (j) => j.filter(named), 'characters.json 非空 name（character.ts:28）');
   addSpec('lightcone.html', '/lightcone', 'light_cones.json', (j) => j.filter(named), 'light_cones.json 非空 name（lightcone.ts:19）');
   addSpec('relic.html', '/relic', 'relics.json', (j) => j.filter(named), 'relics.json 非空 name（relic.ts:17）');
-  addSpec('item.html', '/item', 'items.json', (j) => j.filter(named), 'items.json 非空 name（item.ts:88）');
-  addSpec('monster.html', '/monster', 'monsters.json', (j) => j.filter(named), 'monsters.json 非空 name（monster.ts:34）');
-  addSpec('achievement.html', '/achievement', 'achievements.json', (j) => j, 'achievements.json（应用无条目过滤）');
+  addSpec('monster.html', '/monster', 'monsters.json', (j) => j.filter(named), 'monsters.json 非空 name（monster.ts:35）');
   addSpec('currency/role.html', '/currency/role', 'currency/role.json', (j) => j.roles, 'currency/role.json roles（无过滤）');
   addSpec('currency/item.html', '/currency/item', 'currency/equipment.json', (j) => j.items, 'currency/equipment.json items（无过滤）');
   addSpec('currency/buff.html', '/currency/buff', 'currency/portals.json', (j) => j.portals.filter((p) => p && p.in_book), 'currency/portals.json in_book（currency-portal.ts:30）');
@@ -990,50 +980,6 @@ let sitemapCount = -1;
     }
     if (got !== s.want) details.push(`${s.route}: ${ENTRY} 条目 ${got} ≠ 应用可见条目 ${s.want}（${s.note}）`);
     catCounts.push(`${s.route.slice(1)}=${got}/${s.want}`);
-  }
-
-  const SECTIONED_PAGES = ['item.html', 'achievement.html'];
-  const sectionedFiles = [];
-  for (const loc of Object.keys(LOCALE_CULTURE)) {
-    for (const f of SECTIONED_PAGES) sectionedFiles.push(loc === DEFAULT_LOCALE ? f : `${loc}/${f}`);
-  }
-  const sectionedChecked = [];
-  for (const relFile of sectionedFiles) {
-    const p = join(PRERENDER, relFile);
-    if (!existsSync(p)) {
-      details.push(`缺快照 prerender/${relFile}，分区结构断言无法执行（文件级覆盖率见检查 4）`);
-      continue;
-    }
-    const html = readFileSync(p, 'utf-8');
-    const { blocks, unclosed, orphanCloses } = pairedTagBlocks(html, 'section');
-    if (unclosed > 0 || orphanCloses > 0) {
-      details.push(`prerender/${relFile}: <section> 标签不配对（未闭合 ${unclosed} / 多余闭合 ${orphanCloses}），分区结构无法判定`);
-    }
-    const marks = countEntryMarks(html);
-    if (marks === 0) {
-      details.push(`prerender/${relFile}: 未抽到任何 ${ENTRY}（抽取目标缺失 ⇒ 分区断言无法生效）`);
-    }
-    let inSection = 0;
-    let titleless = 0;
-    for (const b of blocks) {
-      if (!classTokensOf(b.tagText).includes('nk-snapshot__section')) continue;
-      const n = countEntryMarks(b.inner);
-      if (n === 0) continue;
-      const h2m = b.inner.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
-      const h2text = h2m ? visibleText(h2m[1]).trim() : '';
-      if (!h2text) {
-        titleless++;
-        continue;
-      }
-      inSection += n;
-    }
-    if (titleless > 0) {
-      details.push(`prerender/${relFile}: ${titleless} 个含 ${ENTRY} 的 nk-snapshot__section 没有非空 <h2>（分区丢失标题）`);
-    }
-    if (inSection !== marks) {
-      details.push(`prerender/${relFile}: ${marks - inSection}/${marks} 个 ${ENTRY} 不在带非空 <h2> 的分区 section 内（分区外或无标题）`);
-    }
-    sectionedChecked.push(relFile);
   }
 
   const emptyLists = [];
@@ -1085,7 +1031,7 @@ let sitemapCount = -1;
   }
 
   const title = details.length === 0
-    ? `条目级覆盖率（${catCounts.join(' ')}；枢纽 ${hubCounts.join(' ')}；详情页抽样 ${sampled.join(' ')}；分区结构 ${sectionedChecked.length}/${sectionedFiles.length} 份通过；空 nk-snapshot__list 0 处）`
+    ? `条目级覆盖率（${catCounts.join(' ')}；枢纽 ${hubCounts.join(' ')}；详情页抽样 ${sampled.join(' ')}；空 nk-snapshot__list 0 处）`
     : '条目级覆盖率（目录条目数 ≠ 应用可见条目数 / 枢纽或详情页标记违规 / 分区结构或空清单违规）';
   push('5', title, details);
 }
@@ -1116,86 +1062,7 @@ let sitemapCount = -1;
     if (!h1) details.push(`${rel(DIST_INDEX)}: 缺非空 <h1>（'/' 必须投递含正文的 home 快照，不能是纯外壳）`);
     if (countCjk(visibleText(html)) === 0) details.push(`${rel(DIST_INDEX)}: 去标签中文字符 = 0（线上实测 '/' 曾返回 962 B 空壳）`);
   }
-  const homeFamily = Object.keys(LOCALE_CULTURE).map((loc) => (loc === DEFAULT_LOCALE ? 'home.html' : `${loc}/home.html`));
-  const homeFamilySet = new Set(homeFamily);
-  const statsElsewhere = [];
-  for (const file of snapshotFiles) {
-    const relFile = relative(PRERENDER, file).split(sep).join('/');
-    if (homeFamilySet.has(relFile)) continue;
-    let html;
-    try {
-      html = readFileSync(file, 'utf-8');
-    } catch {
-      continue;
-    }
-    const nUl = countTagClass(html, 'ul', 'nk-snapshot__stats');
-    const nLi = countTagClass(html, 'li', 'nk-snapshot__stat');
-    if (nUl > 0 || nLi > 0) statsElsewhere.push(`${relFile}(ul ${nUl}/li ${nLi})`);
-  }
-  if (statsElsewhere.length > 0) {
-    details.push(`非首页族快照出现站点统计块 ${statsElsewhere.length} 份: ${
-      statsElsewhere.slice(0, 5).join(', ')}（nk-snapshot__stats 只允许出现在首页族）`);
-  }
-  let homeStatsOk = 0;
-  for (const relFile of homeFamily) {
-    const p = join(PRERENDER, relFile);
-    if (!existsSync(p)) {
-      details.push(`缺首页族快照 prerender/${relFile}，站点统计块无法校验（文件级覆盖率见检查 4）`);
-      continue;
-    }
-    const html = readFileSync(p, 'utf-8');
-    const uls = pairedTagBlocks(html, 'ul').blocks.filter((b) => classTokensOf(b.tagText).includes('nk-snapshot__stats'));
-    if (uls.length !== 1) {
-      details.push(`prerender/${relFile}: nk-snapshot__stats 容器 ${uls.length} 个，应为恰好 1 个`);
-      continue;
-    }
-    const rows = pairedTagBlocks(uls[0].inner, 'li').blocks.filter((b) => classTokensOf(b.tagText).includes('nk-snapshot__stat'));
-    const problems = [];
-    if (rows.length !== STAT_CATALOG_ROUTES.length) {
-      problems.push(`统计条目 ${rows.length} 条，应为 ${STAT_CATALOG_ROUTES.length} 条`);
-    }
-    const seenRoutes = [];
-    for (const row of rows) {
-      const inner = row.inner.trim();
-      const m = inner.match(
-        /^<a\b[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/a>\s*<span\b[^>]*\bclass\s*=\s*"[^"]*\bnk-snapshot__stat-n\b[^"]*"[^>]*>([\s\S]*?)<\/span>$/i,
-      );
-      if (!m) {
-        problems.push(`统计行结构不符（应为 <a href="/route">目录名</a><span class="nk-snapshot__stat-n">N</span>）: ${
-          inner.replace(/\s+/g, ' ').slice(0, 100)}`);
-        continue;
-      }
-      const href = m[1];
-      const name = visibleText(m[2]).trim();
-      const num = visibleText(m[3]).trim();
-      if (!STAT_CATALOG_ROUTES.includes(href)) {
-        problems.push(`统计行路由不在白名单: ${JSON.stringify(href)}`);
-        continue;
-      }
-      if (seenRoutes.includes(href)) {
-        problems.push(`统计行路由重复: ${href}`);
-        continue;
-      }
-      seenRoutes.push(href);
-      if (!name) problems.push(`统计行 ${href} 的目录名为空`);
-      if (!/^\d+$/.test(num)) {
-        problems.push(`统计行 ${href} 的条目数不是纯数字: ${JSON.stringify(num)}`);
-        continue;
-      }
-      const want = catalogEntryExpect.get(href);
-      if (want === undefined) {
-        problems.push(`统计行 ${href} 的期望条目数不可推导（检查 5 数据源不可用），实测 ${num}`);
-      } else if (Number(num) !== want) {
-        problems.push(`统计行 ${href} 条目数 ${num} ≠ 目录页应用可见条目数 ${want}（与目录页实时统计分叉）`);
-      }
-    }
-    const missingRoutes = STAT_CATALOG_ROUTES.filter((r) => !seenRoutes.includes(r));
-    if (missingRoutes.length > 0) problems.push(`统计行缺路由: ${missingRoutes.join(', ')}`);
-    for (const msg of problems.slice(0, 8)) details.push(`prerender/${relFile}: ${msg}`);
-    if (problems.length > 8) details.push(`prerender/${relFile}: …另有 ${problems.length - 8} 项未列出`);
-    if (problems.length === 0) homeStatsOk++;
-  }
-  push('6', `外壳与首页（_shell.html 无 nk-snapshot / dist/index.html ≡ prerender/home.html / index.html 有 h1 与正文 / 首页族 ${homeStatsOk}/${homeFamily.length} 份统计块 N = 实时条目数，非首页 0 份）`, details);
+  push('6', `外壳与首页（_shell.html 无 nk-snapshot / dist/index.html ≡ prerender/home.html / index.html 有 h1 与正文）`, details);
 }
 
 let failed = 0;

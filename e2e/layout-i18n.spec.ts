@@ -70,23 +70,6 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.nk-hero__desc')).not.toContainText(cn);
   });
 
-  test('/en/achievement：成就描述随语言（模板 + TEXTJOIN + 参数在语言包内按语言组合）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
-    interface AchRow { id: number; desc: string; show_type?: string }
-    const en = readJsonIn<AchRow[]>('en', 'public/data/cn/achievements.json');
-    const cn = readJsonIn<AchRow[]>('cn', 'public/data/cn/achievements.json');
-    expect(en.length, '语言包应覆盖全部成就').toBe(cn.length);
-    const diff = en.filter((a, i) => a.desc !== cn[i]!.desc).length;
-    expect(diff, '英文成就描述应整体不同于中文（组合器按语言现算）').toBe(en.length);
-
-    await page.goto('/en/achievement');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-    const card = page.locator('.nk-ach-card:not(.nk-ach-card--hidden)').first();
-    const id = await card.getAttribute('data-id');
-    const row = en.find((a) => String(a.id) === id);
-    expect(row, `卡片 ${id} 应能在英文语言包里找到`).toBeTruthy();
-    await expect(card.locator('.nk-ach-card__desc')).toHaveText(row!.desc);
-  });
-
   test('/en/relic/N：部位名与属性名取官方词条（不是前端中文枚举表）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     interface Piece { type: string; type_name: string; sub_affix_group: number }
     interface RelicRow { id: number; pieces: Piece[] }
@@ -213,40 +196,6 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/item：物品类别（主类别分组 + 子类别选项）走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
-    const en = msgs('en');
-    const cn = msgs('cn');
-    await page.goto('/en/item');
-    await expect(page.locator('.nk-cat-search input')).toHaveAttribute('placeholder', en['catalog.item.search']!);
-    await expect(page.locator('.nk-cat-select__label').first()).toBeVisible({ timeout: 20000 });
-
-    const selects = page.locator('.nk-cat-select');
-    const count = await selects.count();
-    let idx = -1;
-    for (let i = 0; i < count; i++) {
-      const label = (await selects.nth(i).locator('.nk-cat-select__label').textContent())?.trim();
-      if (label === en['catalog.filter.type']) { idx = i; break; }
-    }
-    expect(idx, 'item 目录应有「Type」筛选器').toBeGreaterThanOrEqual(0);
-    await selects.nth(idx).locator('.nk-cat-select__btn').click();
-
-    const enTypes = new Set(Object.entries(en)
-      .filter(([k]) => k.startsWith('itemType.') || k.startsWith('itemMainType.'))
-      .map(([, v]) => v));
-    const cnTypes = new Set(Object.entries(cn)
-      .filter(([k]) => k.startsWith('itemType.') || k.startsWith('itemMainType.'))
-      .map(([, v]) => v));
-
-    const options = (await page.locator('.nk-cat-select__opt').allTextContents()).map((s) => s.trim());
-    const groups = (await page.locator('.nk-cat-select__group').allTextContents()).map((s) => s.trim());
-    expect(options.length, '类型筛选应有选项').toBeGreaterThan(0);
-    const bad = options.filter((o) => !enTypes.has(o));
-    expect(bad, `选项应是英文类别词典值（含「All」）：${bad.slice(0, 3)}`).not.toContain(undefined);
-    expect(options.filter((o) => cnTypes.has(o)), '不得出现中文类别').toEqual([]);
-    expect(groups.length, '应有主类别分组名').toBeGreaterThan(0);
-    expect(groups.every((g) => [...enTypes].some((t) => g.startsWith(t))), `分组名应取英文词典值：${groups.slice(0, 2)}`).toBe(true);
-  });
-
   test('/en/currency/role/N：属性名与分组名走词典（官方 prop_name 缺失时的兜底）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const rolesDb = readJsonIn<{ roles: { id: number }[] }>('en', 'public/data/cn/currency/role.json');
     const id = rolesDb.roles[0]?.id;
@@ -350,7 +299,7 @@ test.describe('布局验收：多语言', () => {
     }
   });
 
-  test('/en/endgame/<mode> 与 /en/voracity：区块标题与结构口径表走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
+  test('/en/endgame/<mode>：区块标题与结构口径表走词典', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -366,12 +315,6 @@ test.describe('布局验收：多语言', () => {
         'egm.stat.targets', 'egm.stat.countdown', 'egm.stat.scoreCap', 'egm.stat.tierce'].map((k) => en[k]!);
       expect(labels.every((l) => enKeys.includes(l)), `结构口径标签应取英文词典值：${labels}`).toBe(true);
     }
-
-    await page.goto('/en/voracity');
-    await expect(page.locator('.nk-title').first()).toBeVisible();
-    const vorTitles = (await page.locator('.nk-title').allTextContents()).map((s) => s.replace(/\s+/g, ' ').trim());
-    expect(vorTitles.some((s) => s.includes(en['vor.sec.overview']!)), `专题页标题应含英文词典值：${vorTitles}`).toBe(true);
-    expect(vorTitles.some((s) => s.includes(cn['vor.sec.overview']!)), '不得残留中文专题页标题').toBe(false);
   });
 
   test('/en/endgame/maze：赛季名随语言包切语言（字段名 zh 但值是令牌）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
@@ -535,21 +478,6 @@ test.describe('布局验收：多语言', () => {
     const body = await page.locator('body').innerText();
     expect(body, '英雄区标签应取英文词典值').toContain(en['egd.guideLabel']!);
     expect(body, '不得残留中文层级文案').not.toContain(cn['egd.floorLabel']!.split('{n}')[0]!);
-  });
-
-  test('/en/achievement：{NICKNAME} 占位符按语言展开（不是中文「开拓者」）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
-    const pack = JSON.parse(readFileSync('public/data/i18n/en/achievements.json', 'utf8')) as Record<string, string>;
-    const cnPack = JSON.parse(readFileSync('public/data/i18n/cn/achievements.json', 'utf8')) as Record<string, string>;
-    const withName = Object.entries(pack).filter(([, v]) => /Trailblazer/.test(v));
-    expect(withName.length, '英文语言包应有多条含 Trailblazer 的描述').toBeGreaterThan(0);
-    const leaked = Object.values(pack).filter((v) => v.includes('开拓者'));
-    expect(leaked, `英文语言包不得残留中文「开拓者」：${leaked.slice(0, 1)}`).toEqual([]);
-    expect(Object.values(cnPack).some((v) => v.includes('开拓者')), '中文语言包应保留「开拓者」').toBe(true);
-
-    await page.goto('/en/achievement');
-    await expect(page.locator('.nk-ach-card, .nk-cat-search input').first()).toBeVisible({ timeout: 20000 });
-    const body = await page.locator('body').innerText();
-    expect(body, '英文页不得出现中文「开拓者」').not.toContain('开拓者');
   });
 
   test('/en/character/1014：技能动画标题随语言解析（令牌而非中文原文）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {

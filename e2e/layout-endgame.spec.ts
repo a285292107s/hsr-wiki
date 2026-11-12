@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, waitForCatalogCards } from './helpers';
-import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, PEAK_HARD_NODE, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, PEAK_HARD_NODE, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, pollutedMonsters, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierceNodeBossNames } from './layout.shared';
 
 test.describe('布局验收：终局目录页', () => {
   test('/endgame：四模式筛选、卡片渲染、无溢出', async ({ page }) => {
@@ -164,32 +164,6 @@ test.describe('布局验收：终局目录页', () => {
     }
 
     expect(failures, '并排列的列头结构不一致（参差即为回归）').toEqual([]);
-    assertNoErrors();
-  });
-
-  test('/endgame：贪饕污染赛季卡片带标记（挂赛季名后），无污染赛季不带', async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    await page.goto('/endgame');
-    await waitForCatalogCards(page);
-    const polluted = pollutedSeasonHrefs();
-    expect(polluted.length, '目录数据里应有已登记的污染赛季').toBeGreaterThan(0);
-    const badges = await page.locator('.nk-eg-lrow__poll').evaluateAll((els) => els.map((el) => ({
-      text: el.textContent?.trim() || '',
-      afterName: el.previousElementSibling?.classList.contains('nk-eg-lrow__name') ?? false,
-      inMeta: el.closest('.nk-eg-lrow__meta') !== null,
-    })));
-    expect(badges.length, '渲染窗口内应有带标记的赛季（取样为空 = 位置契约没被验到）').toBeGreaterThan(0);
-    for (const b of badges) expect(b).toEqual({ text: '贪饕污染', afterName: true, inMeta: false });
-    const marks = await page.locator('.nk-eg-lrow__poll').evaluateAll((els) =>
-      els.map((el) => (el.closest('a')?.getAttribute('href') || '')),
-    );
-    const rendered = await page.locator('[class*="-grid"] a').evaluateAll((els) =>
-      els.map((el) => el.getAttribute('href') || ''),
-    );
-    const expectedMarks = rendered.filter((h) => polluted.includes(h));
-    expect(expectedMarks.length, '当前渲染窗口内应至少有一个污染赛季（管线静默失效会红）').toBeGreaterThan(0);
-    expect(marks.slice().sort()).toEqual(expectedMarks.slice().sort());
-    await noUnknownOverflow(page);
     assertNoErrors();
   });
 

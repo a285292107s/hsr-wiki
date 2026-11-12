@@ -3,17 +3,17 @@
 > 事实依据（检索结论 + 证据强度；**外部快照、含检索日期、会过期**）见 [docs/audit/AI检索入口事实清单.md](../audit/AI检索入口事实清单.md)；本站据此踩过的坑与判据见 [docs/memory/ai-visibility.md](../memory/ai-visibility.md)。
 > 本文是**实现契约**：产物路径、路由覆盖、生成规则、守卫断言。改动本文件即改动生成器与守卫的接口，三者必须同步。
 
-- **分层多语言快照（用户裁决 B）已落地**：非条目级页面 × 13 语言（首页 / 各目录页 / 4 个玩法枢纽 / voracity / formula 共 20 条路由；缺省语言落根路径，12 个非缺省语言落 `/<locale>/` 前缀 = 240 份分层快照），条目级详情页仍只做缺省语言。生成期默认开启（无开关）；`dist/prerender` 与 `sitemap.xml` 一一对应，总数由守卫按数据实时统计（不在此固化会随 data-sync 漂移的数量）。
+- **分层多语言快照（用户裁决 B）已落地**：非条目级页面 × 13 语言（首页 / 各目录页 / 4 个玩法枢纽共 16 条路由；缺省语言落根路径，12 个非缺省语言落 `/<locale>/` 前缀 = 192 份分层快照），条目级详情页仍只做缺省语言。生成期默认开启（无开关）；`dist/prerender` 与 `sitemap.xml` 一一对应，总数由守卫按数据实时统计（不在此固化会随 data-sync 漂移的数量）。
 
 **契约三件套（新增可索引路由必须同步）**：
 1. **快照**：`node tools/gen-ai-endpoints.mjs`（`pnpm build` 末步）；
-2. **rewrite**：`vercel.json` 在 catch-all 之前有 20 条 `/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)<route>` → `/prerender/:lang<route>.html`（首页 → `:lang/home.html`，因为真实 URL 是 `/<lang>` 而非 `/<lang>/home`）；
+2. **rewrite**：`vercel.json` 在 catch-all 之前有 16 条 `/:lang(en|cht|de|es|fr|id|jp|kr|pt|ru|th|vi)<route>` → `/prerender/:lang<route>.html`（首页 → `:lang/home.html`，因为真实 URL 是 `/<lang>` 而非 `/<lang>/home`）；
 3. **sitemap**：由快照路由一一生成（守卫校验一一对应）。
 
 **守卫口径（`tools/check-ai-endpoints.mjs`，均经反向验证）**：
 - `routeOf()` 对 `<locale>/home.html` 返回 `/<locale>`（否则 sitemap/canonical 校验全错）；
 - 正文长度判据**语言感知**：缺省语言与 `cht` 看汉字数，分层非 Han 语言看去标签可见文本长度（同样拦「空壳 HTML」）；
-- `<locale>/…` 不计入「未登记快照」，其覆盖由**分层总数断言**单独校验（语言集合与 `vercel.json` 前缀改写同源，12 × 20 = 240，缺项逐个列出）；
+- `<locale>/…` 不计入「未登记快照」，其覆盖由**分层总数断言**单独校验（语言集合与 `vercel.json` 前缀改写同源，12 × 16 = 192，缺项逐个列出）；
 - 每页 `<html lang>` 必须等于 `languages.json` 的 `culture`；hreflang 必须 **13 语言 + `x-default` = 14 条**，且**取值是 `culture`（BCP 47）而不是上游 `TextLanguageKey`**——`cht` / `jp` / `kr` 不是语言码（应为 `zh-TW` / `ja-JP` / `ko-KR`），Google 对无法识别的 hreflang 值**整条忽略**，条数断言查不出这种「值非法」；
 - JSON-LD 内嵌 `@id`/`url` 不得指向**别的语言前缀**；
 - **汉字残留判据按脚本划界，不按「非缺省语言」**：`cn` / `cht` / `jp` / `kr` 都合法使用汉字（日文汉字；韩国官方韩文用汉字注音，如 `세검(細劍)`），对其判残留会全量误红（实测 jp 19/19、kr 5/19 命中）；其余语言的分层快照**正文**出现汉字即残留，走 `tools/ai-han-baseline.json` 棘轮（只降不升）。**边界**：jp/kr 的「合法汉字」与「中文残留」用码点范围分不开，本断言不覆盖这两种语言。
@@ -23,7 +23,7 @@
 
 **当前状态**：分层语言展开**无条件全量**（曾经的 `NK_SNAPSHOT_LOCALES` 开关已去掉）：非条目级路由 × 13 语言 + 条目级详情页仅缺省语言；快照数、sitemap URL 数由守卫一一对应断言，不写死。
 
-**已完成（曾列为待办，均已落地）**：语言展开无条件全量（`NK_SNAPSHOT_LOCALES` 开关已去掉）；`vercel.json` 前缀**模式化改写**（20 条覆盖 12 个前缀）；`tools/check-ai-endpoints.mjs` 的分层断言（分层总数 / 每页 `<html lang>` / hreflang 完备性 / JSON-LD URL 与 canonical 同路径）；非汉字脚本语言的分层快照正文汉字残留**已归零**（见下「验收判据」）。
+**已完成（曾列为待办，均已落地）**：语言展开无条件全量（`NK_SNAPSHOT_LOCALES` 开关已去掉）；`vercel.json` 前缀**模式化改写**（16 条覆盖 12 个前缀）；`tools/check-ai-endpoints.mjs` 的分层断言（分层总数 / 每页 `<html lang>` / hreflang 完备性 / JSON-LD URL 与 canonical 同路径）；非汉字脚本语言的分层快照正文汉字残留**已归零**（见下「验收判据」）。
 
 **验收判据**：汉字脚本语言（`cn` / `cht` / `jp` / `kr`）以外的分层快照**正文**汉字残留为 0（品牌名 `星铁档案馆` 除外）。判据已固化为 `check-ai-endpoints.mjs` 的棘轮断言 + 「抽取非空」兜底，不再依赖临时探针。
 
@@ -81,13 +81,11 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 | `/lightcone/:id` | `prerender/lightcone/{id}.html` | light_cones/{id}.json | 同列表 id 集 |
 | `/relic` | `prerender/relic.html` | relics.json | 62 |
 | `/relic/:id` | `prerender/relic/{id}.html` | relics.json 条目 | 同列表 id 集 |
-| `/item` | `prerender/item.html` | items.json | 仅 `name` 非空者（`item.ts:88` 过滤 name/desc/bg_desc 全空占位行）；无详情路由 |
 | `/monster` | `prerender/monster.html` | monsters.json | 270（`monsters.json` 已被转换器裁剪为终局敌人） |
 | `/monster/:id` | `prerender/monster/{id}.html` | monsters/{id}.json | 同列表 id 集（270；非终局模板详情不产快照） |
 | `/endgame` | `prerender/endgame.html` | maze*.catalog.json（四模式） | 四模式赛季并集 |
 | `/endgame/{mode}` | `prerender/endgame/{mode}.html` | endgame_guide.json + maze*.catalog.json | 四模式各 1 页（玩法页；正则白名单，`/endgame/xyz` 落 404） |
 | `/endgame/:mode/:id` | `prerender/endgame/{mode}/{id}.html` | maze.catalog / maze_extra.catalog / maze_boss.catalog / maze_peak.catalog | 按 mode 取表，且**仅 `zh` 非空白者**（`endgame.ts:190`；未发布占位行如 boss 3022 不产快照、不入 sitemap，线上落 404） |
-| `/achievement` | `prerender/achievement.html` | achievements.json + achievement_series.json | 1950 |
 | `/currency` | `prerender/currency.html` | currency/role.json 等 5 表 | 枢纽 |
 | `/currency/role` | `prerender/currency/role.html` | currency/role.json | 列表长度 |
 | `/currency/role/:id` | `prerender/currency/role/{id}.html` | currency/role/{id}.json | 与 role.json 列表 id 集一致 |
@@ -96,8 +94,6 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 | `/currency/augment` | `prerender/currency/augment.html` | currency/augments.json | 列表长度 |
 | `/currency/trait` | `prerender/currency/trait.html` | currency/traits.json | 列表长度 |
 | `/currency/trait/:id` | `prerender/currency/trait/{id}.html` | currency/traits.json 条目 | 列表 id 集 |
-| `/voracity` | `prerender/voracity.html` | voracity.json | 专题页（无实体、非目录）：整页 1 个快照，条目级**不**收 `nk-snapshot__entry` |
-| `/formula` | `prerender/formula.html` | 无（站点撰写的机制长文，ADR 0064） | 专题页：整页 1 个快照，正文只有区块标题 + 乘区公式 + 内链，条目级**不**收 `nk-snapshot__entry` |
 
 **不生成**：`/settings`、`/currency/settings`、`/debug`（无内容页）；旧路径重定向（`/maze` 等）由前端路由处理。
 
@@ -108,9 +104,9 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 ## 3. 快照正文规则
 
 - 每个 `<a href>` 必须是真实站内路径（如 `/character/1308`），**禁止 `#` 或 JS 链接**；内链是快照存在的首要目的。
-- **页面 ↔ 快照的对齐粒度**：**实体级事实标签必须与页面逐字一致**（`<h1>`、实体名、`受『贪饕』侵蚀` 这类事实行、一切数据派生文本）；**页面级 chrome 允许快照使用更完整的措辞**（分区标题可带括号说明、分组标签可用全称、装饰性英文如 `INVASION` 不进快照）。既有实例：`MonsterDetailView.vue` 的 `受『贪饕』侵蚀` 与生成器逐字相同，而 `/voracity` 分区标题 `「贪饕」侵蚀（敌方与玩家支援）` 与分组标签 `侵蚀等级 N` 是快照侧的完整措辞（页面为 `「贪饕」侵蚀 INVASION` / `侵蚀 LV N`），**双方都保持现状**——禁止把页面 chrome 逐字搬进快照，也禁止反过来要求 chrome 逐字对齐。
+- **页面 ↔ 快照的对齐粒度**：**实体级事实标签必须与页面逐字一致**（`<h1>`、实体名、一切数据派生文本）；**页面级 chrome 允许快照使用更完整的措辞**（分区标题可带括号说明、分组标签可用全称、装饰性英文如 `INVASION` 不进快照）。**双方都保持现状**——禁止把页面 chrome 逐字搬进快照，也禁止反过来要求 chrome 逐字对齐。
 - 详情页必须含：`<h1>{实体名}</h1>`、一句话摘要段（**仅当源数据提供文本时输出**：角色 `desc` → `chara_info.stories` 首个非空；敌对物种 `intro`）、属性事实表（`<dl>` 或 `<table>`，值全部来自数据）、面包屑 `<a>`（首页 → 图鉴 → 实体）、**≥3 条同类实体内链**（上一/下一个或同图鉴前若干条）、`数据最后更新：{version.json.synced_at}`。
-- **敌对物种「贪饕」侵蚀标记与回链（ADR 0025）**：怪物详情数据带可选块 `invaded`（T1 契约）时，事实表额外输出一行「受『贪饕』侵蚀 · 等级 {`invaded.invasion_ids`} · {`/voracity` 链接}」（标签字符串与 `MonsterDetailView.vue` 逐字一致）。判据 = **目录条目自身的详情文件**里该块是否存在（`monsters.json` 条目 → `monsters/{id}.json`）——**禁止**按 id 白名单硬编码，**禁止**按 `monsters/` 目录枚举详情文件：该目录下的实例变体页（长号实例 ID）不在 `monsters.json` 目录内、应用不展示、快照也不生成（实测带 `invaded` 的详情文件 217 个，其中仅 24 个是目录条目，故只有 24 个快照带该标记）。无该块的怪物不输出此行。同一段的**掉落与出没**两行的契约镜像这条：`drops` / `appearances` 块存在才输出，值逐字取自该块（掉落只列**基准档**（`world_level` 为 `null`）的物品名 + 总档数；出没输出关卡总数 + 前 4 个玩法域的计数 + 至多 2 个样本名，域与样本槽位判据见 [ADR 0065](../adr/0065-出没关卡按玩法域分组.md)；样本带 `activity`（ADR 0047 决策 6）时按**与页面逐字同格式**拼成「活动名 · 关卡名」——这是同一份数据的展示拼接，不是另算）——**禁止**在生成器里另算一遍关卡数或掉落（那会造出第二个事实源，且与页面口径分叉）。
+- **敌对物种「贪饕」侵蚀标记与回链（ADR 0025）**：怪物详情数据带可选块 `invaded`（T1 契约）时，事实表额外输出一行「受『贪饕』侵蚀 · 等级 {`invaded.invasion_ids`}」（标签字符串与 `MonsterDetailView.vue` 逐字一致）。判据 = **目录条目自身的详情文件**里该块是否存在（`monsters.json` 条目 → `monsters/{id}.json`）——**禁止**按 id 白名单硬编码，**禁止**按 `monsters/` 目录枚举详情文件：该目录下的实例变体页（长号实例 ID）不在 `monsters.json` 目录内、应用不展示、快照也不生成（实测带 `invaded` 的详情文件 217 个，其中仅 24 个是目录条目，故只有 24 个快照带该标记）。无该块的怪物不输出此行。同一段的**掉落与出没**两行的契约镜像这条：`drops` / `appearances` 块存在才输出，值逐字取自该块（掉落只列**基准档**（`world_level` 为 `null`）的物品名 + 总档数；出没输出关卡总数 + 前 4 个玩法域的计数 + 至多 2 个样本名，域与样本槽位判据见 [ADR 0065](../adr/0065-出没关卡按玩法域分组.md)；样本带 `activity`（ADR 0047 决策 6）时按**与页面逐字同格式**拼成「活动名 · 关卡名」——这是同一份数据的展示拼接，不是另算）——**禁止**在生成器里另算一遍关卡数或掉落（那会造出第二个事实源，且与页面口径分叉）。
 - **怪物详情快照的四维数值仍是「基准值」**（`stats.hp/atk/def/speed`），标签逐字写「生命（基准值）」等：页面按 `基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 + 修正值` 在等级滑条上合成并逐因子展开（ADR 0040 / 0045 / 0049），快照**不做合成**（不在生成器里实现第二份算式）。韧性直接取 `stance`（不入曲线链，与页面一致）。改口径时两处（页面注记 / 快照标签）必须同批改，不允许只动一处。
 - **状态词条分区**（`MonsterStatusConfig` 安全子集）：怪物详情快照的「状态词条」分区逐条输出 `名称（增益/减益/其他 · 可驱散）` + **仅有值时**的描述——描述只在源文本**既无 `#N[i]` 占位符、也无 `%宏`**（`%CasterName` / `%DynamicTargetName`）时才有（数值与运行时名称本仓都不可知），故**禁止**在生成器里补参、拼接或渲染 `?`；归属判据与页面同源（命名约定桥 + 去形态后缀同名，见 `docs/data/转换器字段映射.md` 的 monster_extra 段）。
 - **活动出处事实行**：怪物详情快照的「活动出处」逐字取自详情 `event` 块（`ActivityPanel.TitleName` / `ActivityQuestRewardData.QuestTabName` / 关卡等级，均为源文本），无该块时不输出此行；等级**单档时不写区间**（与页面 `eventLevelText` 同口径，源里确有全档同等级的活动敌人）。**快照不断言「复用模型 / 立绘 / 技能组」**——页面那句按 `art_shared` 的两个维度写（[ADR 0048](../../docs/adr/0048-活动出处备注的判据下沉.md)），快照只出源文本事实；**禁止**在生成器里自撰活动名或页签名。
@@ -120,15 +116,11 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 - 源文本里的**字面 `#NN`**（如「天才俱乐部#81号会员」这类编号）原样保留：它们不是参数占位符，**禁止**为了对齐前端渲染（`fmtDesc` 会把无参 `#1` 渲染成 `?`）把真实文本改成 `?`——快照以数据忠实为准。
 - **参数展开保真**：描述文本必须按前端 `fmtDesc`/`fmtVal` 口径展开（数值、`%` 保留、`null`→`?`）。**若源数据缺参数导致无法完整展开（可见文本残留 `#N[...]` 标记），该字段不得进入快照**——前端卡片本就不渲染该字段（如光锥目录卡片只渲染 `skill_name`）、或渲染成 `?` 残句，两者都是噪声。缺参数的实体因此少一段（**不**影响条目集合与 sitemap）。
 - **上游数据例外**：源文本里的字面 `#NN` 编号、转换器未解析的合并标记（如物品名里的 `{TEXTJOIN#61}`）与应用显示一致，属上游/转换器域，**原样保留并单独立项**，不在本域修。
-- 目录页必须含：`<h1>{路由 meta.title}</h1>`、条目清单（每条 `<a href="/…">名称</a>` + 属性摘要；无详情路由的条目如物品/成就输出名称 + 描述文本），`数据最后更新`。
-- **巨型无详情目录页必须给 `<h2>` 骨架**：`/item`（2412 条）与 `/achievement`（1950 条）按数据自带的分组键（物品 `main_type`、成就 `series_id` → 系列名）分组为 `<section><h2>{分组标签}</h2><ul class="nk-snapshot__list">…</ul></section>`，条目仍逐条带 `nk-snapshot__entry`。**只加结构，条目集合 / 顺序 / 数量都不变**，也不新增路由（真实分页 / 条目级 URL 是另一件未决事项）。分组标签取不到时**整轮构建失败**（`groupSections`）：空 `<h2>` 是守卫禁止形态，而给它编一个回退标签等于为数据里没有的分类自撰文本。
+- 目录页必须含：`<h1>{路由 meta.title}</h1>`、条目清单（每条 `<a href="/…">名称</a>` + 属性摘要；无详情路由的条目输出名称 + 描述文本），`数据最后更新`。
 - **正文不得出现空列表**：`<ul class="nk-snapshot__list"></ul>` 这类空壳在语法层无法与「条目静默漏光」区分，守卫显式禁止——因此 `catalogBody()` 对空 `items` 不落 `<ul>`（分组目录页与首页把条目放进 `sections`）。
 - **页脚日期必须是机器可读的 `<time>`**：`数据最后更新：<time datetime="{version.json.synced_at}">{synced_at}</time>`。只写可见文本等于「这页没有日期」——抽取器与搜索侧只能读结构化日期。日期占位在各语言词典模板里的位置不同，故实现为「先塞哨兵 `{{nk-date}}` → 转义模板 → 再把哨兵换成标签」。
-- **首页必须带站点级统计块**：`<ul class="nk-snapshot__stats">` 内 6 条 `<li class="nk-snapshot__stat"><a href="/{目录}">{本地化目录名}</a><span class="nk-snapshot__stat-n">{条目数}</span></li>`（角色 / 光锥 / 遗器 / 物品 / 敌对物种 / 成就）。条目数**从同一次构建的目录页正文里数 `nk-snapshot__entry` 得到**（不复刻各族过滤判据——复刻即第二事实源）；措辞只用**既有词典键 + 纯数字**，不新增 i18n 键、不合成叙述句（`ui()` 缺键回退中文，新键会在 12 个非汉字语言快照里留下中文，撞上汉字残留棘轮）。统计块在目录页构建完成后注入（`injectHomeStats`，插在页脚前），只在首页族出现。
-- **目录条目稳定标记（守卫依赖）**：**收录条目清单**里每个条目必须渲染为 `<li class="nk-snapshot__entry">…</li>`——包括 12 个目录页的条目清单，以及枢纽页（`/` 版本上新三分区、`/currency` 本赛季分区）的收录条目。该类名**禁止**用于详情页的导航性列表（同图鉴/同模式内链、「羁绊成员」等）。守卫按此标记逐目录计数并断言 = 应用可见条目数——否则「生成器静默漏条目」（例如 map 中途异常、上限误用）无法被任何断言察觉；枢纽页则断言 ≥1（新版本必定有新条目，判据失效会让枢纽页静默空态，必须拦住）。
+- **目录条目稳定标记（守卫依赖）**：**收录条目清单**里每个条目必须渲染为 `<li class="nk-snapshot__entry">…</li>`——包括与数据一一对应的目录页条目清单，以及枢纽页（`/` 版本上新三分区、`/currency` 本赛季分区）的收录条目。该类名**禁止**用于详情页的导航性列表（同图鉴/同模式内链、「羁绊成员」等）。守卫按此标记逐目录计数并断言 = 应用可见条目数——否则「生成器静默漏条目」（例如 map 中途异常、上限误用）无法被任何断言察觉；枢纽页则断言 ≥1（新版本必定有新条目，判据失效会让枢纽页静默空态，必须拦住）。
 - **枢纽页分区级列表入口**：`/` 与 `/currency` 的每个分区在快照里额外输出一条 `查看全部{X}` 内链（`<p class="nk-snapshot__more">`，目标 = 该分区对应图鉴页：`/character` `/lightcone` `/relic` / `/currency/role` `/currency/trait`），与应用分区头右端的分区入口（首页 `.nk-home__all`、货币战争 `.nk-hub-release__all`）**同源同目标**（同一份 `listHref`）。措辞属页面级 chrome（页面写「全部角色」、快照写「查看全部角色」），按 §粒度规则允许不同；该 `<p>` **不使用** `nk-snapshot__entry`（它不是收录条目）。
-- **专题页正文规则（`/formula`，ADR 0064 的第二个专题页实例）**：无数据产物——正文是站点撰写的机制长文，必须含 `<h1>战斗公式</h1>` + 面包屑 + 九个区块标题（`formula.sec.*`：直伤链路 / 击破链路 / 欢愉链路 / 附加伤害 / 真实伤害 / 治疗与护盾 / 速度与行动值 / 削韧·命中 / 实战计算器）+ 五条伤害链路的公式纯文本形（直伤六乘区 `formula.zoneFormula.base/modifier/crit/def/res/special`；击破与超击破、欢愉、附加伤害、真实伤害由 `FORMULA_*_ROWS` 经 `formulaChainLine()` 拼装，行名取自 `formula.row.*`）+ 数据来源说明（`formula.hero.note`）+ 站内内链（`/`、`/character`、`/monster`）。文案一律经 `ui()`/`uiT()` 取词典键（13 语言随分层快照各自成文），**禁止在生成器里写死中文**。同样**不使用 `nk-snapshot__entry`**（不是目录收录清单）。JSON-LD 用 `ldDataPage`——`Article` 只允许 `/voracity`，本页虽是长文也不能用。页面的交互（数值输入、开关、实时读数）**不进快照**：无 JS 的爬虫只看到区块与公式，这是形式选择的固有代价。
-- **专题页正文规则（`/voracity`，ADR 0025 的第三种页面形态）**：必须含 `<h1>贪饕污染</h1>` + 面包屑（首页 → 贪饕污染）+ 分区（玩法概览 / 「贪饕」侵蚀（敌方与玩家支援）/ 教程图文 / 位面词条）+ `数据最后更新：{synced_at}`。**专题页一律不使用 `nk-snapshot__entry`**：该标记语义已冻结为「12 个目录页 + 枢纽页的收录条目清单」，专题页的分区列表不是「应用收录条目集合」（条目异构：教程图文 / 位面词条），误用会把它们算进条目级覆盖率断言。分区标题与说明性小节标签属**页面级 chrome**（源数据无此文本，可合成；措辞差异按上一条的粒度规则处理）；实体性内容（活动名与描述、侵蚀/支援描述、教程文案、位面词条）必须逐字来自 `voracity.json`；**进度类字段统一按百分比呈现**（`activity.buff_levels[*].progress_percent`，愿力分档进度）：口径镜像页面 `VoracityView.vue` 的 `ratioPct`/`fmtPct`（0~1 视作比例、>1 原样视作百分数、钳到 [0,100]、保留 1 位小数，如 `0.4 → 40%`、`0.7 → 70%`），`null` 档不输出百分比。`invasion.levels[*].name` 在上游 TextMapCHS 缺失（属预期）→ 只用固定分区名 + `污染等级 {invasion_id}`，**禁止**为缺失名称兜底命名。**已下线的四区块（污染等级与愿力 / 波及关卡与被污染怪物 / 状态词条 / 「污染」同形词说明）不得回流**：`voracity.json` 仍保留 `activity.scores` / `activity.progress_steps` / `invasion.stages` / `statuses` 数据块，页面与快照一律不再渲染——区块增删必须同轮改页面与生成器 `sections`，守卫不校验两者一致。
 - 文本处理：数据里的游戏标记（`<color=…>`、`<unbreak>`、`<u>`、`\n`）必须剥成纯文本或安全 HTML；**所有数据派生文本必须 HTML 转义**（与前端 `escHtml()` 同纪律）。守卫断言可见文本中不残留 `<color=` / `<unbreak>` / `\n`。
 - 单实体文本上限 `SNAPSHOT_TEXT_LIMIT = 4000` 字符（目录条目）/`20000`（详情页），超出截断并加 `…`——防止 `maze.json`（2.9MB）等把 dist 撑爆。截断是有意取舍，不得静默改成全量。
 
@@ -136,14 +128,13 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 
 每页一个 `<script type="application/ld+json">`，`JSON.parse` 必须成功（守卫断言）：
 
-- **每种页面类型都必须带 `dateModified`**（取值 = `version.json.synced_at`，与 sitemap `<lastmod>` 同源）：`CollectionPage`（首页 / 各目录页 / 枢纽页，`ldCollection`）、数据条目页（`ldDataPage`）、角色详情页（`ldCharacter` 的 `WebPage` 节点）、专题页 `Article`（`ldArticle`）四类齐全。缺它的那批页面（曾恰好是首页 + 全部目录枢纽 + 98 个角色详情）等于对机器「没有发布时间」，而 JSON 完全合法、任何解析类断言都查不出来。`ldCollection` 的取值走模块级 `SNAPSHOT_SYNCED_AT`（十余处调用点都不带 `ctx`，而该值与语言无关）。
+- **每种页面类型都必须带 `dateModified`**（取值 = `version.json.synced_at`，与 sitemap `<lastmod>` 同源）：`CollectionPage`（首页 / 各目录页 / 枢纽页，`ldCollection`）、数据条目页（`ldDataPage`）、角色详情页（`ldCharacter` 的 `WebPage` 节点）三类齐全。缺它的那批页面（曾恰好是首页 + 全部目录枢纽 + 98 个角色详情）等于对机器「没有发布时间」，而 JSON 完全合法、任何解析类断言都查不出来。`ldCollection` 的取值走模块级 `SNAPSHOT_SYNCED_AT`（十余处调用点都不带 `ctx`，而该值与语言无关）。
 
 - 目录页：`CollectionPage`（`name`/`url`/`inLanguage`/`isPartOf: WebSite`）+ `ItemList`（有详情路由的条目给 `url`）。
 - 角色详情页：`WebPage` + `mainEntity` = `Person`（`@id` 供页面内引用；游戏属性走 `Person.characterAttribute`）。
 - **数据条目页**（光锥 / 遗器 / 敌对物种 / 终局赛季 / 终局玩法 / 货币战争角色与羁绊详情）：`WebPage`（`@id`/`name`/`description`/`dateModified`/`inLanguage`/`mainEntity`）+ `mainEntity: Thing` + `BreadcrumbList`。
   - 条目类型一律 `Thing`：schema.org 没有「光锥 / 遗器 / 敌对物种」这类类型，自造类型机器不认（要挑 schema.org 有定义的属性）。
-  - **禁止用 `Article` 描述数据条目页**——那等于告诉机器「这是一篇资讯稿」，条目身份与属性都拿不到；`Article` 只允许出现在 `/voracity`（站点撰写的叙述性专题长文）。
-- 专题页（`/voracity`）：`Article` + `BreadcrumbList`，**不**用 `CollectionPage` + `ItemList`：专题页不是目录，分区是异构条目的叙述性集合，写成 `ItemList` 等于把「收录清单」语义强加给它，与 §3「不收 `nk-snapshot__entry`」的规则自相矛盾。
+  - **禁止用 `Article` 描述数据条目页**——那等于告诉机器「这是一篇资讯稿」，条目身份与属性都拿不到；数据条目页一律用 `WebPage` + `mainEntity`。
 - **`inLanguage` 按当前构建语言取 `languages.json` 的 `culture`**，与页面 `<html lang>`、`og:locale`（下划线形）三者同源。硬编码 `zh-CN` 会让 240 份语言前缀快照的富媒体信息全部自称中文页，而 JSON 完全合法——任何解析类断言都查不出来。
 - 理由写清：**富结果与实体消歧，不是 AI 引用杠杆**（Ahrefs 1,885 页 DiD 实测无引用提升，见 memory 文档）。
 
@@ -181,9 +172,9 @@ Vercel 项目的 Domains 里**同时保留** `myhsr.wiki` 与 `myhsr.vercel.app`
 3. 每个 `dist/prerender/**/*.html`：**正文抽取必须非空**（抽取为空即判红；抽样面 = `.nk-snapshot` 之后的可见文本）、`<title>` 非空且不等于站点默认标题、有 `<link rel="canonical">`（同源）、有 ≥1 个 `href="/`、去标签后中文字符 ≥ 80、`<h1>` 存在、JSON-LD `JSON.parse` 成功、无残留游戏标记、**无未展开参数标记 `#\d+\[[^\]]*\]`**（缺参数的字段必须整段省略，见 §3「参数展开保真」；字面 `#NN` 编号与 `{TEXTJOIN#…}` 不在此列）、**汉字脚本语言（`cn`/`cht`/`jp`/`kr`）以外的分层快照正文禁汉字**（棘轮，口径见上「守卫口径」）、入口 `<script src="/assets/…">` 与 **`dist/prerender/_shell.html`** 一致（`dist/index.html` 现在是 home 快照，不得再当外壳基线）。**新增（P0 批次，落在守卫第 3 组）**：每份快照必须含 `"dateModified":"{synced_at}"`（页面级节点 `WebPage` / `CollectionPage` / `Article`）与 `<time datetime="{synced_at}">{synced_at}</time>`（取值与 `version.json.synced_at` 逐字一致）；**任何快照不得含 `noindex` 子串**；`_shell.html` 则**必须**含 `<meta name="robots" content="noindex">`（同属第 3 组的前置断言）。
    - **JSON-LD 内嵌 URL 三项断言**（前缀改写的机械兜底，缺一项就会重演静默断链）：① **语言归属**——分层快照的 LD 同源 URL 路径必须落在 `/<locale>` 下（**唯一豁免站点根 `/`**，那是 `isPartOf` 的 WebSite 本体）；判据必须写成**白名单**「首段 == 本语言前缀」，**不得**写成黑名单「找到别的语言前缀」（`^[a-z]{2,3}$` 匹配不到 `encharacter` 这类粘连形态 ⇒ 正是实测缺陷静默全绿的原因）。② **形状**——同源 URL 去掉站点源后必须为空或以 `/` 开头，拦 `SITE_ORIGIN + href` 少前导斜杠的拼接。③ **自身 URL 在场**——LD 里至少有一个 URL 等于本页 canonical 路径，拦「整份前缀改写缺失」。
    - **前缀改写必须按路径段做，禁止字符串 `split/join` 拼接**：`from` 的收尾斜杠是段分隔符，而 home 的 route 恰是 `/` ⇒ `…wiki/character/1503` 会被粘成 `…wiki/encharacter/1503`（该形态能解析、请求还能 200）。生成器实现 = `prefixLdUrls`：同源 URL 一律改写到 `/<locale>/…`（`/` 站点根同样前缀化），**唯一豁免 `isPartOf` 的 WebSite 本体**。
-   - **社交卡片与语言标注**：每页必须有 `og:image`（同源）与 `twitter:card=summary_large_image`；`og:locale` 必须等于 `<html lang>` 的下划线形；JSON-LD 的 `inLanguage` 必须等于 `<html lang>`；`Article` 只允许出现在 `/voracity`（数据条目页出现即判红）；`prerender/_shell.html` 的静态 `og:image` 必须与 `SITE_ORIGIN` 同源；`og:image` 指向的**文件本身**必须存在且为 PNG、尺寸与 `og:image:width/height` 声明一致（只断言标签不断言文件，删掉图就是线上空卡片）。这些断言都做过「故意弄坏它」的反向验证。
+   - **社交卡片与语言标注**：每页必须有 `og:image`（同源）与 `twitter:card=summary_large_image`；`og:locale` 必须等于 `<html lang>` 的下划线形；JSON-LD 的 `inLanguage` 必须等于 `<html lang>`；`prerender/_shell.html` 的静态 `og:image` 必须与 `SITE_ORIGIN` 同源；`og:image` 指向的**文件本身**必须存在且为 PNG、尺寸与 `og:image:width/height` 声明一致（只断言标签不断言文件，删掉图就是线上空卡片）。这些断言都做过「故意弄坏它」的反向验证。
    - 另：**`currency/item.html`（CW 装备）与 `currency/augment.html`（CW 投资策略）的可见文本不得含裸 `#N`**——该族数据条目携带 `params` 语义（见 §3），裸 `#N` 即占位符；**裸形态无法全局区分字面与占位符**（角色/成就/物品里的「天才俱乐部#81号会员」是上游字面，必须保留），故按页点名而非全局正则。**该断言只扫实体解码后的可见文本**（`html, body { background:#121214 }` 这类 shell 模板色值只出现在注释 / `<style>` / 内联属性里，按原始面断言会永久红）；原始面扫描须先剥 HTML 注释。**已知覆盖边界**：裸 `#N` 断言只点名上列两页——生成器侧已按「条目是否携带 `params`/`base_params`/`param_list`」通用判定（`hasParamSemantics`），若未来在**其它** params 语义族（如 `/currency/buff`）发现泄漏，须把该页加入点名表并复跑守卫。
-4. **覆盖率（文件级 + 条目级）**：① 每族生成文件数 = §2 表内**应用可见**条目数；② 12 个与数据一一对应的目录页，快照内 `<li class="nk-snapshot__entry">` 计数 = 同一可见条目数（防「静默漏条目」——生成器 map 中途异常/上限误用不会被文件数断言发现）；③ `/`、`/currency` 枢纽页断言条目数 ≥1（新版本必定有新条目；`release_version` / 赛季代际判据失效导致的静默空态必须拦住）；④ 单页族中 `/voracity` 与 `/formula`（两个专题页）只断言「无 `:id` 的路由各恰好 1 个快照文件」与「12 语言分层各 1 份」，**无条目级断言**——它们不是目录、也不是枢纽页，正文分区不是收录条目集合（见 §3）；⑤ 反向断言：**专题页 `prerender/voracity.html` 与 `prerender/formula.html` 的 `nk-snapshot__entry` 计数必须 = 0**（该类名未在这两页登记，一旦有人把分区当目录收录清单来标即失败，避免异构条目静默变成覆盖率数字）。期望一律从数据 + 应用可见性判据**实时统计**，禁止写死数字。**新增（P0 批次；组号 = 守卫生成的 `N/7` 汇总行，本表 1–5 与分组不是一一对应）**：⑥ `/item` 与 `/achievement`（含 13 语言，共 26 份）的每个 `nk-snapshot__entry` 必须位于带**非空 `<h2>`** 的 `nk-snapshot__section` 内（**第 5 组**）；⑦ 全站快照不得出现空 `<ul class="nk-snapshot__list"></ul>`（**第 5 组**）；⑧ 首页族（`home.html` + 12 个 `<locale>/home.html`）必须含 `<ul class="nk-snapshot__stats">` 且恰好 6 条 `.nk-snapshot__stat`，路由集合 = `/character` `/lightcone` `/relic` `/item` `/monster` `/achievement`，每条 `.nk-snapshot__stat-n` 的数字 = 该目录页**实时统计**的可见条目数，`nk-snapshot__stats` **只允许出现在首页族**（**第 6 组**）。
+4. **覆盖率（文件级 + 条目级）**：① 每族生成文件数 = §2 表内**应用可见**条目数；② 与数据一一对应的目录页，快照内 `<li class="nk-snapshot__entry">` 计数 = 同一可见条目数（防「静默漏条目」——生成器 map 中途异常/上限误用不会被文件数断言发现）；③ `/`、`/currency` 枢纽页断言条目数 ≥1（新版本必定有新条目；`release_version` / 赛季代际判据失效导致的静默空态必须拦住）。期望一律从数据 + 应用可见性判据**实时统计**，禁止写死数字。**新增（P0 批次；组号 = 守卫生成的 `N/7` 汇总行，本表 1–5 与分组不是一一对应）**：④ 全站快照不得出现空 `<ul class="nk-snapshot__list"></ul>`（**第 5 组**）。
 5. 汇总一行 `[PASS] …`/`[FAIL] …`，非零退出即失败。
 
 ## 7. 验证边界
@@ -199,5 +190,4 @@ Vercel 项目的 Domains 里**同时保留** `myhsr.wiki` 与 `myhsr.vercel.app`
 - **正文来源**：`public/data/cn/endgame_guide.json`（`sections` 逐字来自 `IntroData` 分节）+ 终局产物（当期赛季的结构口径与当期增益名）。
 - **快照约定**：**不使用 `nk-snapshot__entry`**，**无条目级覆盖率断言**（`check-ai-endpoints.mjs` 把它归入 `singleFamilies`，各恰好 1 个快照文件）；正文含 h1 + 面包屑 + 规则分节 + 结构事实 + 增益体系（名/条数/选法）+ 当期增益**名称清单** + ≥3 条同玩法赛季内链 + 其它玩法内链。
 - **为什么当期增益只出名称**：`MazeBuff.desc` 含 `#N[i]` 参数占位，快照不展开参数 ⇒ 直接输出 desc 会命中守卫的「禁未展开 `#N[i]`」断言。名称清单已足够承载「本期有哪些增益」。
-- **与专题页（`/voracity`）的区别**：专题页正文是站点撰写的长文；玩法页正文是**官方规则原文**，站点不加润色。
 

@@ -164,21 +164,16 @@ const figureUrl = computed(() => {
   return monsterFigureUrl(d.value.figure) || monsterIconUrl(d.value.icon);
 });
 const rankLabel = computed(() => (d.value?.rank ? t(monsterRankKey(d.value.rank)) : ''));
-const invaded = computed(() => d.value?.invaded ?? null);
-const invadedLevels = computed(() => {
-  const ids = invaded.value?.invasion_ids ?? [];
-  return [...new Set(ids)].sort((a, b) => a - b).join(' / ');
-});
 
 type VariantSigKey =
   | 'weak' | 'resist' | 'stance' | 'hp' | 'atk' | 'def' | 'speed'
-  | 'skills' | 'camp' | 'rank' | 'intro' | 'figure' | 'invaded';
+  | 'skills' | 'camp' | 'rank' | 'intro' | 'figure';
 
 const VARIANT_SIG_KEY: Record<VariantSigKey, string> = {
   weak: 'catalog.filter.weak', resist: 'catalog.sig.resist', stance: 'catalog.sig.stance',
   hp: 'catalog.sig.hp', atk: 'catalog.sig.atk', def: 'catalog.sig.def', speed: 'catalog.charge.speed',
   skills: 'catalog.sig.skills', camp: 'catalog.filter.camp', rank: 'catalog.filter.category',
-  intro: 'catalog.sig.intro', figure: 'catalog.sig.figure', invaded: 'catalog.sig.invaded',
+  intro: 'catalog.sig.intro', figure: 'catalog.sig.figure',
 };
 const VARIANT_SIG_KEYS = Object.keys(VARIANT_SIG_KEY) as VariantSigKey[];
 const VARIANT_CELL_KEYS: VariantSigKey[] = ['weak', 'stance', 'hp', 'speed', 'skills'];
@@ -197,7 +192,6 @@ function variantSig(d: MonsterDetail): Record<VariantSigKey, string> {
     rank: d.rank || '',
     intro: d.intro || '',
     figure: d.figure || '',
-    invaded: JSON.stringify(d.invaded ?? null),
   };
 }
 
@@ -526,10 +520,6 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
             <span v-if="d.stance != null">{{ t('mob.stat.stance') }} {{ d.stance }}</span>
           </div>
           <h1 class="nk-mob-hero__name">{{ d.name }}</h1>
-          <RouterLink v-if="invaded" class="nk-mob-invaded" to="/voracity">
-            <span class="nk-mob-invaded__text">{{ t('nav.voracity') }}</span>
-            <span v-if="invadedLevels" class="nk-mob-invaded__lv">· {{ t('mob.level', { n: invadedLevels }) }}</span>
-          </RouterLink>
           <section class="nk-mob-hero__sec">
             <header class="nk-mob-sec__head">
               <h2 class="nk-mob-sec__title">{{ t('mob.sec.weakness') }}</h2>
