@@ -51,8 +51,8 @@ test.describe('应用外壳契约', () => {
   });
 
   test('输入框光标色 = 当前强调色（--primary）', async ({ page }) => {
-    await page.goto('/character');
-    await expect(page.locator('.nk-virtual-cell').first()).toBeVisible();
+    await page.goto('/monster');
+    await expect(page.locator('.nk-mob-card').first()).toBeVisible();
 
     const r = await page.evaluate(() => {
       const input = document.querySelector('.nk-cat-search input');
