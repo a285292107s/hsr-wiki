@@ -115,7 +115,7 @@ export const NODES: MapNode[] = [
   { id: 'home', name: '首页', en: 'HOME', layer: 'views', gx: 0, gy: 2,
     files: ['src/app/views/HomeView.vue', 'src/app/composables/use-home-release.ts', 'src/styles/home.css'], desc: '版本入册页：报头 + 版本钢印与同步日期 + 本期入册清单 + 站内即时搜索（ADR 0063）' },
   { id: 'catalog', name: '目录引擎', en: 'CATALOG ENGINE', layer: 'engine', gx: 1, gy: 2,
-    files: ['src/app/views/CatalogView.vue', 'src/app/catalog/pages.ts', 'src/app/catalog/CatalogPage.vue', 'src/app/catalog/CatalogToolbar.vue', 'src/app/catalog/CatalogFilterSelect.vue', 'src/app/catalog/use-virtual-grid.ts'], desc: '配置驱动：12 个目录注册项 + 虚拟滚动 + 搜索筛选工具条' },
+    files: ['src/app/views/CatalogView.vue', 'src/app/catalog/pages.ts', 'src/app/catalog/CatalogPage.vue', 'src/app/catalog/CatalogToolbar.vue', 'src/app/catalog/CatalogFilterSelect.vue', 'src/app/catalog/use-virtual-grid.ts'], desc: '配置驱动：10 个目录注册项 + 卡片渲染 + 搜索筛选工具条' },
   { id: 'detail', name: '详情页群', en: 'DETAIL VIEWS', layer: 'views', gx: 2, gy: 2,
     files: ['src/app/views/CharacterView.vue', 'src/app/views/LightconeView.vue', 'src/app/views/RelicView.vue', 'src/app/views/MonsterDetailView.vue', 'src/app/views/EndgameView.vue', 'src/app/views/EndgameModeView.vue'], desc: '角色/光锥/遗器/敌对/终局（含模式页）详情编排页（加载编排 + 骨架屏）' },
   { id: 'cw', name: '货币战争模式', en: 'CURRENCY WAR', layer: 'views', gx: 3, gy: 2,
