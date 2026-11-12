@@ -126,6 +126,14 @@ MODULE_SOURCES: dict[str, list[str]] = {
         str(OUTPUT_DIR / "maze_boss.json"),
         str(OUTPUT_DIR / "maze_peak.json"),
     ],
+    "monster_filter": [
+        str(OUTPUT_DIR / "monsters.json"),
+        str(OUTPUT_DIR / "maze.json"),
+        str(OUTPUT_DIR / "maze_extra.json"),
+        str(OUTPUT_DIR / "maze_boss.json"),
+        str(OUTPUT_DIR / "maze_peak.json"),
+        str(OUTPUT_DIR / "monsters"),
+    ],
     "currency": [
         "GridFightRoleBasicInfo.json", "AvatarConfig.json", "AvatarConfigLD.json",
         "AvatarSkillConfig.json", "AvatarSkillConfigLD.json",

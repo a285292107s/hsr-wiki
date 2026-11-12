@@ -25,7 +25,7 @@ python convert.py --raw                    # 关闭令牌化：输出完整中�
 
 令牌模式是默认路径（[ADR 0052](../../docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）：结构层 `public/data/cn/**` 里的文本是引用令牌 `"$t:<键>"`（`clean=False` 取到的原文用 `~raw` 变体），各语言正文落 `public/data/i18n/<语言>/<分组>.json`。**该模式禁用增量跳过**——语言包是整语言产物、分组可由多个模块写入，部分重跑会写出被截断的包。运行结束打印「结构层残留中文」清单（尚未令牌化的转换器自拼文案）。
 
-输出目录为 `public/data/cn/`（`config.py` 的 `OUTPUT_DIR`）；模块名以 `convert.py` 的 `MODULES` 为准，未知模块名报错退出；`endgame_catalog` 由 `endgame` 的全量输出派生（不读源数据），需在 `endgame` 之后运行。
+输出目录为 `public/data/cn/`（`config.py` 的 `OUTPUT_DIR`）；模块名以 `convert.py` 的 `MODULES` 为准，未知模块名报错退出；`endgame_catalog` / `monster_filter` 由终局全量输出派生（不读源数据），需在 `endgame` 之后运行；`monster_filter` 就地裁剪 `monsters.json`（665→270）并删除非终局模板的 `monsters/{id}.json`，使列表与详情只保留终局敌人。
 
 | 模块 | 输出文件 |
 | --- | --- |
@@ -40,6 +40,7 @@ python convert.py --raw                    # 关闭令牌化：输出完整中�
 | `relics` | `relics.json`、`relic_stories.json` |
 | `relic_affixes` | `relic_main_affixes.json`、`relic_sub_affixes.json` |
 | `monsters` | `monsters.json` |
+| `monster_filter` | 就地裁剪 `monsters.json` + 删除非终局模板详情页 |
 | `monster_detail` | `monsters/{id}.json` |
 | `endgame` | `maze.json`、`maze_extra.json`、`maze_boss.json`、`maze_peak.json` |
 | `endgame_catalog` | `maze.catalog.json`、`maze_extra.catalog.json`、`maze_boss.catalog.json`、`maze_peak.catalog.json` |

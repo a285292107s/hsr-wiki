@@ -82,8 +82,8 @@ llms.txt **不是收录杠杆**（Google 明文忽略它，依据见 [AI检索�
 | `/relic` | `prerender/relic.html` | relics.json | 62 |
 | `/relic/:id` | `prerender/relic/{id}.html` | relics.json 条目 | 同列表 id 集 |
 | `/item` | `prerender/item.html` | items.json | 仅 `name` 非空者（`item.ts:88` 过滤 name/desc/bg_desc 全空占位行）；无详情路由 |
-| `/monster` | `prerender/monster.html` | monsters.json | 632 |
-| `/monster/:id` | `prerender/monster/{id}.html` | monsters/{id}.json | 同列表 id 集 |
+| `/monster` | `prerender/monster.html` | monsters.json | 270（`monsters.json` 已被转换器裁剪为终局敌人） |
+| `/monster/:id` | `prerender/monster/{id}.html` | monsters/{id}.json | 同列表 id 集（270；非终局模板详情不产快照） |
 | `/endgame` | `prerender/endgame.html` | maze*.catalog.json（四模式） | 四模式赛季并集 |
 | `/endgame/{mode}` | `prerender/endgame/{mode}.html` | endgame_guide.json + maze*.catalog.json | 四模式各 1 页（玩法页；正则白名单，`/endgame/xyz` 落 404） |
 | `/endgame/:mode/:id` | `prerender/endgame/{mode}/{id}.html` | maze.catalog / maze_extra.catalog / maze_boss.catalog / maze_peak.catalog | 按 mode 取表，且**仅 `zh` 非空白者**（`endgame.ts:190`；未发布占位行如 boss 3022 不产快照、不入 sitemap，线上落 404） |

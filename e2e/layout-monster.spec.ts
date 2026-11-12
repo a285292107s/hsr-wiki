@@ -285,11 +285,11 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
-    '/monster/1004017：战斗数值逐因子上屏，拖动等级时曲线系数与战斗值同步重算',
+    '/monster/1004014：战斗数值逐因子上屏，拖动等级时曲线系数与战斗值同步重算',
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      const id = 1004017;
+      const id = 1004014;
       const mon = detailOf(id);
       const curve = readJson<Record<string, Record<string, Record<string, number>>>>(
         'public/data/cn/monster-level-curve.json',
@@ -383,7 +383,7 @@ test.describe('布局验收：敌方详情页', () => {
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      const id = 1003014;
+      const id = 300304401;
       const mon = detailOf(id);
       expect(String(mon.stats.hp), `${id} 的基准 HP 应有 4 位以上小数（断言前提）`).toMatch(/\.\d{4,}$/);
       expect(String(mon.stats.atk), `${id} 的基准 ATK 应有 4 位以上小数（断言前提）`).toMatch(/\.\d{4,}$/);
@@ -752,15 +752,16 @@ test.describe('布局验收：敌方详情页', () => {
         '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
       ).toEqual(appearSamples(dropMon).map(sampleLabel));
 
-      const festMon = detailOf(1004015);
-      await page.goto('/monster/1004015');
+      const actMon = detailOf(1002015);
+      await page.goto('/monster/1002015');
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
+      const actSamples = appearSamples(actMon);
       const festNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
-      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(appearSamples(festMon).map(sampleLabel));
-      expect(festNames, '活动级常量 StageName 不得作为关卡名上屏').not.toContain('承露天人');
-      expect(festNames[0], '活动链样本名应带「活动名 · 关卡名」前缀').toMatch(/^星天演武仪典 · /);
+      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(actSamples.map(sampleLabel));
+      expect(actSamples.filter((s) => s.activity).length, '1002015 应有带活动名的关卡样本（断言前提）').toBeGreaterThan(0);
+      expect(festNames.some((n) => n.includes(' · ')), '活动链样本名应带「活动名 · 关卡名」前缀').toBe(true);
 
-      for (const id of [1003011, 1003012]) {
+      for (const id of [1002011, 1002012]) {
         const mon = detailOf(id);
         expect(mon.appearances!.total, `${id} 应有出没计数（断言前提）`).toBeGreaterThan(0);
         expect(appearSamples(mon).map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
@@ -772,7 +773,6 @@ test.describe('布局验收：敌方详情页', () => {
       }
 
       const noChipId = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
-        .slice(0, 120)
         .map((m) => m.id)
         .find((id) => {
           const a = detailOf(id).appearances;
@@ -848,8 +848,8 @@ test.describe('布局验收：敌方详情页', () => {
         );
       };
 
-      await checkPhases(3025010);
-      const sibling = 4034015;
+      await checkPhases(4014010);
+      const sibling = 4034014;
       await page.goto(`/monster/4034013`);
       await expect(page.locator('.nk-mob-atlas__links')).toBeVisible();
       expect(
@@ -857,7 +857,7 @@ test.describe('布局验收：敌方详情页', () => {
         '同条目成员必须仍在「图鉴族」互链里',
       ).toContain(detailOf(sibling).name);
       await checkPhases(4034013);
-      await checkPhases(8015022);
+      await checkPhases(4034014);
 
       assertNoErrors();
     },
@@ -897,7 +897,7 @@ test.describe('布局验收：敌方详情页', () => {
         });
       };
       await check(2023030);
-      await check(2004013);
+      await check(1002012);
       assertNoErrors();
     },
   );
