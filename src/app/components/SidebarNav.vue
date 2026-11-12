@@ -200,6 +200,21 @@ const DEBUG_ITEM = {
     </RouterLink>
 
     <button
+      type="button"
+      class="ui-sidebar-link ui-sidebar-swap"
+      :title="swapAria"
+      :aria-label="swapAria"
+      @click="onSwap"
+    >
+      <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
+      <span class="ui-sidebar-link__text">
+        <span class="ui-sidebar-link__cn">{{ swapDest }}</span>
+        <span class="ui-sidebar-link__en">{{ swapLabel.en }}</span>
+      </span>
+      <span class="ui-sidebar-link__label">{{ swapDest }}</span>
+    </button>
+
+    <button
       ref="moreBtnRef"
       type="button"
       :title="t('nav.titleMore')"
@@ -232,21 +247,6 @@ const DEBUG_ITEM = {
         </span>
         <span class="ui-sidebar-link__label">{{ t('nav.debug') }}</span>
       </RouterLink>
-
-      <button
-        type="button"
-        class="ui-sidebar-link ui-sidebar-swap"
-        :title="swapAria"
-        :aria-label="swapAria"
-        @click="onSwap"
-      >
-        <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
-        <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">{{ swapDest }}</span>
-          <span class="ui-sidebar-link__en">{{ swapLabel.en }}</span>
-        </span>
-        <span class="ui-sidebar-link__label">{{ swapDest }}</span>
-      </button>
 
       <RouterLink
         :to="settingsPath"

@@ -98,14 +98,20 @@ test.describe('布局验收：跨模式入口文案', () => {
     await expect(swap).toHaveAttribute('title', '前往货币战争');
     await expect(swap).not.toContainText('交换');
 
-    await expect(page.locator('.ui-sidebar-tools').locator('.ui-sidebar-swap')).toHaveCount(1);
-    expect(await swap.evaluate((el) => el.nextElementSibling?.classList.contains('ui-sidebar-settings'))).toBe(true);
-    const vis = await page.evaluate(() => {
-      const s = document.querySelector('.ui-sidebar-swap')!.getBoundingClientRect();
-      const e = document.querySelector('.ui-sidebar-settings')!.getBoundingClientRect();
-      return { swapY: s.y, swapX: s.x, settingsY: e.y, settingsX: e.x };
+    expect(await page.locator('.ui-sidebar-tools .ui-sidebar-swap').count(), '切换按钮已移出工具组，直接置于章节项之后').toBe(0);
+    expect(
+      await swap.evaluate((el) => el.parentElement?.classList.contains('ui-sidebar') ?? false),
+      '切换按钮应是侧栏直接子节点（排在章节项之后）',
+    ).toBe(true);
+    const order = await page.evaluate(() => {
+      const kids = [...document.querySelector('.ui-sidebar')!.children];
+      return {
+        swapIdx: kids.findIndex((k) => k.classList.contains('ui-sidebar-swap')),
+        monsterIdx: kids.findIndex((k) => k.getAttribute('href') === '/monster'),
+      };
     });
-    expect(vis.swapY <= vis.settingsY + 1 || vis.swapX < vis.settingsX).toBe(true);
+    expect(order.monsterIdx, '常规模式应渲染敌人项').toBeGreaterThanOrEqual(0);
+    expect(order.swapIdx, '切换按钮应排在敌人项之后').toBeGreaterThan(order.monsterIdx);
 
     await swap.click();
     await expect(page).toHaveURL(/\/currency\/role$/);

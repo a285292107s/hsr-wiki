@@ -370,6 +370,7 @@
   .ui-sidebar-link:not(.ui-sidebar-swap):not(.ui-sidebar-settings):not(.ui-sidebar-more) {
     flex: 1 1 0; min-width: 0;
   }
+  .ui-sidebar-swap { order: 2; }
   .ui-sidebar-swap,
   .ui-sidebar-settings,
   .ui-sidebar-more {
