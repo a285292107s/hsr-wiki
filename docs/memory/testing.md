@@ -42,6 +42,7 @@
 - **等待条件必须带「样本数 ≥ N」前缀**：把「全部卡片都在界内」写成 `[].every(...)` 时，**空数组恒 true** ⇒ `waitForFunction` 秒过、给出假绿。同批还要：过滤入场动画未 reveal 的卡片（`backwards` + delay 期 `opacity: 0` / `translateY(14px)` 会给 `getBoundingClientRect` 多出位移量），且门槛不得高于稳定 reveal 的条数（IntersectionObserver threshold 0.5 时缓冲行不触发）。`e2e/helpers.ts`
 - **骨架不得复用「就绪判定类名」**：那个类名同时是 e2e 与视图的「等就绪」条件，骨架自己带上就会骗过所有等待、静默通过。骨架与就绪态的类名必须分开。`e2e/helpers.ts`（`waitForSettled` 的骨架退场门只认 `.nk-skeleton`）
 - **`getComputedStyle` 在 `border-style: none` 下仍会返回颜色**（等于元素文字色）⇒ 描边断言必须连 `width` / `style` 一起比，只比颜色会误报「有描边」。`e2e/layout-endgame*.spec.ts`
+- **就绪选择器不能绑「可选渲染分支」的类名**：`.nk-virtual-cell` 只在 `items.length > 400`（`CatalogPage.vue` 的 `VIRTUAL_THRESHOLD`）时渲染——物品页下架后能拿它当就绪判据的只剩超阈值的目录，敌方图鉴裁到 270 条后常规目录全走非虚拟分支，用例于是停在 `element(s) not found`（而它要验的是搜索框 `caret-color`，与虚拟网格实现无关）。判据：等待用**内容就绪**判据（卡面 `.nk-mob-card` / `.nk-idx-card`）；要专门验虚拟网格就显式挑仍超阈值的目录（当前 `/currency/augment`），并在数据量逼近阈值时复查。`e2e/shell.spec.ts` `src/app/catalog/CatalogPage.vue`
 - **`check-e2e-viewport-tags` 的用例归属判据（正则在任意缩进下都要命中）见本节「源码扫描型守卫先要『归属』正确」条**：`describe → for` 里的用例必须被报到它自己的行。
 - **CWV 量测口径**：必须对 `dist` 产物量（dev 的传输量是未压缩形态，数字无意义）；跨源资源无 TAO 时 `transferSize` 恒为 0；LCP 取 `startTime` **最大**的一条而不是首条。`docs/audit/UI质量验收标准.md`
 - **「等某个状态」的守卫，其等待上限必须与该现象的真实时长同量级**：上限过短 + 超时后继续测量 = **把合法中间态判成缺陷，比不加等待更危险**（只在高负载 CI 偶发，本地复现不出）。
