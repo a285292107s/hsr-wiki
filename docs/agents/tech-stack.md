@@ -35,7 +35,7 @@
 - **Python**：<!--ver:python-->3.12（CI 固定；本地最低 3.10——`requirements.txt` 无下限声明，故以 CI 为准）
 - 运行时依赖 `xxhash` <!--ver:xxhash-->3.0.0,<4.0.0；测试依赖 `pytest` <!--ver:pytest-->8.0.0,<10.0.0（权威源 `tools/converter/requirements.txt`）
 - Spine 运行时：spine-ts **双运行时** <!--ver:spine-ts-->4.2.43 / 4.1.23（4.0 骨架走 4.1，见 [ADR 0002](../adr/0002-spine-self-render-only.md) / [ADR 0009](../adr/0009-官网spine动画增量接入.md)）；权威源 `src/spine/constants.ts`
-- 上游数据：`vendor/TurnBasedGameData` 本地副本（**非 git 子模块**，gitignore，每日 CI 浅克隆）
+- 上游数据：`vendor/TurnBasedGameData` 本地副本（**非 git 子模块**，gitignore，每日 CI 稀疏浅克隆：仅 `ExcelOutput` + `TextMap` + `Config/ConfigCharacter`）
 
 ## 四、依赖现状
 

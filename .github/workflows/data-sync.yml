@@ -18,8 +18,15 @@ jobs:
 
       # 上游非 git 子模块：--depth 1 但保留 .git（version 模块读 HEAD 提交标题）；上游无新提交时产物无 diff，
       # 由提交步骤 diff 判空退出。
-      - name: Fetch upstream data (shallow clone)
-        run: git clone --depth 1 https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
+      # 稀疏检出只拉转换器真正读取的三块（ExcelOutput 全部 / TextMap 全部 / Config/ConfigCharacter），
+      # 丢弃 Stages、Story、Config 其余（约 1.38 GB，converter 从不读）：blob:none 只按需取这些路径的 blob。
+      # 保留 cone 模式的 README.md 根文件。完整判据与落位见 docs/memory/data-pipeline.md。
+      - name: Fetch upstream data (sparse shallow clone)
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
+          cd vendor/TurnBasedGameData
+          git sparse-checkout set ExcelOutput TextMap Config/ConfigCharacter
 
       - uses: actions/setup-python@v6
         with:

@@ -170,7 +170,7 @@ node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 →
 
 ## 数据转换工具（Python）
 
-需 `vendor/TurnBasedGameData` 本地目录（已 gitignore，克隆命令见 `.gitignore` 注释）。
+需 `vendor/TurnBasedGameData` 本地目录（已 gitignore，**稀疏检出**只取 `ExcelOutput` + `TextMap` + `Config/ConfigCharacter`；克隆命令见 `.gitignore` 注释）。
 
 ```bash
 cd tools/converter

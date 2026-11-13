@@ -4,7 +4,7 @@
 
 ## 数据转换管线（Python）
 
-`tools/converter/` 将 `vendor/TurnBasedGameData/`（本地数据目录，**非 git 子模块**：ExcelOutput + TextMap；克隆命令见 `.gitignore` 注释）转换为 `public/data/cn/` 下的 JSON。上游数据无手动流程：`data-sync.yml` 每日 04:00 UTC 自动浅克隆上游 → `convert.py --force` → `gen_catalog.py` 重建 `DATA_CATALOG.md` 总索引与 `DATA_CATALOG.parts/` 分片 → 有 diff 才提交推送 main（转换失败即 job 失败，不推送坏数据）。
+`tools/converter/` 将 `vendor/TurnBasedGameData/`（本地数据目录，**非 git 子模块**；**稀疏检出**只取转换器读取的三块 `ExcelOutput` + `TextMap` + `Config/ConfigCharacter`，丢弃 `Stages` / `Story` / `Config` 其余 ≈1.38 GB；克隆命令见 `.gitignore` 注释）转换为 `public/data/cn/` 下的 JSON。上游数据无手动流程：`data-sync.yml` 每日 04:00 UTC 自动稀疏浅克隆上游 → `convert.py --force` → `gen_catalog.py` 重建 `DATA_CATALOG.md` 总索引与 `DATA_CATALOG.parts/` 分片 → 有 diff 才提交推送 main（转换失败即 job 失败，不推送坏数据）。
 
 - 入口：`convert.py` → `MODULES` 注册表驱动，支持 `--only` / `--force` / `--pretty`
 - 模块 → 源文件映射的**唯一事实源是 `incremental.py` 的 `MODULE_SOURCES`**（由 `tools/converter/tests/test_incremental.py` AST 校验锁住，防止声明与实际读取漂移）；本文件不复述映射表，需要时读代码

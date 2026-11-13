@@ -50,7 +50,11 @@ venv/
 
 # Local upstream data (converter source, cloned from DimbreathBot/TurnBasedGameData)
 # 2026-08-12: removed from git submodule to keep Vercel builds fast (~13MB repo);
-# clone manually: git clone https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
+# 2026-11-13: 改稀疏检出，只拉转换器读取的三块（ExcelOutput / TextMap / Config/ConfigCharacter），
+#   丢弃 Stages / Story / Config 其余（约 1.38 GB，converter 从不读）。手动克隆：
+#   git clone --depth 1 --filter=blob:none --sparse https://github.com/DimbreathBot/TurnBasedGameData.git vendor/TurnBasedGameData
+#   cd vendor/TurnBasedGameData && git sparse-checkout set ExcelOutput TextMap Config/ConfigCharacter
+#   （CI 与本地取数口径一致，见 .github/workflows/data-sync.yml 与 docs/memory/data-pipeline.md）
 vendor/TurnBasedGameData/
 # 源表冻结快照（如 `TurnBasedGameData-cw-season-1`）：本地备份，永不入库
 vendor/TurnBasedGameData-*/
