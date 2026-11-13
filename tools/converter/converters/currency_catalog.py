@@ -78,6 +78,17 @@ def _flatten_property_mods(lst: list | None, prop_names: dict[str, str] | None =
         out.append(node)
     return out
 
+def _season_item_membership() -> dict[int, list[int]]:
+    membership: dict[int, set[int]] = {}
+    for row in _load_optional("GridFightSeasonItem.json"):
+        item_id = row.get("ItemID")
+        season_id = row.get("SeasonID")
+        if item_id is None or not isinstance(season_id, int) or isinstance(season_id, bool):
+            continue
+        membership.setdefault(item_id, set()).add(season_id)
+    return {item_id: sorted(seasons) for item_id, seasons in membership.items()}
+
+
 def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, season: dict | None = None) -> int:
     items_raw = _load_excel("GridFightItems.json")
     equip_raw = _load_excel("GridFightEquipment.json")
@@ -88,6 +99,7 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, 
     forge_raw = _load_excel("GridFightForge.json")
 
     items_index = _build_index(items_raw)
+    season_items = _season_item_membership()
     equip_index = _build_index(equip_raw)
     cat_index = _build_index(cat_raw, "EquipCategory")
     tag_index = _build_index(tag_raw, "TagID")
@@ -97,6 +109,7 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, 
 
     out: list[dict] = []
     skipped_unnamed: list[int] = []
+    unregistered: list[int] = []
     for item in items_raw:
         iid = item["ID"]
         name = resolve_text(item.get("ItemName", {}))
@@ -132,6 +145,10 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, 
         recommend = recommend_index.get(iid)
         recommend_roles = recommend.get("RecommendRoleIDList", []) if recommend else []
 
+        season_ids = season_items.get(iid)
+        if season_ids is None:
+            unregistered.append(iid)
+
         consumable = consumable_index.get(iid)
         forge = forge_index.get(iid)
         if consumable:
@@ -154,10 +171,21 @@ def _convert_equipment(out_dir: Path, prop_names: dict[str, str] | None = None, 
             "tags": tags,
             "props": props,
             "recommend_roles": recommend_roles,
+            "season_ids": season_ids,
         })
 
     if skipped_unnamed:
         logger.warning("  装备图鉴：过滤名称解析失败条目 %s（共 %d 条）", skipped_unnamed, len(skipped_unnamed))
+    if unregistered:
+        logger.warning("  装备图鉴：赛季归属缺失 %d 条未在 GridFightSeasonItem 登记（示例 %s），season_ids 置 null", len(unregistered), unregistered[:8])
+
+    current_season_id = (season or {}).get("id")
+    in_current = sum(
+        1
+        for item in out
+        if isinstance(item["season_ids"], list) and current_season_id in item["season_ids"]
+    )
+    logger.info("  装备图鉴：当前赛季（%s）登记 %d/%d 条", current_season_id, in_current, len(out))
 
     out.sort(key=lambda x: (x["category"], -x["priority"], x["id"]))
 

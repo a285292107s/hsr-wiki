@@ -34,8 +34,10 @@ export const currencyAugmentPage: CatalogPageConfig = {
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
-    const { augments } = await loadLocalCurrencyAugments();
-    return augments.map((a) => ({
+    const { augments, season } = await loadLocalCurrencyAugments();
+    const currentSeason = season?.id ?? null;
+    const scoped = currentSeason == null ? augments : augments.filter((a) => a.season_id === currentSeason);
+    return scoped.map((a) => ({
       id: String(a.id),
       name: a.name,
       icon: a.icon,

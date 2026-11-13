@@ -940,11 +940,18 @@ let sitemapCount = -1;
   addSpec('lightcone.html', '/lightcone', 'light_cones.json', (j) => j.filter(named), 'light_cones.json 非空 name（lightcone.ts:19）');
   addSpec('relic.html', '/relic', 'relics.json', (j) => j.filter(named), 'relics.json 非空 name（relic.ts:17）');
   addSpec('monster.html', '/monster', 'monsters.json', (j) => j.filter(named), 'monsters.json 非空 name（monster.ts:35）');
-  addSpec('currency/role.html', '/currency/role', 'currency/role.json', (j) => j.roles, 'currency/role.json roles（无过滤）');
-  addSpec('currency/item.html', '/currency/item', 'currency/equipment.json', (j) => j.items, 'currency/equipment.json items（无过滤）');
-  addSpec('currency/buff.html', '/currency/buff', 'currency/portals.json', (j) => j.portals.filter((p) => p && p.in_book), 'currency/portals.json in_book（currency-portal.ts:30）');
-  addSpec('currency/augment.html', '/currency/augment', 'currency/augments.json', (j) => j.augments, 'currency/augments.json augments（无过滤）');
-  addSpec('currency/trait.html', '/currency/trait', 'currency/traits.json', (j) => j.traits, 'currency/traits.json traits（无过滤）');
+  const cwSeasonId = (j) => (j && j.season && Number.isInteger(j.season.id) ? j.season.id : null);
+  const cwInSeason = (j, item, field) => {
+    const sid = cwSeasonId(j);
+    if (sid == null) return true;
+    const box = item && item[field];
+    return Array.isArray(box) ? box.includes(sid) : box === sid;
+  };
+  addSpec('currency/role.html', '/currency/role', 'currency/role.json', (j) => j.roles.filter((r) => cwInSeason(j, r, 'season_ids')), 'currency/role.json roles 含当前赛季（currency-role.ts）');
+  addSpec('currency/item.html', '/currency/item', 'currency/equipment.json', (j) => j.items.filter((it) => cwInSeason(j, it, 'season_ids')), 'currency/equipment.json season_ids 含当前赛季（currency-equipment.ts）');
+  addSpec('currency/buff.html', '/currency/buff', 'currency/portals.json', (j) => j.portals.filter((p) => p && p.in_book && cwInSeason(j, p, 'season_id')), 'currency/portals.json in_book ∩ 当前赛季（currency-portal.ts）');
+  addSpec('currency/augment.html', '/currency/augment', 'currency/augments.json', (j) => j.augments.filter((a) => cwInSeason(j, a, 'season_id')), 'currency/augments.json 当前赛季（currency-augment.ts）');
+  addSpec('currency/trait.html', '/currency/trait', 'currency/traits.json', (j) => j.traits.filter((t) => cwInSeason(j, t, 'season_id')), 'currency/traits.json 当前赛季（currency-trait.ts）');
   let endgameWant = 0;
   let endgameOk = true;
   for (const f of ['maze.catalog.json', 'maze_extra.catalog.json', 'maze_boss.catalog.json', 'maze_peak.catalog.json']) {

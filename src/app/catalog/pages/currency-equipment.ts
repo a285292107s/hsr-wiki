@@ -92,8 +92,12 @@ export const currencyEquipmentPage: CatalogPageConfig = {
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
-    const { items } = await loadLocalCurrencyEquipment();
-    return items.map((it) => ({
+    const { items, season } = await loadLocalCurrencyEquipment();
+    const currentSeason = season?.id ?? null;
+    const scoped = currentSeason == null
+      ? items
+      : items.filter((it) => (it.season_ids ?? []).includes(currentSeason));
+    return scoped.map((it) => ({
       id: String(it.id),
       name: it.name,
       icon: it.icon,

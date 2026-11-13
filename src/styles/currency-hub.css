@@ -408,7 +408,6 @@
 }
 
 .nk-cwsc-ledger__total { font-size: var(--nk-fs-6); font-weight: 600; color: var(--text3); }
-.nk-cwsc-ledger__note { grid-column: 3; font-size: var(--nk-fs-3); color: var(--text3); }
 .nk-cwsc-ledger__go { grid-column: 4; display: flex; align-self: center; color: var(--text3); transition: transform var(--nk-dur-hover) var(--nk-ease-out); }
 .nk-cwsc-ledger__go svg { width: 12px; height: 12px; }
 .nk-cwsc-ledger__row:hover { background: color-mix(in srgb, var(--card) 76%, var(--primary) 24%); }
@@ -498,7 +497,6 @@
   .nk-cwsc-trait__quality { display: none; }
   .nk-cwsc-trait__carriers { display: none; }
   .nk-cwsc-ledger__row { grid-template-columns: 84px minmax(0, 1fr) 16px; gap: 8px; }
-  .nk-cwsc-ledger__note { grid-column: 2; grid-row: 2; }
   .nk-cwsc-ledger__go { grid-column: 3; grid-row: 1; }
   .nk-cwsc-sk__premiere { grid-template-columns: minmax(0, 1fr); }
   .nk-cwsc-sk__art { height: 220px; }

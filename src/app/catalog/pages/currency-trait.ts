@@ -47,8 +47,10 @@ export const currencyTraitPage: CatalogPageConfig = {
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
-    const { traits } = await loadLocalCurrencyTraits();
-    return traits.map((t) => ({
+    const { traits, season } = await loadLocalCurrencyTraits();
+    const currentSeason = season?.id ?? null;
+    const scoped = currentSeason == null ? traits : traits.filter((t) => t.season_id === currentSeason);
+    return scoped.map((t) => ({
       id: String(t.id),
       name: t.name,
       href: activeHref(`/currency/trait/${t.id}`),

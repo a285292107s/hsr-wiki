@@ -198,6 +198,7 @@ export interface CurrencyEquipEntry {
   tags: CurrencyEquipTag[];
   props: CurrencyEquipProp[];
   recommend_roles: number[];
+  season_ids?: number[] | null;
 }
 
 export interface CurrencyEquipList {

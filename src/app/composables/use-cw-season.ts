@@ -69,7 +69,7 @@ export interface CwDomainStat {
   key: 'portals' | 'augments' | 'equipment';
   navKey: string;
   href: string;
-  season: number | null;
+  season: number;
   total: number;
 }
 
@@ -287,7 +287,7 @@ interface DomainSnapshot {
   seasonId: number | null;
   portals: { season: number; total: number } | null;
   augments: { season: number; total: number } | null;
-  equipment: { total: number } | null;
+  equipment: { season: number; total: number } | null;
   failed: number;
 }
 
@@ -321,7 +321,11 @@ async function loadDomainSnapshot(): Promise<DomainSnapshot> {
     }),
     safeLoad(async () => {
       const list = await loadLocalCurrencyEquipment();
-      return { total: list.items.length };
+      const seasonId = list.season?.id ?? null;
+      return {
+        season: list.items.filter((item) => seasonId != null && (item.season_ids ?? []).includes(seasonId)).length,
+        total: list.items.length,
+      };
     }),
   ]);
   return {
@@ -358,7 +362,7 @@ function toLedger(snapshot: DomainSnapshot): CwDomainStat[] {
       key: 'equipment',
       navKey: 'nav.cwEquipment',
       href: activeHref('/currency/item'),
-      season: null,
+      season: snapshot.equipment.season,
       total: snapshot.equipment.total,
     });
   }

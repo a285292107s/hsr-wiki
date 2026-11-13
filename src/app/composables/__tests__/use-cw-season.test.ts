@@ -4,7 +4,7 @@ import type { CatalogItem } from '../../catalog/types';
 
 const LEDGER: CwDomainStat[] = [
   { key: 'portals', navKey: 'nav.cwPortal', href: '/currency/buff', season: 36, total: 120 },
-  { key: 'equipment', navKey: 'nav.cwEquipment', href: '/currency/item', season: null, total: 269 },
+  { key: 'equipment', navKey: 'nav.cwEquipment', href: '/currency/item', season: 174, total: 269 },
 ];
 
 const roleOf = (id: string, over: Record<string, unknown> = {}): CatalogItem => ({
@@ -189,10 +189,11 @@ describe('buildCwSeason：羁绊分类与四件套', () => {
 });
 
 describe('buildCwSeason：账房与元数据', () => {
-  it('账房原样透传，season 为 null 表示该域没有赛季字段', () => {
+  it('账房原样透传，每个域都带本赛季登记数与全量', () => {
     const season = buildCwSeason([], [], LEDGER);
     expect(season.ledger).toEqual(LEDGER);
-    expect(season.ledger[1]!.season).toBeNull();
+    expect(season.ledger[1]!.season).toBe(174);
+    expect(season.ledger[1]!.total).toBe(269);
   });
 
   it('赛季号 / 版本 / 同步日随元数据透传', () => {

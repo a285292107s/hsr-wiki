@@ -68,9 +68,11 @@ export const currencyRolePage: CatalogPageConfig = {
     await import('../../../../src/styles/currency-role-skills.css');
   }],
   async fetchData() {
-    const { roles } = await loadLocalCurrencyRoles();
+    const { roles, season } = await loadLocalCurrencyRoles();
+    const currentSeason = season?.id ?? null;
+    const scoped = currentSeason == null ? roles : roles.filter((r) => r.season_ids.includes(currentSeason));
     const gender = getSavedTrailblazerGender();
-    return roles.map((r) => {
+    return scoped.map((r) => {
       const traits = r.traits || [];
       const avatarId = shouldUseFemaleAvatar(gender, r.female_avatar_id) ? r.female_avatar_id : r.avatar_id;
       return {
@@ -163,23 +165,27 @@ export const currencyRolePage: CatalogPageConfig = {
       });
     }
 
-    filters.push({
-      key: 'is_expert',
-      labelKey: 'catalog.filter.expert',
-      options: [
-        { val: '', labelKey: 'catalog.all' },
-        { val: 'true', labelKey: 'catalog.option.expertOnly' },
-      ],
-    });
+    if (items.some((it) => it.is_expert)) {
+      filters.push({
+        key: 'is_expert',
+        labelKey: 'catalog.filter.expert',
+        options: [
+          { val: '', labelKey: 'catalog.all' },
+          { val: 'true', labelKey: 'catalog.option.expertOnly' },
+        ],
+      });
+    }
 
-    filters.push({
-      key: 'has_equipment',
-      labelKey: 'catalog.filter.lightcone',
-      options: [
-        { val: '', labelKey: 'catalog.all' },
-        { val: 'true', labelKey: 'catalog.option.hasBackLightcone' },
-      ],
-    });
+    if (items.some((it) => it.has_equipment)) {
+      filters.push({
+        key: 'has_equipment',
+        labelKey: 'catalog.filter.lightcone',
+        options: [
+          { val: '', labelKey: 'catalog.all' },
+          { val: 'true', labelKey: 'catalog.option.hasBackLightcone' },
+        ],
+      });
+    }
 
     return filters;
   },

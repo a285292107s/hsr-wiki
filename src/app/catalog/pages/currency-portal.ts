@@ -25,9 +25,11 @@ export const currencyPortalPage: CatalogPageConfig = {
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
   async fetchData() {
-    const { portals } = await loadLocalCurrencyPortals();
+    const { portals, season } = await loadLocalCurrencyPortals();
+    const currentSeason = season?.id ?? null;
     return portals
       .filter((p) => p.in_book)
+      .filter((p) => currentSeason == null || p.season_id === currentSeason)
       .map((p) => ({
         id: String(p.id),
         name: p.title,

@@ -27,24 +27,31 @@ test.describe('布局验收：货币战争主题', () => {
     );
     expect(acts, '长卷固定四幕：启幕 → 板块 → 名册 → 账房').toEqual(['premiere', 'traits', 'roles', 'ledger']);
 
-    const roleData = readJson<{
-      roles: { id: number; name: string; avatar_id: number; rarity: number; is_season_new?: boolean; traits: { id: number }[] }[];
-    }>('public/data/cn/currency/role.json').roles;
-    const traitData = readJson<{
+    const roleDb = readJson<{
+      season?: { id: number | null };
+      roles: { id: number; name: string; avatar_id: number; rarity: number; season_ids: number[]; is_season_new?: boolean; traits: { id: number }[] }[];
+    }>('public/data/cn/currency/role.json');
+    const traitDb = readJson<{
+      season?: { id: number | null };
       traits: {
-        id: number; name: string; cat: string; simple_desc: string; is_season_new?: boolean;
+        id: number; name: string; cat: string; simple_desc: string; season_id: number; is_season_new?: boolean;
         package?: { invite: number | null; stock: number | null; badge: number | null };
       }[];
-    }>('public/data/cn/currency/traits.json').traits;
+    }>('public/data/cn/currency/traits.json');
+    const seasonId = roleDb.season?.id ?? null;
+    const roleData = roleDb.roles;
+    const traitData = traitDb.traits;
+    const roleS2 = seasonId == null ? roleData : roleData.filter((role) => role.season_ids.includes(seasonId));
+    const traitS2 = seasonId == null ? traitData : traitData.filter((trait) => trait.season_id === seasonId);
     const newRoles = roleData.filter((role) => role.is_season_new === true);
     const newTraits = traitData.filter((trait) => trait.is_season_new === true);
 
     const figures = await page.locator('.nk-cwsc-figure__num').evaluateAll((els) =>
       els.map((el) => (el.textContent ?? '').replace(/\s+/g, '').trim()),
     );
-    expect(figures, '账头两个数是「本季新增 / 全量」').toEqual([
-      `${newRoles.length}/${roleData.length}`,
-      `${newTraits.length}/${traitData.length}`,
+    expect(figures, '账头两个数是「本季新增 / 本赛季全量」').toEqual([
+      `${newRoles.length}/${roleS2.length}`,
+      `${newTraits.length}/${traitS2.length}`,
     ]);
 
     const catRows = await page.locator('.nk-cwsc-traits__col').evaluateAll((els) =>
@@ -137,13 +144,19 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-cwsc-act')).toHaveCount(0);
     await expect(page.locator('.nk-cwsc-figures')).toHaveCount(0);
     const archiveTotals = [
-      readJson<{ roles: unknown[] }>('public/data/cn/currency/role.json').roles.length,
-      readJson<{ traits: unknown[] }>('public/data/cn/currency/traits.json').traits.length,
+      readJson<{ season?: { id: number | null }; roles: { season_ids: number[] }[] }>('public/data/cn/currency/role.json'),
+      readJson<{ season?: { id: number | null }; traits: { season_id: number }[] }>('public/data/cn/currency/traits.json'),
     ];
+    const archiveCount = archiveTotals.map((db) => {
+      const sid = db.season?.id ?? null;
+      return sid == null
+        ? (('roles' in db ? db.roles : db.traits) as unknown[]).length
+        : ('roles' in db ? db.roles.filter((r) => r.season_ids.includes(sid)).length : db.traits.filter((t) => t.season_id === sid).length);
+    });
     const holds = await page.locator('.nk-cwsc-hold').evaluateAll((els) =>
       els.map((el) => Number((el.querySelector('.nk-cwsc-hold__num')?.textContent ?? '').trim())),
     );
-    expect(holds, '空态仍保留档案存量，且是全量').toEqual(archiveTotals);
+    expect(holds, '空态仍保留档案存量，且是本赛季全量').toEqual(archiveCount);
     await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);

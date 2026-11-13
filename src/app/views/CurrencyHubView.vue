@@ -285,11 +285,7 @@ onMounted(() => { void load(); });
               <li v-for="row in season.ledger" :key="row.key">
                 <RouterLink class="nk-cwsc-ledger__row" :to="row.href">
                   <span class="nk-cwsc-ledger__label">{{ t(row.navKey) }}</span>
-                  <span class="nk-cwsc-ledger__num">
-                    <template v-if="row.season != null">{{ row.season }}<span class="nk-cwsc-ledger__total">/{{ row.total }}</span></template>
-                    <template v-else>{{ row.total }}</template>
-                  </span>
-                  <span v-if="row.season == null" class="nk-cwsc-ledger__note">{{ t('cwHub.equipNote') }}</span>
+                  <span class="nk-cwsc-ledger__num">{{ row.season }}<span class="nk-cwsc-ledger__total">/{{ row.total }}</span></span>
                   <span class="nk-cwsc-ledger__go" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </span>

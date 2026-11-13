@@ -1404,11 +1404,14 @@ function currencyHubPages(ctx) {
 
 
 function currencyRolePages(ctx) {
-  const roles = readJson('currency/role.json').roles || [];
+  const roleData = readJson('currency/role.json');
+  const seasonId = roleData.season?.id ?? null;
+  const roles = roleData.roles || [];
+  const listRoles = seasonId == null ? roles : roles.filter((r) => (r.season_ids || []).includes(seasonId));
   const links = roles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}` }));
   const chargeText = (r) => (r.charge_type || []).map((c) => cwChargeLabel(c)).join(' · ');
-  const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: gameName(), n: roles.length });
-  const items = roles.map((r) => ({
+  const summaryPlain = uiT('snapshot.sum.cwRole', '{site}货币战争角色图鉴：共 {n} 名可招募角色，含费用、前后台定位与羁绊。', { site: gameName(), n: listRoles.length });
+  const items = listRoles.map((r) => ({
     name: cwRoleName(r),
     href: `/currency/role/${r.id}`,
     meta: [esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })), esc(cwFbLabel(r.front_back_type)), esc(chargeText(r))].filter(Boolean).join(' · '),
@@ -1517,7 +1520,9 @@ function currencyRolePages(ctx) {
 function currencyListPages(ctx) {
   const pages = [];
 
-  const equip = (readJson('currency/equipment.json').items || []).filter((e) => e.name);
+  const equipData = readJson('currency/equipment.json');
+  const equipSeason = equipData.season?.id ?? null;
+  const equip = (equipData.items || []).filter((e) => e.name && (equipSeason == null || (e.season_ids || []).includes(equipSeason)));
   const equipSummary = uiT('snapshot.sum.cwItem', '{site}货币战争装备图鉴：共 {n} 件装备，含分类、效果与属性加成。', { site: gameName(), n: equip.length });
   const equipItems = equip.map((e) => {
     const tags = (e.tags || []).map((t) => clean(t.desc)).filter(Boolean).join('、');
@@ -1543,7 +1548,9 @@ function currencyListPages(ctx) {
     }),
   }));
 
-  const portals = (readJson('currency/portals.json').portals || []).filter((p) => p.in_book && p.title);
+  const portalData = readJson('currency/portals.json');
+  const portalSeason = portalData.season?.id ?? null;
+  const portals = (portalData.portals || []).filter((p) => p.in_book && p.title && (portalSeason == null || p.season_id === portalSeason));
   const portalSummary = uiT('snapshot.sum.cwPortal', '{site}货币战争投资环境图鉴：共 {n} 个投资环境。', { site: gameName(), n: portals.length });
   const portalItems = portals.map((p) => ({ name: p.title, href: null, meta: esc(ui('nav.cwPortal', '投资环境')), desc: txtSafe(p.desc, p.params, 400, hasParamSemantics(p)) }));
   pages.push(makePage('currency-portal-list', {
@@ -1560,7 +1567,9 @@ function currencyListPages(ctx) {
     }),
   }));
 
-  const augments = (readJson('currency/augments.json').augments || []).filter((a) => a.name);
+  const augData = readJson('currency/augments.json');
+  const augSeason = augData.season?.id ?? null;
+  const augments = (augData.augments || []).filter((a) => a.name && (augSeason == null || a.season_id === augSeason));
   const augSummary = uiT('snapshot.sum.cwAugment', '{site}货币战争投资策略图鉴：共 {n} 条投资策略。', { site: gameName(), n: augments.length });
   const augItems = augments.map((a) => ({
     name: a.name,
@@ -1587,11 +1596,14 @@ function currencyListPages(ctx) {
 
 
 function currencyTraitPages(ctx) {
-  const traits = readJson('currency/traits.json').traits || [];
+  const traitData = readJson('currency/traits.json');
+  const seasonId = traitData.season?.id ?? null;
+  const traits = traitData.traits || [];
+  const listTraits = seasonId == null ? traits : traits.filter((t) => t.season_id === seasonId);
   const roles = readJson('currency/role.json').roles || [];
   const links = traits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}` }));
-  const summaryPlain = uiT('snapshot.cwTraitSummary', '{site}货币战争羁绊图鉴：共 {n} 个羁绊，含激活人数层级与成员加成。', { site: gameName(), n: traits.length });
-  const items = traits.map((t) => ({
+  const summaryPlain = uiT('snapshot.cwTraitSummary', '{site}货币战争羁绊图鉴：共 {n} 个羁绊，含激活人数层级与成员加成。', { site: gameName(), n: listTraits.length });
+  const items = listTraits.map((t) => ({
     name: t.name,
     href: `/currency/trait/${t.id}`,
     meta: [esc(cwCatLabel(t.cat)), esc(uiT('egm.value.floors', '{n} 层', { n: (t.layers || []).length }, (t.layers || []).length))].filter(Boolean).join(' · '),
