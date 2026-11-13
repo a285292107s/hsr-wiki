@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "Qualität {name}",
   "catalog.relic.search": "Relikte suchen...",
   "catalog.relic.title": "Relikte",
+  "catalog.searchLabel": "Suche",
   "catalog.sig.atk": "Angriff",
   "catalog.sig.def": "Verteidigung",
   "catalog.sig.figure": "Artwork",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Terracotta",
   "toast.cdnDown": "CDN-Ressourcen nicht verfügbar; Bilder und Animationen eingeschränkt",
   "toast.cdnUp": "CDN wieder verfügbar; Bilder neu geladen",
+  "toast.close": "Schließen",
+  "toast.region": "Benachrichtigungen",
   "ui.footerMotto": "Möge diese Reise uns zu den Sternen führen",
   "vor.invasionLevel": "Korruptionsstufe {n}",
   "vor.stageCount": "{n} Stufe | {n} Stufen"

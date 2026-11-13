@@ -28,7 +28,11 @@
 - **`min-height` 撑高的 flex 按钮里，`align-items: baseline` 会把内容钉在行首**：单行 flex 容器把基线组放在行首、多余空间全落到尾部 ⇒ 44px 触控按钮里文字墨迹贴着上沿。而「按钮高 44 + 条高 47」两条断言在贴顶与居中两种形态下都成立，抓不到它——判据必须取**墨迹的上留白与下留白之差**。修法只有 `align-items: center`：`align-content: center` 对 `flex-wrap: nowrap` 的单行容器无效。
 - **删掉详情页里最后一个可聚焦元素＝滚动盒同时丢掉键盘入口与 axe 通过**：`.nk-page--detail` 是各详情视图根节点上的**独立滚动盒**（`position: absolute; inset: 0; overflow-y: auto`），与文档滚动无关 ⇒ 焦点不在其中时 PageDown / 方向键滚不动内容，axe 报 `scrollable-region-focusable`。判据：`document.activeElement` 落在容器内 + 按 PageDown 后容器 `scrollTop` 增长；修法是根节点挂 `tabindex="0"`（焦点环由 tokens 的 `[tabindex]:focus-visible` 白送）。`src/app/views/RelicView.vue`
 - **滚动时间轴驱动的「入场」若带 opacity，会把未进视口的区块判成低对比度**：`animation-timeline: view()` 把视口外元素钉在 `from` 态，axe 量的是渲染后的**有效色**，于是正文被算成 2:1 量级的假失败。入场只用 `translate` / `transform`、不碰 opacity；改成单文档后每个区块都会进一次 view 时间轴，这个坑才显形。`src/styles/relic.css`
-- **靠「滚动即关闭」收口的浮层有两类合法滚动会被误判成失焦，两个豁免缺一即「菜单自己滚一下就没了」**：① 监听挂在 `document` 的 capture 阶段时，`scroll` 不冒泡、任何后代的滚动都会冒到文档 ⇒ 必须放行浮层**自身**的滚动（长选项列表 `overflow-y: auto`；浮层 Teleport 到 body，与视图滚动容器隔离）；② 点击按钮瞬间浏览器会把按钮滚进视口，紧随其后的 `scroll` 会把刚打开的浮层立刻关掉 ⇒ 需开窗（本项目 120ms）吸收这段自动滚动。自动化点击同样触发 ②。`src/app/catalog/CatalogFilterSelect.vue`
+- **浮层关闭别自己实现**：旧实现靠 document 级 capture `scroll` + 点击「滚动即关闭」，为此要两个豁免（放行浮层自身滚动、开 120ms 窗口吸收「点击按钮时浏览器把按钮滚进视口」的自动滚动，自动化点击同样会踩）。改用 `popover="auto"` + `popovertarget` 后 light dismiss / Escape / 顶层全交回浏览器，只剩 resize 与 capture `scroll` 做重定位——**重定位时若 `scroll` 来自面板内部必须跳过**，否则「菜单自己滚一下就位移」。`src/app/catalog/CatalogFilterSelect.vue`
+- **滚动条滑块是非文本对比度，三道门禁都不管**：滑块取 `--border` / `--line-2` / `--border2` 这类低透明边框令牌时，合成到 `--bg` 只有 1.19–1.67:1（5 套强调色逐套实测），远低于 WCAG 1.4.11 的 3:1，而 `check-contrast`（只算文字令牌）与 axe（不检滚动条）全绿。**主色给 80% 也不够**——slate 2.96 / iris 2.98 卡在 3:1 线下；必须 100% `--primary`（3.95–4.30）。消费点收口到 `--nk-scrollbar-thumb` / `--nk-scrollbar-track`。
+- **`overflow: visible` 上的 `::-webkit-scrollbar` 是永不渲染的死规则**：`.nk-panels` 两条即属此（宿主从不滚动），删除无副作用；判死判据 = 宿主计算值 `overflow-y` 不是 `auto` / `scroll` / `hidden`。
+- **`role="menu"` 是一份键盘契约，不是装饰**：写了 role 却没方向键 / Escape / 焦点进入，axe 与静态审查都抓不到（Tab 顺序会穿过整页才落到选项）。判据 = 打开后 `document.activeElement` 是否落在选项内、Escape 是否关闭。修法优先退回「button + `popover="auto"`」，把关闭与焦点交还浏览器。
+- **定时 dismiss 的 toast 要先看焦点**：焦点落在 toast 内时自动消失等于抢走正在读的内容。判据 = `host.contains(document.activeElement)` 为真时**顺延重排定时器**，不能直接丢弃（丢弃会让它永不消失）；关闭入口必须是真按钮，不可用整块 `div` 的 click 兼作关闭。
 
 ## 令牌收口与迁移
 
@@ -37,7 +41,7 @@
 - **调试台系统地图只保留三层编码**：地形段位＝层域、色相＝域（站内取 `--primary`、外部与交付取 `--gold-400`）、高度＝该模块接口数；线型＝路径类型。**不要再按 19 个分层各自配色**——18+ 色相读不出来，且等于把 5 个强调色族当调色板用（缺省橄榄色下还会与绿色的「数据域」撞色，所以域只留两色：站内 / 外部）。分层名只在检视面板出现；原始层直连一律经 `--nk-dom`（模块）与 `--nk-wire-*`（线型）两个局部变量出口，新增消费点复用它，别再在模板里写颜色。`src/app/debug/system-map/`
 - **`--elem-*` 七个令牌全仓零消费者**：故「让角色页用上属性身份色」是零新颜色、零四步评审的改动；但扩展成 hero 整块会撞单强调色通道，需单独裁决。
 - **页面级共享原语改造必须作用域化**：`.nk-title` 被六个页面共享，改 `tokens.css` 等于同时改六个页面版面。「改了某页 CSS 会不会波及别页」的第一步应该是**数根类名的写入方**（某根类全仓只有一处写入 ⇒ 天然不外溢），而不是先跑全量 e2e。`src/styles/tokens.css`
-- **`scrollbar-color` 写在 `#app` 上即可**（继承属性，一处覆盖全部滚动容器）；但**不要顺手加 `scrollbar-width: thin`**——细滚动条让容器宽出约 7px，虚拟网格格宽与像素基线连锁变化。
+- **`scrollbar-color` 写在 `#app` 上即可**（继承属性，一处覆盖全部滚动容器）；但**不要顺手加 `scrollbar-width: thin`**——细滚动条让容器宽出约 7px，虚拟网格格宽与像素基线连锁变化。着色与占位要分开看：**颜色可全局继承，宽度只能逐容器显式写**。同源坑的另一半：**别把 `::-webkit-scrollbar` 包进 `@supports not (scrollbar-color: auto)`**——Chromium 支持后者后会跳过厂商块、落到 `thin` 的约 11px，等于偷偷换宽度；本项目要的是「Chromium 维持 6px、Firefox 拿标准色」，故厂商块保持裸写、标准属性只补 `scrollbar-color`。
 - **`::selection` 提为全局时页面级那份必须同时删除**（同一事实只留一处）；环境层同理收口成单点事实源，页面根转透明。
 - **刻度收口后 `calc(刻度 ± n)` 是离刻度值的藏身处**：它字面上引用了令牌，却把结果推离刻度。**复审刻度一致性时要专门扫 calc 表达式**，不能只查字面量。
 

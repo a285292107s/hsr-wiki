@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { watch, onBeforeUnmount } from 'vue';
+import { watch, onBeforeUnmount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore, type ToastType } from '../stores/app';
 
 const app = useAppStore();
+const { t } = useI18n();
+
+const hostRef = ref<HTMLElement | null>(null);
 
 const ICONS: Record<ToastType, string> = {
   error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>',
@@ -13,22 +17,28 @@ const ICONS: Record<ToastType, string> = {
 
 const timers = new Map<number, ReturnType<typeof setTimeout>>();
 
+function arm(id: number, duration: number): void {
+  timers.set(
+    id,
+    setTimeout(() => {
+      timers.delete(id);
+      if (hostRef.value?.contains(document.activeElement)) {
+        arm(id, duration);
+        return;
+      }
+      app.dismissToast(id);
+    }, duration),
+  );
+}
+
 watch(
   () => app.toasts.slice(),
   (list) => {
-    for (const t of list) {
-      if (!timers.has(t.id)) {
-        timers.set(
-          t.id,
-          setTimeout(() => {
-            timers.delete(t.id);
-            app.dismissToast(t.id);
-          }, t.duration),
-        );
-      }
+    for (const item of list) {
+      if (!timers.has(item.id)) arm(item.id, item.duration);
     }
     for (const id of timers.keys()) {
-      if (!list.some((t) => t.id === id)) {
+      if (!list.some((item) => item.id === id)) {
         clearTimeout(timers.get(id));
         timers.delete(id);
       }
@@ -38,7 +48,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
-  for (const t of timers.values()) clearTimeout(t);
+  for (const timer of timers.values()) clearTimeout(timer);
   timers.clear();
 });
 
@@ -48,17 +58,29 @@ function dismiss(id: number): void {
 </script>
 
 <template>
-  <div class="nk-toast-container" aria-live="polite">
+  <div
+    ref="hostRef"
+    class="nk-toast-container"
+    role="region"
+    :aria-label="t('toast.region')"
+    aria-live="polite"
+  >
     <TransitionGroup name="nk-toast">
       <div
-        v-for="t in app.toasts"
-        :key="t.id"
-        :class="['nk-toast', `nk-toast--${t.type}`]"
-        role="status"
-        @click="dismiss(t.id)"
+        v-for="item in app.toasts"
+        :key="item.id"
+        :class="['nk-toast', `nk-toast--${item.type}`]"
       >
-        <span class="nk-toast__icon" v-html="ICONS[t.type]" />
-        <span>{{ t.message }}</span>
+        <span class="nk-toast__icon" v-html="ICONS[item.type]" />
+        <span class="nk-toast__msg">{{ item.message }}</span>
+        <button
+          type="button"
+          class="nk-toast__close"
+          :aria-label="t('toast.close')"
+          @click="dismiss(item.id)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>
+        </button>
       </div>
     </TransitionGroup>
   </div>

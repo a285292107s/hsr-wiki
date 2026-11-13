@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "{name}品質",
   "catalog.relic.search": "遺物を検索...",
   "catalog.relic.title": "遺物図鑑",
+  "catalog.searchLabel": "検索",
   "catalog.sig.atk": "攻撃",
   "catalog.sig.def": "防御",
   "catalog.sig.figure": "立ち絵",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "テラコッタ",
   "toast.cdnDown": "CDN リソースが利用できないため、画像とアニメは簡易表示です",
   "toast.cdnUp": "CDN が復旧し、画像を自動で再読み込みしました",
+  "toast.close": "閉じる",
+  "toast.region": "通知",
   "ui.footerMotto": "この旅が、いつか群星に辿り着かんことを。",
   "vor.invasionLevel": "汚染レベル {n}",
   "vor.stageCount": "{n} ステージ"

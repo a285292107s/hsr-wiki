@@ -87,7 +87,7 @@
 .nk-relic-table-wrap {
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
+  scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track);
 }
 .nk-relic-affix-table {
   width: 100%; border-collapse: collapse;

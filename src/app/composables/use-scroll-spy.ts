@@ -70,14 +70,28 @@ export function useScrollSpy(
     raf = requestAnimationFrame(() => {
       pending = false;
       refresh();
-      scheduleSettle();
     });
   }
 
+  const SCROLLEND_OK = 'onscrollend' in window;
   let settleTimer = 0;
-  function scheduleSettle(): void {
+
+  function settle(): void {
+    if (settleTimer) {
+      window.clearTimeout(settleTimer);
+      settleTimer = 0;
+    }
+    pinnedId = '';
+    refresh();
+  }
+
+  function armSettle(c: HTMLElement): void {
+    if (SCROLLEND_OK) {
+      c.addEventListener('scrollend', settle, { once: true });
+      return;
+    }
     if (settleTimer) window.clearTimeout(settleTimer);
-    settleTimer = window.setTimeout(() => { settleTimer = 0; pinnedId = ''; refresh(); }, 160);
+    settleTimer = window.setTimeout(settle, 160);
   }
 
   function jumpTo(id: string): void {
@@ -88,7 +102,8 @@ export function useScrollSpy(
     pinnedId = id;
     c.scrollTo({ top: Math.max(top, 0), behavior: reducedMotion ? 'auto' : 'smooth' });
     activeId.value = id;
-    if (reducedMotion) { pinnedId = ''; refresh(); }
+    if (reducedMotion) settle();
+    else armSettle(c);
   }
 
   function scrollTop(): void {
@@ -100,6 +115,7 @@ export function useScrollSpy(
   });
   onBeforeUnmount(() => {
     container.value?.removeEventListener('scroll', onScroll);
+    container.value?.removeEventListener('scrollend', settle);
     if (raf) cancelAnimationFrame(raf);
     if (settleTimer) window.clearTimeout(settleTimer);
   });

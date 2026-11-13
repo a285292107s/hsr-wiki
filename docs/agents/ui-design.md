@@ -8,7 +8,7 @@
 
 | 层 | 文件 | 放什么 | 禁止 |
 |---|---|---|---|
-| 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / 更多抽屉 `ui-more*` / 详情页壳 `nk-page--detail`·Hero `nk-hero*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / 区块标题 `nk-title` / 回顶 `nk-top-btn` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / 页面过渡 `nk-view-*` / `nk-hub-footer`·`nk-hub-masthead` / 状态原语 `nk-error-state`·`nk-slot-empty`·`nk-img-error`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 引用彩色原始层** |
+| 令牌 + 全局原语 | `src/styles/tokens.css` | 四层令牌（§2）；跨页全局原语（导航壳 `ui-sidebar*` / 更多抽屉 `ui-more*` / 详情页壳 `nk-page--detail`·Hero `nk-hero*` / `nk-tabs` / `nk-panels`·`nk-panel` / `nk-secnav` / 区块标题 `nk-title` / 回顶 `nk-top-btn` / `nk-skeleton`·`nk-sk--*` / `nk-toast` / `nk-card` / 页面过渡 `nk-view-*` / `nk-hub-footer`·`nk-hub-masthead` / 状态原语 `nk-error-state`·`nk-slot-empty`·`nk-img-error` / 视觉隐藏 `nk-sr-only`）；无障碍三件套；纸感颗粒覆层 | 页面专属规则；**页面 CSS 引用彩色原始层** |
 | 目录引擎 | `src/styles/catalog.css` | 目录卡片与网格族（`nk-idx-grid` / `nk-relic-grid` / `nk-item-grid` / `nk-mob-grid`；卡片 HTML 由模板字符串 v-html 注入，scoped 命不中） | 页面专属样式；复制该区块 |
 | 页面 | `src/styles/<page>.css` | 页面专属，由视图组件 `import`，随路由拆 chunk 懒加载 | 跨页复用（先查原语）；复制粘贴其他页面规则 |
 | 组件 | SFC `<style scoped>` | 组件专属（如 CW Hub 导航） | 污染全局命名空间 |
@@ -17,7 +17,7 @@
 - **样式加载**：全局仅 `tokens.css` + `catalog.css` + `fonts.css`（三者由 `src/app/bootstrap.ts` 导入；`fonts.css` 只有自托管 `@font-face`、无选择器）；目录页专属样式在 `CatalogPageConfig.styles` 声明并随路由并行加载（同一 loader 内串行）。页面样式只在自有作用域内细化——枢纽两页用 id（`#nk-home-app` / `#nk-cwhub-app`），详情页多数用页前缀类（`.nk-char-page` 等）；共享原语单点声明留在 tokens / catalog，页面不复制共享区块。
 - **不使用 CSS 预处理器**；元素级重置与无障碍规则用 `:where(#app)` 保持零特异性；类原语是单类选择器（0,1,0），页面规则靠作用域与加载顺序覆盖。
 - **纸感颗粒**（`#app::after`）唯一收口于 tokens.css，禁止页面级复制或调参；强度唯一调参位 `--grain-opacity`。
-- **无障碍三件套**（tokens.css 末尾，全站硬标准）：`focus-visible` 统一 2px 主色焦点环；`prefers-reduced-motion: reduce` 全站禁用位移/过渡；`hover: none` 取消 hover 位移（`transform: none`）。页面级只追加细化，不重定义基础态。
+- **无障碍三件套**（tokens.css 末尾，全站硬标准）：`focus-visible` 统一 2px 主色焦点环；`prefers-reduced-motion: reduce` 全站禁用位移/过渡；`hover: none` 取消 hover 位移（`transform: none`）。页面级只追加细化，不重定义基础态。**焦点环在横向滚动容器内必须内缩**（`outline-offset: -2px`，`.nk-tabs__bar .nk-tab` / `.nk-secnav__btn` 已登记）——外扩部分会被 `overflow` 裁掉。
 - **图标占位不是 CSS 原语**：`MISSING_ICON_SVG` / `MISSING_ICON_SRC` 是 TS 共享常量（`src/services/cdn/placeholder.ts`，内联 SVG data URI），跨页靠 import，**禁止在页面 CSS / 组件里复制**；CSS 配套只有 tokens.css 的 `img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden }`（占位必须可见），语义见 [ADR 0024](../adr/0024-图标回退链与真缺失占位.md)。
 
 ## 2. 色彩：四层令牌与单向事实链
@@ -26,7 +26,7 @@
 |---|---|---|
 | **原始层**（色阶事实） | 强调候选色阶 5 族 `--tc-*` / `--ol-*` / `--sl-*` / `--sd-*` / `--ir-*`（缺省族见 §3）；`--gold-*`（星级 / 领域金）；`--blk-*`（中性纯黑阶，5 级 750–950）；`--ph-*`（领域泛品红紫）；`--em-*`（调试系统图专用绿阶，非强调候选） | 彩色裸档只允许被别名层与领域层引用，**页面 CSS 禁止新增直接引用**；黑阶例外——承载面按 ADR 0021 方向直接取 `850/800/750`。存量页面的 `--gold-*` / `--tc-*` 裸档引用属待偿漂移，不得复制 |
 | **主题色阶别名层** | `--th-*`（全站唯一，随 `data-accent`） | 语义层只引用别名层、不绑定具体色族——这是「强调色可切换」的实现机制 |
-| **语义层** | `--primary`（= `--th-500`）/ `--accent`（= `--th-400`）/ `--bg`（纯黑阶）/ `--surface`·`--card`（黑阶 + 主色 5~6% 注入）/ `--text*` / `--border*` / 发丝线 `--line-1`·`--line-2` / `--gold`·`--gold-sem` / `--highlight` / `--metric-val` / `--primary-glow` / 状态 `--diff-*`·`--season-*`；外壳·抽屉·头部·输入的派生族 `--nk-shell-*`·`--nk-sheet-*`·`--nk-header-*`·`--nk-input-*`·`--nk-page-tint`·`--nk-card-border` | 随强调色切换（**货币战争共用同一套**，ADR 0041）；派生色一律 `color-mix(in srgb, var(--primary) X%, transparent)` |
+| **语义层** | `--primary`（= `--th-500`）/ `--accent`（= `--th-400`）/ `--bg`（纯黑阶）/ `--surface`·`--card`（黑阶 + 主色 5~6% 注入）/ `--text*` / `--border*` / 发丝线 `--line-1`·`--line-2` / `--gold`·`--gold-sem` / `--highlight` / `--metric-val` / `--primary-glow` / 状态 `--diff-*`·`--season-*`；外壳·抽屉·头部·输入的派生族 `--nk-shell-*`·`--nk-sheet-*`·`--nk-header-*`·`--nk-input-*`·`--nk-page-tint`·`--nk-card-border`·**滚动条 `--nk-scrollbar-thumb`（= `--primary`）·`--nk-scrollbar-track`（透明）** | 随强调色切换（**货币战争共用同一套**，ADR 0041）；派生色一律 `color-mix(in srgb, var(--primary) X%, transparent)` |
 | **领域层** | `--rarity-*` / `--prop-*` / `--skill-*` / `--relic-*` / `--cw-*` / `--crole-*` / `--ctrait-*` / `--ach-*`；**语境色成员** `--eg-*`（终局四模式）/ `--vor-*`（「贪饕」污染） | 数据语义色，**不随主题/强调色**；领域色不得引用 `--th-*`。语境色在各自子树内局部取代强调位（§3）。`--elem-*` 是零消费者的预留族（与 `elements.json` 的官方色有意不同，属深底可读性调整；启用前按 §5 复核对比度）；**禁止再引入从别名层派生的领域令牌**（曾有的 `--hero-bg-*` 即此类，已按本条删除） |
 
 **事实链单向依赖**：原始层 → 别名层 → 语义层 → 消费层（页面 CSS / JS 模板字符串，只读 `var()` / `color-mix` / 变量注入）。消费层定义任何颜色事实 = 违规。
@@ -58,6 +58,7 @@
 - **`tools/check-colors.mjs --strict`**：扫 `src/**/*.{css,vue,ts}` 裸色值（hex / rgb / rgba），中性阈值 ≤4、`var()` fallback 纳入检查——这些扫描**恒执行**，`--strict` 只决定命中是否非零退出（`check-guards` 恒带该参数）。**盲区**：`color-mix(...)` 整段在扫描前被剥离，首参写裸色不报警。豁免面固定为 `SKIP_FILE`（`__tests__` / `debug/` / `theme.ts`）与 `tokens.css` 本体，**禁止擅自扩大**。颜色变更后必跑。
 - **`tools/check-contrast.mjs --strict`**：读 `:root` 与**全部 `[data-accent="…"]` 色板**（每个叠在 `:root` 基底上解析），正文类 ≥4.5:1（`--text` / `--text2` / `--text3` / `--text-bright` / `--highlight` / `--gold-sem` / `--metric-val` / `--vor-300`），`--primary` ≥3:1（装饰与大字号豁免）。`--strict` 同样只控退出码；换任何一套色板都会被逐个验收。
 - **`check-contrast` 盲区（改底色/表面亮度必查）**：它只算「文字令牌 × `--bg`」；文字落在 `--surface` / `--card` / 着色片（tag·chip·激活段）上还要再降一档，这层只有 `e2e/accessibility.spec.ts`（axe，12 页 × 缺省强调色）兜底；**两处都覆盖不到的组合（其余页面、非缺省强调色、非激活态）须人工按 sRGB 合成核算**。故改底色时必须同时核 `--bg` / `--surface` / `--card` / 外壳四条。
+- **非文本对比度不在上述任何一处门禁内**：滚动条滑块验收线 3:1（WCAG 1.4.11），形状与可见性都不进 axe。故滑块唯一消费 `--primary`——它已被 `check-contrast` 按 3:1 逐套强制（实测 3.95–4.30），改滑块**不要**换用 `--border*` / `--line-*` 那类低透明边框令牌（合成后仅 1.2–1.7:1，见 [memory](../memory/ui-tokens.md)）。
 - **颜色两守卫 + 其余五项**（Spine 清单 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文）由 `tools/check-guards.mjs` 串行汇总挂到 `pnpm build`（见 [commands.md](commands.md)）。CI 只重跑七守卫与 `vue-tsc`，省掉 `vite build` 与 AI 端点两步。**守卫全绿 ≠ 语法正确**：守卫走正则，CSS 语法错误只在 build 的 postcss 阶段暴露（`tools/check-css-dup-selectors.mjs` 是未挂 build/CI 的孤儿脚本）。
 
 ## 5. 新增颜色四步流程（评审闸，唯一事实源）

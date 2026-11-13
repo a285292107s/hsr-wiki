@@ -41,7 +41,7 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const traitChips = traits
     .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" src="${cdnUri('gridfight-icon', `${t.id}.webp`)}" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
     .join('');
-  return `<a class="nk-crole-card" href="${item.href}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">
+  return `<a class="nk-crole-card" href="${escHtml(item.href)}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">
       <div class="nk-crole-card__avatar">
         <img loading="lazy" src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
         ${fbBadge}

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CatalogFilterSelect from './CatalogFilterSelect.vue';
+import { useScrollFade } from '../composables/use-scroll-fade';
 import type { CatalogFilter } from './types';
 
 const props = defineProps<{
@@ -21,6 +22,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const filtersRef = ref<HTMLElement | null>(null);
+const fade = useScrollFade(filtersRef);
 
 const resolvedFilters = computed(() =>
   props.filters.map((f) => ({
@@ -43,6 +47,7 @@ const resolvedFilters = computed(() =>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/>
       </svg>
+      <span class="nk-sr-only">{{ t('catalog.searchLabel') }}</span>
       <input
         type="text"
         :placeholder="placeholder"
@@ -50,7 +55,7 @@ const resolvedFilters = computed(() =>
         @input="(e) => emit('search', (e.target as HTMLInputElement).value)"
       >
     </label>
-    <div v-if="filters.length" class="nk-cat-filters-bar">
+    <div v-if="filters.length" ref="filtersRef" class="nk-cat-filters-bar" :data-fade="fade">
       <CatalogFilterSelect
         v-for="f in resolvedFilters"
         :key="f.key"

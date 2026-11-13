@@ -799,7 +799,7 @@
 .nk-mob-calc__wrap {
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
+  scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track);
 }
 
 .nk-mob-calc__table {

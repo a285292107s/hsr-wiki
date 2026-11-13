@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "Качество: {name}",
   "catalog.relic.search": "Поиск реликвий...",
   "catalog.relic.title": "Реликвии",
+  "catalog.searchLabel": "Поиск",
   "catalog.sig.atk": "Атака",
   "catalog.sig.def": "Защита",
   "catalog.sig.figure": "Арт",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Терракота",
   "toast.cdnDown": "Ресурсы CDN недоступны; изображения и анимации показаны в упрощённом виде",
   "toast.cdnUp": "CDN восстановлен; изображения перезагружены",
+  "toast.close": "Закрыть",
+  "toast.region": "Уведомления",
   "ui.footerMotto": "Пусть это путешествие приведёт нас к звёздам!",
   "vor.invasionLevel": "Уровень заражения {n}",
   "vor.stageCount": "{n} этап | {n} этапов"

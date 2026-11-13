@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "{name} quality",
   "catalog.relic.search": "Search relics...",
   "catalog.relic.title": "Relics",
+  "catalog.searchLabel": "Search",
   "catalog.sig.atk": "Attack",
   "catalog.sig.def": "Defense",
   "catalog.sig.figure": "Artwork",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Terracotta",
   "toast.cdnDown": "CDN assets are unavailable; images and animations are shown in degraded mode",
   "toast.cdnUp": "CDN restored; images reloaded automatically",
+  "toast.close": "Close",
+  "toast.region": "Notifications",
   "ui.footerMotto": "May This Journey Lead Us Starward",
   "vor.invasionLevel": "Corruption Level {n}",
   "vor.stageCount": "{n} stage | {n} stages"

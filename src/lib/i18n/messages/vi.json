@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "Phẩm chất {name}",
   "catalog.relic.search": "Tìm di vật...",
   "catalog.relic.title": "Di Vật",
+  "catalog.searchLabel": "Tìm kiếm",
   "catalog.sig.atk": "Tấn Công",
   "catalog.sig.def": "Phòng Thủ",
   "catalog.sig.figure": "Hình ảnh",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Đất nung",
   "toast.cdnDown": "Tài nguyên CDN không khả dụng; ảnh và hoạt ảnh hiển thị giản lược",
   "toast.cdnUp": "CDN đã phục hồi; ảnh tự động tải lại",
+  "toast.close": "Đóng",
+  "toast.region": "Thông báo",
   "ui.footerMotto": "Mong cuộc hành trình này, sẽ đưa chúng ta đến những vì sao.",
   "vor.invasionLevel": "Cấp ăn mòn {n}",
   "vor.stageCount": "{n} màn"

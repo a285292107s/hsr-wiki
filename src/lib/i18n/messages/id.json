@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "Kualitas {name}",
   "catalog.relic.search": "Cari relic...",
   "catalog.relic.title": "Relic",
+  "catalog.searchLabel": "Cari",
   "catalog.sig.atk": "Attack",
   "catalog.sig.def": "Defense",
   "catalog.sig.figure": "Gambar",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Terakota",
   "toast.cdnDown": "Aset CDN tidak tersedia; gambar dan animasi ditampilkan sederhana",
   "toast.cdnUp": "CDN pulih; gambar dimuat ulang",
+  "toast.close": "Tutup",
+  "toast.region": "Notifikasi",
   "ui.footerMotto": "Semoga Perjalanan Ini Membawa Kita Menuju Bintang-Bintang",
   "vor.invasionLevel": "Tingkat korupsi {n}",
   "vor.stageCount": "{n} stage"

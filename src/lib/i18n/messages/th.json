@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "คุณภาพ {name}",
   "catalog.relic.search": "ค้นหารีลิก...",
   "catalog.relic.title": "รีลิก",
+  "catalog.searchLabel": "ค้นหา",
   "catalog.sig.atk": "Attack",
   "catalog.sig.def": "ป้องกัน",
   "catalog.sig.figure": "ภาพตัวละคร",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "เทอร์ราคอตตา",
   "toast.cdnDown": "ทรัพยากร CDN ใช้ไม่ได้ รูปและแอนิเมชันแสดงแบบลดทอน",
   "toast.cdnUp": "CDN กลับมาแล้ว รูปถูกโหลดใหม่",
+  "toast.close": "ปิด",
+  "toast.region": "การแจ้งเตือน",
   "ui.footerMotto": "ขอให้การเดินทางครั้งนี้ พาเรามุ่งไปสู่ดวงดาว",
   "vor.invasionLevel": "ระดับกัดกร่อน {n}",
   "vor.stageCount": "{n} ด่าน"

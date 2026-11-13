@@ -1,16 +1,8 @@
-#nk-cwhub-app {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  font-family: var(--font-body);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-}
+#nk-cwhub-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; font-family: var(--font-body); color: var(--text); -webkit-font-smoothing: antialiased; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
 #nk-cwhub-app * { box-sizing: border-box; }
 #nk-cwhub-app::-webkit-scrollbar { width: 6px; }
-#nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: var(--nk-radius-1); }
-#nk-cwhub-app::-webkit-scrollbar-track { background: transparent; }
+#nk-cwhub-app::-webkit-scrollbar-thumb { background: var(--nk-scrollbar-thumb); border-radius: var(--nk-radius-1); }
+#nk-cwhub-app::-webkit-scrollbar-track { background: var(--nk-scrollbar-track); }
 
 .nk-cwsc {
   max-width: var(--nk-content-max);

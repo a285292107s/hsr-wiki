@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "Qualité {name}",
   "catalog.relic.search": "Rechercher des reliques...",
   "catalog.relic.title": "Reliques",
+  "catalog.searchLabel": "Rechercher",
   "catalog.sig.atk": "Attaque",
   "catalog.sig.def": "Défense",
   "catalog.sig.figure": "Illustration",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "Terracotta",
   "toast.cdnDown": "Ressources CDN indisponibles ; images et animations en mode dégradé",
   "toast.cdnUp": "CDN rétabli ; images rechargées automatiquement",
+  "toast.close": "Fermer",
+  "toast.region": "Notifications",
   "ui.footerMotto": "Que ce voyage nous mène vers les étoiles",
   "vor.invasionLevel": "Niveau de corruption {n}",
   "vor.stageCount": "{n} étape | {n} étapes"

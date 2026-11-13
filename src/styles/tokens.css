@@ -241,6 +241,8 @@
   --nk-card-border: color-mix(in srgb, var(--primary) 30%, transparent);
   --line-1: rgba(255,255,255,0.07);
   --line-2: rgba(255,255,255,0.13);
+  --nk-scrollbar-thumb: var(--primary);
+  --nk-scrollbar-track: transparent;
 }
 
 @media (min-width: 768px) {
@@ -453,7 +455,7 @@
     radial-gradient(118% 94% at 50% 44%, transparent 50%, color-mix(in srgb, var(--blk-950) 55%, transparent) 100%);
   --nk-ambient-size: auto, auto, auto;
 }
-#app { position: relative; min-height: 100vh; overflow: clip; font-family: var(--font-body); color: var(--text); background-color: var(--bg); background-image: var(--nk-ambient-image); background-size: var(--nk-ambient-size); background-attachment: fixed; -webkit-font-smoothing: antialiased; scrollbar-color: var(--border2) transparent; }
+#app { position: relative; min-height: 100vh; min-height: 100dvh; overflow: clip; font-family: var(--font-body); color: var(--text); background-color: var(--bg); background-image: var(--nk-ambient-image); background-size: var(--nk-ambient-size); background-attachment: fixed; -webkit-font-smoothing: antialiased; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
 :where(#app) ::selection { background: color-mix(in srgb, var(--primary) 32%, transparent); color: var(--text-bright); }
 :where(#app) input,
 :where(#app) textarea { caret-color: var(--primary); }
@@ -474,10 +476,10 @@
   opacity: var(--grain-opacity);
 }
 
-.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+.nk-page--detail { position: absolute; inset: 0; left: 0; bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
 .nk-page--detail::-webkit-scrollbar { width: 6px; }
-.nk-page--detail::-webkit-scrollbar-thumb { background: var(--border2); border-radius: var(--nk-radius-1); }
-.nk-page--detail::-webkit-scrollbar-track { background: transparent; }
+.nk-page--detail::-webkit-scrollbar-thumb { background: var(--nk-scrollbar-thumb); border-radius: var(--nk-radius-1); }
+.nk-page--detail::-webkit-scrollbar-track { background: var(--nk-scrollbar-track); }
 
 .nk-img-error { background: color-mix(in srgb, var(--primary) 6%, transparent); border: 1px dashed var(--border); object-fit: contain; }
 
@@ -603,6 +605,8 @@ background-position: center 15%;
   overflow-x: auto; scrollbar-width: none;
 }
 .nk-secnav::-webkit-scrollbar { display: none; }
+.nk-tabs__bar .nk-tab:focus-visible,
+.nk-secnav__btn:focus-visible { outline-offset: -2px; }
 .nk-secnav__btn {
   display: inline-flex; align-items: baseline; gap: 5px;
   padding: 6px 11px; border-radius: var(--nk-radius-2); border: none; background: transparent;
@@ -623,8 +627,6 @@ background-position: center 15%;
 .nk-secnav__btn--active .nk-secnav__idx { opacity: 1; }
 
 .nk-panels { flex: 1; overflow: visible; }
-.nk-panels::-webkit-scrollbar { width: 4px; }
-.nk-panels::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--nk-radius-1); }
 .nk-panel { display: none; max-width: var(--nk-detail-max); margin: 0 auto; padding: 24px 16px 60px; animation: nk-fade 0.3s var(--nk-ease-out); }
 .nk-panel--active { display: block; }
 @keyframes nk-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -708,7 +710,16 @@ background-position: center 15%;
 }
 
 .nk-toast-container { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: var(--nk-radius-3); background: color-mix(in srgb, var(--blk-800) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: var(--nk-fs-4); color: var(--text); pointer-events: auto; cursor: pointer; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 18px; border-radius: var(--nk-radius-3); background: color-mix(in srgb, var(--blk-800) 95%, transparent); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); font-size: var(--nk-fs-4); color: var(--text); pointer-events: auto; max-width: 340px; transition: transform var(--nk-dur-normal) var(--nk-ease-out), opacity var(--nk-dur-normal) ease; }
+.nk-toast__msg { flex: 1 1 auto; min-width: 0; }
+.nk-toast__close {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; padding: 0; border: none; border-radius: var(--nk-radius-2);
+  background: transparent; color: var(--text3); cursor: pointer;
+  transition: color var(--nk-dur-hover) var(--nk-ease-out), background var(--nk-dur-hover) var(--nk-ease-out);
+}
+.nk-toast__close:hover { color: var(--text); background: var(--nk-shell-hover); }
+.nk-toast__close svg { width: 14px; height: 14px; }
 .nk-toast-enter-from, .nk-toast-leave-to { transform: translateX(120%); opacity: 0; }
 .nk-toast-leave-active { transition: transform 0.25s ease-in, opacity 0.25s ease-in; }
 .nk-toast-move { transition: transform var(--nk-dur-normal) var(--nk-ease-out); }
@@ -807,6 +818,7 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1.1;
+  text-wrap: balance;
   color: var(--text-bright);
   animation: nk-fade 0.8s var(--nk-ease-out) 0.2s backwards;
 }
@@ -954,13 +966,15 @@ img[data-cdn-down]:not([data-cdn-placeholder]) { visibility: hidden; }
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+.nk-sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
 @media (prefers-reduced-motion: reduce) {
   #app *,
   #app *::before,
   #app *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0s !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
   }
 }
 @media (prefers-reduced-motion: reduce) {

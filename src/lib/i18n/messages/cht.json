@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "{name}品質",
   "catalog.relic.search": "搜尋遺器...",
   "catalog.relic.title": "遺器圖鑑",
+  "catalog.searchLabel": "搜尋",
   "catalog.sig.atk": "攻擊",
   "catalog.sig.def": "防禦",
   "catalog.sig.figure": "立繪",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "赤陶",
   "toast.cdnDown": "CDN 資源暫不可用，圖片與動畫已降級展示",
   "toast.cdnUp": "CDN 已恢復，圖片自動重載",
+  "toast.close": "關閉",
+  "toast.region": "通知",
   "ui.footerMotto": "願此行，終抵群星",
   "vor.invasionLevel": "污染等級 {n}",
   "vor.stageCount": "{n} 關"

@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "{name} 품질",
   "catalog.relic.search": "유물 검색...",
   "catalog.relic.title": "유물 도감",
+  "catalog.searchLabel": "검색",
   "catalog.sig.atk": "공격",
   "catalog.sig.def": "방어",
   "catalog.sig.figure": "일러스트",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "테라코타",
   "toast.cdnDown": "CDN 리소스를 사용할 수 없어 이미지와 애니메이션이 간소화 표시됩니다",
   "toast.cdnUp": "CDN이 복구되어 이미지를 자동으로 다시 불러왔습니다",
+  "toast.close": "닫기",
+  "toast.region": "알림",
   "ui.footerMotto": "여정의 끝이 뭇별에 닿길",
   "vor.invasionLevel": "오염 등급 {n}",
   "vor.stageCount": "{n}개 스테이지"

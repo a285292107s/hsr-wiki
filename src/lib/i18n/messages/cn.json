@@ -81,6 +81,7 @@
   "catalog.qualityLabel": "{name}品质",
   "catalog.relic.search": "搜索遗器...",
   "catalog.relic.title": "遗器图鉴",
+  "catalog.searchLabel": "搜索",
   "catalog.sig.atk": "攻击",
   "catalog.sig.def": "防御",
   "catalog.sig.figure": "立绘",
@@ -697,6 +698,8 @@
   "theme.accent.terracotta": "赤陶",
   "toast.cdnDown": "CDN 资源暂不可用，图片与动画已降级展示",
   "toast.cdnUp": "CDN 已恢复，图片自动重载",
+  "toast.close": "关闭",
+  "toast.region": "通知",
   "ui.footerMotto": "愿此行，终抵群星",
   "vor.invasionLevel": "污染等级 {n}",
   "vor.stageCount": "{n} 关"
