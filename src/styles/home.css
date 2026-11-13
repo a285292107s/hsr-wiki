@@ -896,6 +896,7 @@
   font-weight: 900;
   letter-spacing: -0.01em;
   color: var(--text-bright);
+  overflow-wrap: break-word;
 }
 
 .nk-home__relic-body {

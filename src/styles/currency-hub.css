@@ -345,7 +345,7 @@
 .nk-cwsc-role__line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 10px; min-width: 0; }
 
 .nk-cwsc-role__name { font-size: var(--nk-fs-5); font-weight: 800; color: var(--text-bright); overflow-wrap: break-word; }
-.nk-cwsc-role__cost { font-family: var(--font-hud); font-size: var(--nk-fs-3); color: var(--metric-val); white-space: nowrap; }
+.nk-cwsc-role__cost { font-family: var(--font-hud); font-size: var(--nk-fs-3); color: var(--metric-val); white-space: normal; overflow-wrap: break-word; }
 .nk-cwsc-role__pos { font-size: var(--nk-fs-3); color: var(--text3); }
 
 .nk-cwsc-role__traits { display: flex; flex-wrap: wrap; gap: 3px 12px; min-width: 0; }
