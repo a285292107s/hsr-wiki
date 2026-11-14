@@ -28,7 +28,11 @@
   - **判据（一次记牢）**：只要对一个**已 resolve 的字符串**做了 `split` / `join` / `strip` / `replace` / `re.sub` / 切片 / f-string 拼接，那片文本就永远是缺省语言。要么把操作搬到前端，要么登记组合器。
   - **闭包必须按值绑定**：`lambda tm: f(tm, 循环变量)` 在包生成（循环结束后）才求值 ⇒ 整批条目会塌成最后一条（实测 334 条货币词条全成同一条）。写 `lambda tm, k=key: …`。
 - **覆盖守卫** `node tools/check-i18n-packs.mjs`（已进 `pnpm build` 前置）：结构层里出现过的令牌 = 必须被语言包覆盖的键，**与来源无关**——`endgame_catalog` 从已令牌化的 `maze*.json` 派生 catalog，拿到的是普通字符串令牌，只登记 `TextRef` 会让这些分组缺包（前端解析即报缺键）
-- 分组规则 = 数据文件相对路径首段目录（顶层文件取文件名去 `.json`）：转换器 `textpack.group_of` 与前端 `src/lib/i18n/pack-path.ts` 各一份，真实性由覆盖守卫对着产物校验
+- 分组规则（`textpack.group_of` ↔ `src/lib/i18n/pack-path.ts`，守卫 `check-i18n-packs.mjs` 对着产物校验）：
+  - **顶层文件**取 `<文件名去 .json>.index`（`characters.json` → `characters.index`、`maze.catalog.json` → `maze.catalog.index`）——列表索引包与详情包分离；
+  - **`characters/` `light_cones/` `currency/role/` 下数字命名的详情文件**按 `<目录路径>.<ID % 32>` 分片（`characters/1310.json` → `characters.6`、`currency/role/1502.json` → `currency.role.30`）——详情页只取自己那一片，不背整目录正文（`characters` 整包 1.3 MB / 6.3k 键，单片均值 41 KB）；
+  - 其余按首段目录；`monsters/` **不分片**（怪物技能键在目录内高度共享，分片后各片重复收录同一批键，总体积反而涨 30%）。
+  - 分片目录清单与分片数常量 `SHARD_DIRS` / `DETAIL_SHARD_MOD` 两侧各一份，改任一项必须全量重生成语言包。
 - 运行结束打印「结构层残留中文」清单——转换器自己拼出来、语言包取不到的文案，即多语言化尚未完成的部分（实现进度判据，不写进文档以免漂移）
 - 转换器内硬编码中文（`config.py` 枚举映射等）改稳定枚举键下沉，产物内禁止出现写死中文
 

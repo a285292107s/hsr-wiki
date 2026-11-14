@@ -1,5 +1,5 @@
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 
 const LIST_API = 'https://act-api-takumi-static.mihoyo.com/common/blackboard/sr_wiki/v1/home/content/list?app_sn=sr_wiki&channel_id=18';
 const INFO_API = 'https://act-api-takumi-static.mihoyo.com/common/blackboard/sr_wiki/v1/content/info?app_sn=sr_wiki&content_id=';
@@ -33,6 +33,7 @@ const OUT_PATH = new URL('../../public/data/cn/skill_animations.json', import.me
 const PACK_DIR = new URL('../../public/data/i18n/', import.meta.url);
 const DEFAULT_LANG = 'cn';
 const LANGS = ['cn', 'cht', 'en', 'jp', 'kr', 'es', 'fr', 'de', 'pt', 'ru', 'th', 'vi', 'id'];
+const DETAIL_SHARD_MOD = 32;
 const CHAR_LIST_PATH = new URL('../../public/data/cn/characters.json', import.meta.url);
 const CHAR_DIR = new URL('../../public/data/cn/characters/', import.meta.url);
 
@@ -69,7 +70,8 @@ function loadSkillNameMap(avatarId) {
 function loadSkillTokenMap(avatarId) {
   try {
     const d = JSON.parse(readFileSync(new URL(`${avatarId}.json`, CHAR_DIR), 'utf-8'));
-    const pack = JSON.parse(readFileSync(new URL('../../public/data/i18n/cn/characters.json', import.meta.url), 'utf-8'));
+    const shard = Number(avatarId) % DETAIL_SHARD_MOD;
+    const pack = JSON.parse(readFileSync(new URL(`${DEFAULT_LANG}/characters.${shard}.json`, PACK_DIR), 'utf-8'));
     const map = {};
     const add = (sk) => {
       if (!sk || !sk.name) return;
@@ -208,6 +210,18 @@ function mergeTypes(target, incoming) {
  * 而前端按「同分组包」解析令牌（`singletonLocalData('skill_animations.json')`）。
  * 不写这一份，前端拿到的是未解析的 `$t:…`，守卫 `check-i18n-packs.mjs` 也会报缺包。
  */
+function readCharacterText(lang) {
+  const merged = {};
+  let names = [];
+  try {
+    names = readdirSync(new URL(`${lang}/`, PACK_DIR)).filter((f) => /^characters\.\d+\.json$/.test(f));
+  } catch {
+    return merged;
+  }
+  for (const f of names) Object.assign(merged, JSON.parse(readFileSync(new URL(`${lang}/${f}`, PACK_DIR), 'utf-8')));
+  return merged;
+}
+
 function writeTitlePacks(merged) {
   const keys = new Set();
   for (const types of Object.values(merged)) {
@@ -218,20 +232,13 @@ function writeTitlePacks(merged) {
     }
   }
   if (!keys.size) return 0;
-  const read = (lang) => {
-    try {
-      return JSON.parse(readFileSync(new URL(`${lang}/characters.json`, PACK_DIR), 'utf-8'));
-    } catch {
-      return {};
-    }
-  };
-  const packs = Object.fromEntries(LANGS.map((l) => [l, read(l)]));
+  const packs = Object.fromEntries(LANGS.map((l) => [l, readCharacterText(l)]));
   let written = 0;
   for (const lang of LANGS) {
     const fallback = packs[DEFAULT_LANG];
     const out = {};
     for (const k of [...keys].sort()) out[k] = packs[lang][k] ?? fallback[k] ?? '';
-    writeFileSync(new URL(`${lang}/skill_animations.json`, PACK_DIR), JSON.stringify(out, null, 2) + '\n', 'utf-8');
+    writeFileSync(new URL(`${lang}/skill_animations.index.json`, PACK_DIR), JSON.stringify(out, null, 2) + '\n', 'utf-8');
     written += 1;
   }
   return written;

@@ -11,10 +11,20 @@ const REGISTRY = join(ROOT, 'tools', 'converter', 'languages.json');
 
 const TOKEN_PREFIX = '$t:';
 
+const DETAIL_SHARD_MOD = 32;
+const SHARD_DIRS = new Set(['characters', 'light_cones', 'currency/role']);
+
 function groupOf(rel) {
-  const slash = rel.indexOf('/');
-  if (slash >= 0) return rel.slice(0, slash);
-  return rel.endsWith('.json') ? rel.slice(0, -5) : rel;
+  const parts = rel.split('/').filter(Boolean);
+  if (!parts.length) return rel;
+  const name = parts[parts.length - 1];
+  const stem = name.endsWith('.json') ? name.slice(0, -5) : name;
+  if (parts.length === 1) return name.endsWith('.json') ? `${stem}.index` : stem;
+  const directory = parts.slice(0, -1).join('/');
+  if (/^\d+$/.test(stem) && SHARD_DIRS.has(directory)) {
+    return `${directory.replace(/\//g, '.')}.${Number(stem) % DETAIL_SHARD_MOD}`;
+  }
+  return parts[0];
 }
 
 function collectKeys(value, sink) {
@@ -112,18 +122,27 @@ const HAN_LANGS = new Set(['cn', 'cht']);
     }
 }
 
-const BORROWED = { skill_animations: 'characters' };
-for (const [g, src] of Object.entries(BORROWED)) {
+const readCharacterPacks = (lang) => {
+  const dir = join(PACK_DIR, lang);
+  if (!existsSync(dir)) return {};
+  const merged = {};
+  for (const f of readdirSync(dir).filter((x) => /^characters\.\d+\.json$/.test(x))) {
+    Object.assign(merged, JSON.parse(readFileSync(join(dir, f), 'utf8')));
+  }
+  return merged;
+};
+
+const BORROWED = { 'skill_animations.index': readCharacterPacks };
+for (const [g, readSource] of Object.entries(BORROWED)) {
   for (const lang of languages) {
     const a = join(PACK_DIR, lang, `${g}.json`);
-    const b = join(PACK_DIR, lang, `${src}.json`);
-    if (!existsSync(a) || !existsSync(b)) continue;
+    if (!existsSync(a)) continue;
+    const pb = readSource(lang);
     const pa = JSON.parse(readFileSync(a, 'utf8'));
-    const pb = JSON.parse(readFileSync(b, 'utf8'));
     const drift = Object.keys(pa).filter((k) => pb[k] !== undefined && pa[k] !== pb[k]);
     if (drift.length > 0) {
       problems.push(
-        `${lang}/${g}.json 与 ${src} 分组有 ${drift.length} 键值不一致（借值未随源更新，例：${drift[0]}）`,
+        `${lang}/${g}.json 与 characters 分组有 ${drift.length} 键值不一致（借值未随源更新，例：${drift[0]}）`,
       );
     }
   }
@@ -134,12 +153,12 @@ const HAN_SCAN_LANGS = ['en', 'es', 'fr', 'de', 'pt', 'ru', 'kr', 'th', 'vi', 'i
 const BASELINE_FILE = join(ROOT, 'tools', 'i18n-han-baseline.json');
 const counts = {};
 for (const lang of HAN_SCAN_LANGS) {
-  let n = 0;
+  const hit = new Set();
   for (const f of readdirSync(join(PACK_DIR, lang)).filter((x) => x.endsWith('.json'))) {
     const pack = JSON.parse(readFileSync(join(PACK_DIR, lang, f), 'utf8'));
-    for (const v of Object.values(pack)) if (typeof v === 'string' && HAN_RE.test(v)) n += 1;
+    for (const [k, v] of Object.entries(pack)) if (typeof v === 'string' && HAN_RE.test(v)) hit.add(k);
   }
-  counts[lang] = n;
+  counts[lang] = hit.size;
 }
 if (process.argv.includes('--write-baseline')) {
   writeFileSync(BASELINE_FILE, JSON.stringify(counts, null, 2) + '\n', 'utf8');

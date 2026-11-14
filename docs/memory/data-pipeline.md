@@ -115,7 +115,7 @@
 - **wiki 技能标签映射漏项会静默丢技能**：`欢愉技` → `ElationDamage`、`忆灵技` / `忆灵天赋` → `Servant` / `ServantPassive`；新增 tag 必须同时改抓取侧映射表与前端查表键（`SkillsPanel` 按 `sk.type` 查表）。
 - **「可选增强 + 失败静默」的链路必须产出覆盖报告**：按 `characters.json` 逐技能、与 `SkillsPanel` 同口径核对缺失类型与参考站侧原因，否则缺口无声累积。
 - **抓取产物的「文案字段」也要按语言落地**：`skill_animations.json` 的 `title` 曾是 wiki 中文小标题，被前端同时用于**匹配技能**（`a.title === sk.name`）与**展示** ⇒ 非中文语言下既挂错技能又露中文。修法：抓取端命中官方技能名时写名称令牌 `$t:<hash>`（**未命中则一律不写**——中文原文比回落序号更差），并**由同一脚本产出该分组的 13 语言包**（值借用 `characters` 分组）——令牌按同分组包解析，缺包时界面直接显示 `$t:…` 且 `check-i18n-packs.mjs` 报缺包。
-- **语言包质量要一条「只降不升」的棘轮**：同类泄漏在本仓复发过两次（`{NICKNAME}` 写成中文 568 处、货币战争属性名 2000+ 处），而既有守卫只看「键是否存在」⇒ 新写入的写死中文或缺词条回退中文一律静默通过。`tools/check-i18n-packs.mjs` 现按 `tools/i18n-han-baseline.json` 记录「非汉字语言包含汉字的条目数」，回涨即失败（`--write-baseline` 重写，只允许下调）。**kr 基线偏高是合法的**：官方韩文自带汉字注音（`세검(細劍)`）。
+- **语言包质量要一条「只降不升」的棘轮**：同类泄漏在本仓复发过两次（`{NICKNAME}` 写成中文 568 处、货币战争属性名 2000+ 处），而既有守卫只看「键是否存在」⇒ 新写入的写死中文或缺词条回退中文一律静默通过。`tools/check-i18n-packs.mjs` 现按 `tools/i18n-han-baseline.json` 记录「非汉字语言包含汉字的条目数」，回涨即失败（`--write-baseline` 重写，只允许下调）。**按令牌键去重后计数**：索引包与详情包会重复收录同一键（`characters.index` 与 `characters`），按文件累加会把同一泄漏算两遍、让基线随分组变化漂移。**kr 基线偏高是合法的**：官方韩文自带汉字注音（`세검(細劍)`）。
 - **合并语义要区分「身份」与「元数据」**：条目身份由 `url` 决定（媒体不变即同一条），`title` 属元数据、应随最新抓取更新；「既有优先」会让文案改造永远不生效（改标题那次实测踩到）。整表覆盖用 `--fresh`，代价是丢掉本轮 wiki 不再下发的条目（主角页实测少 6 条）。
 - **抓取产物一律「读既有 → 按 key 取并集 → 写」**：覆盖须显式 `--fresh`，静默丢键比报错更危险。`public/data/cn/skill_animations.json`
 
@@ -127,7 +127,8 @@
   - 反例警示一：`8003060`「虚构集合体」在整个 vendor 里 **0/99,393** 个 `StageConfig` 波次槽位、只出现在 140 个 ∞ 造怪组 —— 拿「波次名单里没有它」推「它不是战斗内的敌方」会得出相反结论。
   - 反例警示二：**「上游有这个字段」不等于「该上屏」**。`8003060` 是可被击杀的合法敌人（7 条 `MonsterDrop`）却没有任何独立美术（三条路径全是占位图、`icon` 借 8001010）⇒ 游戏内预览不显示它。判据落在**美术资源**上而不是「有没有掉落 / 有没有技能」，才能同时覆盖 `5013090` 这种没进任何 ∞ 队列的同类载具。
   - ∞ 表的 `MaxMonsterCount` / `ParamList` / `EliteGroup` 语义未验证（`MaxMonsterCount` 与队列长度并不总相等）⇒ 不消费、不硬列，同 `PHOIICMCGIH` 的处理纪律。
-- **`--only <模块子集>` 会写出「子集语言包」，不是合并**：语言包按本次跑过的模块累积键，`--only currency_catalog` 单跑后 `public/data/i18n/cn/currency.json` 从 5176 键掉到 1451 键（值全对、只是缺键），`git diff` 表现为整行重写。改完某组转换器要重跑时，跑**该产物分组的全部模块**（如 `--only currency,currency_catalog`），或重跑后 `git checkout -- public/data/i18n` 还原，禁止提交子集语言包。
+- **`--only <模块子集>` 会写出「子集语言包」，不是合并**：语言包按本次跑过的模块累积键，`--only currency_catalog` 单跑后 `public/data/i18n/cn/currency.json` 从 5176 键掉到 1451 键（值全对、只是缺键），`git diff` 表现为整行重写。改完某组转换器要重跑时，跑**该产物分组的全部模块**（如 `--only currency,currency_catalog`），或重跑后 `git checkout -- public/data/i18n` 还原，禁止提交子集语言包。全量跑（不带 `--only`）会按本次分组清单删除各语言目录里的过期包（`skill_animations.index` 由抓取脚本产出，已在白名单）；带 `--only` 时不删，避免误删未参与本次转换的分组。
+- **`group_of` 改动即全量重建**：语言包分组名写进文件名，改 `textpack.group_of`（或前端镜像 `packGroupOf`）会让所有旧包变成「过期包」——必须全量 `convert.py --force` 重生成并同步前端分组实现、`check-i18n-packs.mjs` 的 `groupOf`、相关单测，否则解析层按新分组取包恒 404。分片范围/分片数（`SHARD_DIRS` / `DETAIL_SHARD_MOD`）同理：改一项就要重跑并重写 `tools/i18n-han-baseline.json`（同一令牌键会在多个分片里重复出现，基线按 key 去重）。
 - **删数据层兜底分支前，先用全量产物量该分支是否可达**：四份产物所有期的 `floor_details` / `tierce` / `levels` 无一期全空 ⇒ 固定条与其 `v-if` 兜底永不触发，属数据层已死的分支。
 - **「重跑产物 vs 已提交产物」逐字节对比有三个恒定伪差异，先排除再下结论**：① `characters.json` / `light_cones.json` 的 `release_version` 由 `release_version.py` 读**上次产物自身**推导，临时输出目录为空时必然退化成 `''`（对比前先把这两份已提交文件预置进临时目录）；② `version.json` 的 `synced_at` / `build` 取自 vendor 的 git HEAD，本机 vendor 落后于已提交产物时会整体不同（对比时排除该文件）；③ `public/data/assets/**`（本地图标，**已移出结构层**，见 ADR 0052 修订注记）不由转换器产出，会以「已提交有、本次未产出」出现。三条排除干净后仍不一致才是真回归。
 - **转换器里 `clean_text(resolve_text(...))` 是双洗，会静默吞掉文本的 TextMap 键**：`resolve_text` 默认已 `clean=True`，再包一层 `clean_text` 会把携带键的 `TextRef` 退化成普通 `str`（见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md) 的令牌化）。`convert.py --tokens` 结束时打印的「结构层残留中文」清单里，凡 `text` / `desc` 字段成片出现且形如游戏模板（带 `#1[i]`）的，先查这类冗余二次加工与字符串拼接，不要先怀疑 TextMap 缺键。

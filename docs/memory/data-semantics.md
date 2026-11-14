@@ -140,7 +140,7 @@
 - **`StageType` 的中文枚举全仓无文本源**：不要为展示硬造标签，也不要靠它给读者解释活动类型。
 - **人工权重（如「特写哪一条」「偏袒哪一条」）没有判据时就不要有**：2 条时按 `picked[0]` 决定谁独占大名字，纯由数据顺序决定，读者读起来像漏了一条。判据要收窄到有据可依的档位（如「恰 1 条」）。
 - **角色等级成长有两套并存口径，跨页展示必须锁同一本**：`statAtLevel` 给 `PHASE_STAT` 注入 `max_level`（= 晋阶上限）走**突破前**（三月七 Lv20 HP 280.8），不注入走 `charStageForLevel` 走**突破后**（338.4 = 角色页 `StatsPanel` 口径）。同一实体在两个页面差 57 点不会有任何守卫报警，单测还会各自锁死一条分支。判据：展示层统一取「突破后」并与角色页对齐，同一函数的测试必须**两条分支都断言**，改口径时同步改注记文案。
-- **游戏术语的译名以数据包里的官方文本为准，不以「看起来更顺」为准**：欢愉系（4.x）的官方写法是 笑点 = **Punchline** / Lachpunkt / Panache / Chiste / Piada、好活当赏 = **Certified Banger**、欢愉度 = Elation / Hochgefühl / Allégresse / Exultación / Euforia、超击破 = **Rupture extrême** / **Ultrarruptura**（不是 Super Rupture / Súper Ruptura）、削韧值 = **Toughness Reduction**；jp/kr 是 愉悦ダメージ・愉悦度・爆笑ネタ・爆笑の褒美 / 환락 피해・환락도・웃음 포인트・훌륭한 솜씨에는 보상을，**不是** 歓愉・ジョーク・환희・조크。判据：`public/data/i18n/<lang>/characters.json` 搜一次该概念，取现有写法；数据包没有的名词（如「欢愉度」的独立名词形态）沿用同一词根，**不自造新词**——自造会让同一页出现两套写法（02 用一套、06 用另一套）。
+- **游戏术语的译名以数据包里的官方文本为准，不以「看起来更顺」为准**：欢愉系（4.x）的官方写法是 笑点 = **Punchline** / Lachpunkt / Panache / Chiste / Piada、好活当赏 = **Certified Banger**、欢愉度 = Elation / Hochgefühl / Allégresse / Exultación / Euforia、超击破 = **Rupture extrême** / **Ultrarruptura**（不是 Super Rupture / Súper Ruptura）、削韧值 = **Toughness Reduction**；jp/kr 是 愉悦ダメージ・愉悦度・爆笑ネタ・爆笑の褒美 / 환락 피해・환락도・웃음 포인트・훌륭한 솜씨에는 보상을，**不是** 歓愉・ジョーク・환희・조크。判据：`public/data/i18n/<lang>/characters.*.json` 各分片合并后搜一次该概念（角色详情语言包按 ID % 32 分片，没有整份 `characters.json`），取现有写法；数据包没有的名词（如「欢愉度」的独立名词形态）沿用同一词根，**不自造新词**——自造会让同一页出现两套写法（02 用一套、06 用另一套）。
 - **同一页里「暴击伤害」既可能是属性名、也可能是「按暴击结算的那一次伤害」**：后者必须写成「暴击时伤害」，否则玩家会把它读成暴击伤害属性。判据：读数标签若与某个属性同名而语义不同，就必须改名，不能靠上下文。`formula.elation.result`
 
 ## 战斗机制口径

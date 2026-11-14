@@ -27,6 +27,11 @@ Composer = Callable[[Mapping[str, str]], str]
 TOKEN_PREFIX = "$t:"
 """令牌前缀。游戏文本不会以此开头（占位符一律是 `{...}`），且由本模块独占产出。"""
 
+DETAIL_SHARD_MOD = 32
+"""详情文件按 ID 取模分包：单页只取自己那一份，不背整目录正文。"""
+
+SHARD_DIRS = frozenset({"characters", "light_cones", "currency/role"})
+
 RAW_SUFFIX = "~raw"
 """原文变体后缀（`clean=False` 取到的文本带此后缀）。
 
@@ -86,9 +91,17 @@ class TextRef(str):
 
 def group_of(rel_path: str) -> str:
     rel = rel_path.replace("\\", "/").lstrip("/")
-    if "/" in rel:
-        return rel.split("/", 1)[0]
-    return rel[:-5] if rel.endswith(".json") else rel
+    parts = [part for part in rel.split("/") if part]
+    if not parts:
+        return rel
+    name = parts[-1]
+    stem = name[:-5] if name.endswith(".json") else name
+    if len(parts) == 1:
+        return f"{stem}.index" if name.endswith(".json") else stem
+    directory = "/".join(parts[:-1])
+    if stem.isdigit() and directory in SHARD_DIRS:
+        return f"{directory.replace('/', '.')}.{int(stem) % DETAIL_SHARD_MOD}"
+    return parts[0]
 
 
 class Interner:

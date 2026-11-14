@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-def _write_language_packs() -> None:
+def _write_language_packs(prune: bool) -> None:
     builder = textpack.session()
     if builder is None:
         logger.error("令牌会话未开启，跳过语言包生成")
@@ -100,6 +100,17 @@ def _write_language_packs() -> None:
     logger.info("语言包：%d 个分组 × %d 语言 → %s", len(builder.groups), len(lang_codes), out_dir)
     for code in lang_codes:
         logger.info("  %-4s %7d 键", code, stats[code])
+
+    if prune:
+        keep = set(builder.groups) | {"skill_animations.index"}
+        for code in lang_codes:
+            lang_dir = out_dir / code
+            if not lang_dir.exists():
+                continue
+            for path in sorted(lang_dir.glob("*.json")):
+                if path.stem not in keep:
+                    path.unlink()
+                    logger.info("删除过期语言包 %s", path)
 
     residual = textpack.survey_tree(OUTPUT_DIR)
     total = sum(len(v) for v in residual.values())
@@ -160,7 +171,7 @@ def main() -> None:
     save_state(state)
 
     if not args.raw:
-        _write_language_packs()
+        _write_language_packs(prune=not args.only)
 
     elapsed = time.time() - start
     logger.info("=== 转换完成 ===")

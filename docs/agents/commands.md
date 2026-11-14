@@ -36,7 +36,7 @@ pnpm preview   # 预览构建产物
 
 ```bash
 node tools/check-languages.mjs     # converter languages.json ↔ 前端 locales.ts 逐项比对 + 上游语言交叉校验 + 禁止无参 toLocaleString()（数字格式化须按站点语言）+ 非 RouterLink 内链必须经 activeHref（否则非缺省语言跳回缺省语言）
-node tools/check-i18n-packs.mjs    # 语言包覆盖：结构层令牌 ↔ 各语言语言包（含缺包与缺键；非中文包不得残留中文「开拓者」= 占位符漏按语言展开；skill_animations 的借值须与 characters 分组一致；非汉字语言包含汉字条目数按 tools/i18n-han-baseline.json 只降不升，`--write-baseline` 重写基线）
+node tools/check-i18n-packs.mjs    # 语言包覆盖：结构层令牌 ↔ 各语言语言包（含缺包与缺键；非中文包不得残留中文「开拓者」= 占位符漏按语言展开；skill_animations.index 的借值须与 characters 分组一致；非汉字语言包含汉字条目数按 tools/i18n-han-baseline.json 只降不升，`--write-baseline` 重写基线）
 node tools/check-i18n-messages.mjs # UI 词典：13 语言键集对齐 / 空值 / 漏译（非中日韩语言不得含汉字）/ 代码 t() 键拼写 / 值里的花括号只能是 {占位符} / 模板拼接键的数据取值域兜底（itemType、prop、skillType、monster.rank、endgame.status、propGroup）
 node tools/check-ui-chinese.mjs   # 界面中文：代码里不得写死面向用户的中文（品牌名 / 母语自称 / 诊断日志 / 内部校验文本 / 中文解析表经白名单放行）
 ```

@@ -2,8 +2,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
 const DATA = '/data/cn/characters.json';
-const PACK_CN = '/data/i18n/cn/characters.json';
-const PACK_EN = '/data/i18n/en/characters.json';
+const PACK_CN = '/data/i18n/cn/characters.index.json';
+const PACK_EN = '/data/i18n/en/characters.index.json';
+const DETAIL_GROUP = `characters.${1001 % 32}`;
+const PACK_DETAIL_CN = `/data/i18n/cn/${DETAIL_GROUP}.json`;
 
 function routedFetch(routes: Record<string, unknown>) {
   return vi.fn(async (url: string) => {
@@ -84,18 +86,35 @@ describe('loadLocalJSON：已令牌化结构层', () => {
     });
   });
 
-  it('同一 (语言, 分组) 的包只取一次（多文件共享）', async () => {
+  it('同一 (语言, 分组) 的包只取一次（同分片多文件共享）', async () => {
     const { local } = await fresh();
     const fetchMock = routedFetch({
       '/data/cn/characters/1001.json': { name: '$t:111' },
-      '/data/cn/characters/1002.json': { name: '$t:222' },
-      [PACK_CN]: { '111': '三月七', '222': '丹恒' },
+      '/data/cn/characters/1033.json': { name: '$t:222' },
+      [PACK_DETAIL_CN]: { '111': '三月七', '222': '丹恒' },
     });
     vi.stubGlobal('fetch', fetchMock);
 
     await local.loadLocalJSON('characters/1001.json', 'char_1001');
-    await local.loadLocalJSON('characters/1002.json', 'char_1002');
+    await local.loadLocalJSON('characters/1033.json', 'char_1033');
     expect(fetchMock.mock.calls.filter((c) => String(c[0]).includes('/i18n/'))).toHaveLength(1);
+  });
+
+  it('顶层索引与详情目录取不同分组包（索引包不背详情正文）', async () => {
+    const { local } = await fresh();
+    const fetchMock = routedFetch({
+      [DATA]: { name: '$t:111' },
+      '/data/cn/characters/1001.json': { name: '$t:222' },
+      [PACK_CN]: { '111': '三月七' },
+      [PACK_DETAIL_CN]: { '222': '丹恒' },
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(local.loadLocalJSON('characters.json', 'list')).resolves.toEqual({ name: '三月七' });
+    await expect(local.loadLocalJSON('characters/1001.json', 'char_1001')).resolves.toEqual({ name: '丹恒' });
+    expect(fetchMock.mock.calls.map((c) => String(c[0]))).toEqual([
+      DATA, PACK_CN, '/data/cn/characters/1001.json', PACK_DETAIL_CN,
+    ]);
   });
 });
 

@@ -147,7 +147,7 @@ export const NODES: MapNode[] = [
   { id: 'data', name: '本地数据仓库', en: 'DATA/CN', layer: 'data', gx: 1, gy: 5,
     files: ['public/data/cn/characters.json', 'public/data/cn/items.json', 'public/data/cn/light_cones.json', 'public/data/cn/maze.json'], desc: 'cn 结构层 JSON 约 3.1k（monsters 2.7k / light_cones 170 / characters 98），随站部署；图片/Spine 仍走外部 CDN' },
   { id: 'langpack', name: '语言包仓', en: 'I18N PACKS', layer: 'data', gx: 2, gy: 5,
-    files: ['public/data/i18n/en/characters.json', 'src/services/i18n/pack.ts', 'src/lib/i18n/pack-path.ts', 'src/lib/i18n/text-ref.ts'], desc: 'public/data/i18n/<语言>/<分组>.json：13 语言 × 23 组 = 299 个语言包；结构层文本是 "$t:<键>" 引用令牌，唯一解析入口 services/api/local.ts → services/i18n/pack.ts + lib/i18n/text-ref.ts' },
+    files: ['public/data/i18n/en/characters.index.json', 'public/data/i18n/en/characters.7.json', 'src/services/i18n/pack.ts', 'src/lib/i18n/pack-path.ts', 'src/lib/i18n/text-ref.ts'], desc: 'public/data/i18n/<语言>/<分组>.json：13 语言 × 119 组 = 1547 个语言包（顶层索引独立成 <名>.index、character/lightcone/currency 角色详情按 ID % 32 分片、其余按首段目录）；结构层文本是 "$t:<键>" 引用令牌，唯一解析入口 services/api/local.ts → services/i18n/pack.ts + lib/i18n/text-ref.ts' },
   { id: 'manifest', name: 'Spine 清单', en: 'MANIFESTS', layer: 'data', gx: 3, gy: 5,
     files: ['public/data/cn/spine-manifest-official.json', 'public/data/cn/spine-manifest-nanoka.json', 'public/data/cn/version.json'], desc: '双清单（官方 21 entry / nanoka 66 entry）+ 版本号；SPINE_MANIFEST_VERSION 一致性由构建守卫 tools/check-spine-manifest.mjs 强制（build 首步）' },
   { id: 'misc', name: '详情数据', en: 'DETAIL JSON', layer: 'data', gx: 4, gy: 5,

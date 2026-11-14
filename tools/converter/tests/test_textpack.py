@@ -160,18 +160,25 @@ class TestSubstitute:
 
 
 class TestGroupOf:
-    def test_dir_first_segment(self):
-        assert textpack.group_of("characters/1310.json") == "characters"
-        assert textpack.group_of("currency/role/1502.json") == "currency"
+    def test_detail_file_uses_directory_and_id_shard(self):
+        assert textpack.group_of("characters/1310.json") == f"characters.{1310 % textpack.DETAIL_SHARD_MOD}"
+        assert textpack.group_of("currency/role/1502.json") == f"currency.role.{1502 % textpack.DETAIL_SHARD_MOD}"
+        assert textpack.group_of("light_cones/23003.json") == f"light_cones.{23003 % textpack.DETAIL_SHARD_MOD}"
 
-    def test_top_level_file_stem(self):
-        assert textpack.group_of("characters.json") == "characters"
-        assert textpack.group_of("maze.json") == "maze"
-        assert textpack.group_of("maze.catalog.json") == "maze.catalog"
+    def test_unsharded_detail_dir_keeps_first_segment(self):
+        assert textpack.group_of("monsters/1003010.json") == "monsters"
+
+    def test_top_level_file_stem_and_index_suffix(self):
+        assert textpack.group_of("characters.json") == "characters.index"
+        assert textpack.group_of("maze.json") == "maze.index"
+        assert textpack.group_of("maze.catalog.json") == "maze.catalog.index"
 
     def test_windows_separator_and_leading_slash(self):
-        assert textpack.group_of("\\characters\\1310.json") == "characters"
-        assert textpack.group_of("/characters/1310.json") == "characters"
+        assert textpack.group_of("\\characters\\1310.json") == f"characters.{1310 % textpack.DETAIL_SHARD_MOD}"
+        assert textpack.group_of("/characters/1310.json") == f"characters.{1310 % textpack.DETAIL_SHARD_MOD}"
+
+    def test_non_numeric_detail_file_keeps_first_segment(self):
+        assert textpack.group_of("currency/prop_icons.json") == "currency"
 
     def test_non_json_name(self):
         assert textpack.group_of("assets/cw-hero.mp4") == "assets"
@@ -295,21 +302,22 @@ class TestSaveJsonTokenMode:
             "name": "$t:111",
             "tags": ["$t:222", "plain"],
         }
-        assert token_mode.groups == ("characters",)
-        assert token_mode.keys_of("characters") == frozenset({"111", "222"})
+        group = f"characters.{1001 % textpack.DETAIL_SHARD_MOD}"
+        assert token_mode.groups == (group,)
+        assert token_mode.keys_of(group) == frozenset({"111", "222"})
 
-    def test_top_level_file_uses_stem_group(self, token_mode):
+    def test_top_level_file_uses_index_group(self, token_mode):
         import utils
 
         utils.save_json({"n": textpack.TextRef("冰", "222")}, utils.OUTPUT_DIR / "maze.json")
-        assert token_mode.groups == ("maze",)
+        assert token_mode.groups == ("maze.index",)
 
     def test_passthrough_token_is_recorded(self, token_mode):
         import utils
 
         utils.save_json({"zh": "$t:222", "n": 1}, utils.OUTPUT_DIR / "maze.catalog.json")
-        assert token_mode.groups == ("maze.catalog",)
-        assert token_mode.keys_of("maze.catalog") == frozenset({"222"})
+        assert token_mode.groups == ("maze.catalog.index",)
+        assert token_mode.keys_of("maze.catalog.index") == frozenset({"222"})
 
     def test_plain_text_with_cjk_is_left_verbatim(self, token_mode):
         import utils
