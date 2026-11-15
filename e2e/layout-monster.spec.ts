@@ -841,7 +841,7 @@ test.describe('布局验收：敌方详情页', () => {
         const firstWeak = await blocks.first().evaluate((el) => {
           const row = el.querySelector('.nk-mob-resist__row');
           return [...(row?.querySelectorAll('.nk-mob-resist__tags img') ?? [])]
-            .map((i) => (i.getAttribute('src') || '').split('/').pop() || '');
+            .map((i) => ((i.getAttribute('data-cdn-src') || i.getAttribute('src')) || '').split('/').pop() || '');
         });
         expect(firstWeak, '形态弱点的元素图标逐项与数据一致').toEqual(
           want[0].weak.map((e) => `${e.toLowerCase()}.webp`),
@@ -1009,7 +1009,7 @@ test.describe('布局验收：敌方目录（同族各档必须可辨）', () =>
         href: el.getAttribute('href') || '',
         variant: (el.querySelector('.nk-mob-card__var')?.textContent || '').trim(),
         weakIcons: [...el.querySelectorAll('.nk-mob-card__weak img')]
-          .map((i) => (i.getAttribute('src') || '').split('/').pop() || ''),
+          .map((i) => ((i.getAttribute('data-cdn-src') || i.getAttribute('src')) || '').split('/').pop() || ''),
         title: el.getAttribute('title') || '',
       })));
 

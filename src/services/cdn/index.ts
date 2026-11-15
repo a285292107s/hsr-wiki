@@ -5,3 +5,4 @@ export * from './resolve';
 export * from './placeholder';
 export * from './dom';
 export * from './health';
+export * from './img-gate';

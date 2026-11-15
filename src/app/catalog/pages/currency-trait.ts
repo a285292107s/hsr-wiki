@@ -25,7 +25,7 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
   );
 
   return `<a class="nk-cw-trait-card" href="${escHtml(activeHref(`/currency/trait/${item.id}`))}" data-cat="${escHtml(cat)}" title="${escHtml(item.name as string)}：${fullDesc}" style="--i:${index}">
-      <div class="nk-cw-trait-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
+      <div class="nk-cw-trait-card__icon"><img loading="lazy" data-cdn-src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-cw-trait-card__body">
         <div class="nk-cw-trait-card__name">${escHtml(item.name)}</div>
         <div class="nk-cw-trait-card__meta">

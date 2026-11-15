@@ -46,7 +46,7 @@ Pinia store（加载编排 / 缓存 / 错误态；不写业务计算）
    ▼
 view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
    │
-   ├─ 图片 / Spine → services/cdn/ 纯函数解析基址 → CDN 双源回退（运行期）
+   ├─ 图片 / Spine → services/cdn/ 纯函数解析基址 → 图片经并发闸门（img-gate，全局在途上限）→ jsdelivr/raw 回退（运行期）
    └─ 构建期 gen-ai-endpoints.mjs：dist/index.html → dist/prerender/** 快照（AI 可见性）
 ```
 
@@ -64,7 +64,7 @@ view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
 
 1. **配置驱动目录页**：所有列表页都是 `CatalogPageConfig`——每个目录一个 `src/app/catalog/pages/<id>.ts` 子模块（`shared.ts` 提供共享常量），由 `pages.ts` 注册为注册表。目录清单**以 `pages.ts` 注册表为准**，本文件不复述清单。`CatalogView.vue` 按 `route.meta.catalog` 取配置，交由单一 `CatalogPage.vue` 渲染，无需新视图；带专属样式的目录在配置 `styles` 字段声明，路由层并行加载（`src/app/router/index.ts` 的 `catalogView` 工厂）。**非列表页的例外只有枢纽页**（`/`、`/currency`）。
 2. **数据流向**：`Pinia store` → `src/services/api/` 纯函数 → 本地 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`，均随站部署；解析入口唯一落在 `api/local.ts`，令牌→正文在取数层完成，见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md)）；图片 URL 经 `src/services/cdn/` 纯函数解析。Store 负责加载编排、缓存与错误处理。
-3. **本地优先数据**：全部目录/详情数据为预转换 JSON；仅图片与 Spine 动画在运行期走 CDN。CDN 基址定义于 `src/lib/constants.ts → CDN`。
+3. **本地优先数据**：全部目录/详情数据为预转换 JSON；图片经 jsdelivr 从项目 GitHub 仓库镜像分发（`src/services/cdn/base.ts → LOCAL_ICONS_BASE`，回退 raw.githubusercontent.com），Spine 动画在运行期走 `src/lib/constants.ts → CDN`。
 4. **单强调色主题**：全站（含货币战争）共用一套可切换强调色（缺省橄榄青），开关为 `<html data-accent>`；货币战争的 `meta.cw` → `<html data-theme="cw">` 只作**模式标记**，不再重映射颜色（[ADR 0041](../adr/0041-主题色统一为单强调色通道.md)），CW 路由位于 `/currency/*`。令牌分层与强调色通道见 [ui-design.md](ui-design.md) §2/§3。
 5. **方向性页面过渡**：Router `beforeEach` 比较 from/to 的 `meta.depth` 得到 `navDir`（1 前进 / -1 返回 / 0 平级），`App.vue` 据此选择过渡动画。桌面/平板为**交叉过渡**（两视图重叠，离场视图在上层且起步更早，见 [CONTEXT.md](../../CONTEXT.md)「页面过渡」）；手机端（<768px）、平级导航与 `prefers-reduced-motion` 统一简单淡入淡出。
 6. **样式随路由懒加载**：页面 CSS 在对应视图组件内 `import`，由 Vite 拆为独立 CSS chunk；全局样式仅 `tokens.css` + `catalog.css`。分层、命名与共享原语纪律见 [ui-design.md](ui-design.md) §1。

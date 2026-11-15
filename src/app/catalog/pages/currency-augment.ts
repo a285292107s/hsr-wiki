@@ -15,7 +15,7 @@ function renderAugmentCard(item: CatalogItem, index = 0): string {
   const qLabel = QUALITY_KEY[quality] ? translate(QUALITY_KEY[quality]) : quality;
   const desc = fmtDesc(item.desc as string, item.params as number[]);
   return `<div class="nk-cw-card nk-cw-augment-card" data-quality="${escHtml(quality)}" style="--i:${index}" title="${escHtml(item.name)}">
-      <div class="nk-cw-card__icon"><img loading="lazy" src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
+      <div class="nk-cw-card__icon"><img loading="lazy" data-cdn-src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
       <div class="nk-cw-card__body">
         <div class="nk-cw-card__name">${escHtml(item.name)}</div>
         ${qLabel ? `<span class="nk-cw-tag nk-cw-tag--${quality.toLowerCase()}">${escHtml(qLabel)}</span>` : ''}

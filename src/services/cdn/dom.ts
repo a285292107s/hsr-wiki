@@ -2,6 +2,7 @@ import { isCdnDown, subscribeCdnHealth } from './health';
 import { LOCAL_ICONS_BASE } from './base';
 import { localFallbackFromPrimary } from './resolve';
 import { MISSING_ICON_SRC } from './placeholder';
+import { gateImagesIn } from './img-gate';
 
 export const CDN_STALL_TIMEOUT_MS = 10_000;
 
@@ -128,6 +129,9 @@ export function installCdnImgFallback(): () => void {
           if (node instanceof HTMLImageElement) watchStall(node);
           if (node instanceof Element) {
             node.querySelectorAll('img').forEach((img) => watchStall(img));
+          }
+          if (node instanceof HTMLImageElement || node instanceof Element) {
+            gateImagesIn(node as unknown as ParentNode);
           }
         }
         for (const node of rec.removedNodes) {

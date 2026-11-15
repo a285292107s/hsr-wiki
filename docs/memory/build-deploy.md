@@ -64,7 +64,26 @@
 
 ## 图标入库：新版本缺口的补数路径
 
-- **`avatarcutinfigures` 是唯一没有远端兜底的图标分类，缺一张就必露占位符**：nanoka 对该分类整体 404（`avatardrawcard` / `avatarroundicon` / `rank` 等分类有），jsDelivr 侧冻结在旧版本；本机 `StarRailTextures` 只是上次导出的快照，目录存在 ≠ 含新版本文件。判据：先按「本地缺 + nanoka 404」定性，再去解包补数，别拿同角色其它分类的 200 当该分类有图的证据。
+- **图标分类缺文件看兜底链、别猜**：图片走 jsdelivr（主）+ raw.githubusercontent（回退）同仓库镜像（两者都指向已提交的 `public/data/assets/icons/`），某分类在仓库里缺文件时两端同时 404 → 占位符。判据：先按「jsdelivr 与 raw 都 404」定性，再去解包补数并提交入库，别拿同角色其它分类的 200 当该分类有图的证据。
 - **补数走 AnimeStudio CLI 的 map 定向导出，不要全量扫包**：`AnimeStudio.CLI.exe "<game>\StarRail_Data" <导出目录> --game SR --map_op AssetMap,Load --map_type MessagePack --map_name "<textures>\index\game.map" --group_assets ByContainer --types Sprite --containers "<分类正则>" --dedupe_content`；`--containers` 让 map 只回捞相关包。前提是 `index/game.map` 建时已含当前版本——旧 map 只会回捞到旧资产（「map 里搜不到资产名」即此因，重建 map 等于整盘扫）；`--src` 要给 `<导出目录>/assets/asbres/spriteoutput`（解包根可能多一层 `ui/`，别依赖脚本默认路径）。
 - **`ingest-icons.py --crop-alpha 4:5` 的产物比例并不统一，这是算法而非流程漂移**：裁剪窗口宽高被 `min(w2, W) / min(h2, H)` 夹回画布后不再缩小，所以宽幅或几乎满画布的立绘会原样保留比例——目录里 4:5 与 0.9~1.1 的比例混存是正常形态；判据是「窗口受画布限制」，不要为了凑 4:5 手裁或换源。
+
+## 图片分发：jsdelivr 项目仓库镜像（主）+ raw.githubusercontent（回退）
+
+图片不再从 Vercel 源站（`/data/assets/icons`）直发——跨境链路带宽低、单张立绘体量大，首屏 LCP 图会被拖到明显的秒级等待才出。改由 `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`（jsdelivr `@gh/<repo>@<ref>` 镜像）分发，`LOCAL_ICONS_FALLBACK_BASE`（raw.githubusercontent 同仓库同 ref）作 img 回退。**图标分类的 `local` 分支现在就是「镜像主源 + raw 回退」**，不再是原来的「Vercel 源站 + nanoka 回退」。
+
+- **jsdelivr `@gh/<repo>@<ref>` 有 50 MB 的 ref 体积上限，本仓库远超它 → 未预热的冷文件会间歇返回 403 `Package size exceeded the configured limit of 50 MB`**：同一个文件重试往往又 200（官方 issue 定性为「取单文件偶尔失败，通常需预热」，不是路径写错）。只配 jsdelivr 会有概率性裂图，**必须接 raw.githubusercontent 回退**（raw 无该上限、稳定性更好，速度略慢）。判据：出现「部分图 403、同一 URL 重试 200」即此因。
+- **回退链两端必须同 ref**：jsdelivr 与 raw 的 ref（`ICON_MIRROR_REF`，现为 `main`）要一致，否则主源与回退各取不同提交，数据更新后可能一张新一张旧。
+- **`index.html` 的 `preconnect` 指向 jsdelivr、`dns-prefetch` 指向 raw.githubusercontent**：不要再 `preconnect` `static.nanoka.cc`——该 Cloudflare 域在目标网络常不可达（connect/TLS 超时），首屏 LCP 图会先卡在死主源上等超时才回退。
+- **构建产物里基址是模板字面量拼接，grep 完整 URL 会 0 命中**：minify 后形如 ``a=`https://cdn.jsdelivr.net/gh/${repo}@${ref}/public/data/assets/icons` ``，核对时 grep `hsr-wiki` 或 `raw.githubusercontent` 片段，别因整串 grep 无果就以为没改到。
+
+## 图片并发闸门（避免一次性大量加载被 jsdelivr 限流）
+
+`src/services/cdn/img-gate.ts` 的 `installImageGate()`（bootstrap 里 `app.mount` 之前安装）给全站图片加了一个**全局在途并发上限**（`IMAGE_GATE_MAX_INFLIGHT=6`），避免列表首屏一次性把 30–40 个 jsdelivr 请求同时发出去、撞上突发限流。**列表页的并发峰值实测从 ~31 降到 6**，可见图仍全部加载。
+
+- **浏览器一旦拿到 `src` 就立即发请求，改属性/改 `src` 拦不住**——所以闸门必须让图**一开始就没有真 `src`**。实现：装一个 `HTMLImageElement.prototype.src` 属性 setter 拦截，本域图片一律改成透明占位、把真 URL 记在 `data-cdn-src`，等拿到名额再由闸门写回。`v-html`/`innerHTML` 出的图不走属性 setter（实测：setter 只拦属性赋值，`setAttribute`/`innerHTML` 都漏），因此**模板串里本域图片必须写 `data-cdn-src` 而非 `src`**，由闸门在插入时接管。
+- **本域判定**：`img-gate.ts` 的 `isGatedImageUrl` 认 `CDN`(nanoka) + `cdn.jsdelivr.net` + `raw.githubusercontent.com`。新增图片来源（换 CDN / 加域名）必须同步这里，否则新源不受闸门。
+- **优先级/视口**：`fetchpriority="high"` 的 LCP 图立即放行（不受上限约束，并移除该属性避免过早请求），其余按「靠近视口优先」入队；名额靠全局 `load`/`error` 捕获释放（`load` 不冒泡，故必须 capture），并 rAF 合并重算，避免 1000 图页面里每次 release 都 O(n) 全扫。
+- **降级与闸门的耦合坑**：闸门把 `src` 设成**透明**占位（不是错误图标）——4×4 的透明图 `complete && naturalWidth>0` 成立，所以**任何「图已加载」的断言必须认真实 `src`（或 `data-cdn-src`），别只信 `naturalWidth>0`**（它会假阳性）。若用错误 SVG 当占位，会触发组件 `@error` 处理器误隐藏图，更糟。
+- **测试约定**：闸门接管后，本域图的真实 URL 统一在 `data-cdn-src`（不管在队还是已加载），`src` 可能是占位 GIF（未放行时）。e2e 断言图片地址一律读 `data-cdn-src || src`；旧 `toHaveAttribute('src', …)` 会假失败。全 404 占位类断言要先把目标 `scrollIntoViewIfNeeded()`，否则屏外图根本不会入队加载、404 永不触发。
 

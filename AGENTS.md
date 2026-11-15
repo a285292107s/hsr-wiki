@@ -1,6 +1,6 @@
 # AGENTS.md
 
-HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki（Vue + TypeScript + Vite + Pinia / Vue Router）：数据由 Python 工具 `tools/converter` 从官方解包数据离线转换为本地 JSON 随站分发，图片与 Spine 动画在运行期走 CDN 双源回退。
+HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki（Vue + TypeScript + Vite + Pinia / Vue Router）：数据由 Python 工具 `tools/converter` 从官方解包数据离线转换为本地 JSON 随站分发，图片经 jsdelivr 从项目 GitHub 仓库镜像分发（回退 raw.githubusercontent.com）、Spine 动画在运行期走 CDN。
 
 > **加载指引**：先读本文件；确认命中某域后再按「任务 → 必读」读**对应那一份**子文件——不预读、不整目录通读。
 > 术语与 `_Avoid_` 禁用词以 [CONTEXT.md](CONTEXT.md) 为准；决策 [docs/adr/](docs/adr/)、字段裁决 [docs/audit/](docs/audit/)、数据源与字段探索 [docs/data/](docs/data/)、Spine 机制 [docs/spine/](docs/spine/)、按域坑位 [docs/memory/](docs/memory/)。
@@ -55,7 +55,7 @@ node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超�
 > 只留「动手前必须知道、且子文件不便替代」的判据；细节与决策经过见子文件与 ADR——**同一事实不在两处重述**。
 
 - **配置驱动目录页**：列表页一律 `CatalogPageConfig`（`src/app/catalog/pages/` + `pages.ts` 注册，目录清单以注册表为准）+ 单一 `CatalogView` 按 `route.meta.catalog` 渲染；专属样式在配置 `styles` 声明，随路由并行加载。
-- **本地优先数据**：目录 / 详情数据全部是预转换 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`；结构层里文本是引用令牌 `"$t:<键>"`，唯一解析入口 `src/services/api/local.ts`，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）；仅图片与 Spine 动画运行期走 CDN（基址 `src/lib/constants.ts → CDN`）。
+- **本地优先数据**：目录 / 详情数据全部是预转换 JSON（结构层 `public/data/cn/` + 语言包 `public/data/i18n/<语言>/<分组>.json`；结构层里文本是引用令牌 `"$t:<键>"`，唯一解析入口 `src/services/api/local.ts`，见 [ADR 0052](docs/adr/0052-多语言站点架构-路径前缀与语言包.md)）；图片经 jsdelivr 走项目 GitHub 仓库镜像（基址 `src/services/cdn/base.ts → LOCAL_ICONS_BASE`，回退 raw.githubusercontent.com），并由 `src/services/cdn/img-gate.ts` 全局并发闸门控制（在途 ≤6，防突发限流；模板串里的本域图片必须写 `data-cdn-src` 而非 `src`，由闸门接管），Spine 动画运行期走 `src/lib/constants.ts → CDN`。
 - **单强调色主题**：全站（含货币战争）共用一套可切换强调色，开关 `<html data-accent>`；`meta.cw` → `<html data-theme="cw">` 只是**模式标记**，不重映射颜色（[ADR 0041](docs/adr/0041-主题色统一为单强调色通道.md)）。色板、缺省值与令牌分层见 [ui-design.md](docs/agents/ui-design.md) §2/§3。
 - **样式随路由懒加载**：页面 CSS 随视图 import 拆独立 chunk；全局仅 tokens.css + catalog.css + fonts.css。
 - **首页＝版本入册页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为报头 + 版本钢印与同步日期 + 本期入册清单（整行链接）+ 站内即时搜索 + 角色对页 / 光锥行 / 遗器双联 + 页脚藏书量，跨模式只走侧栏「交换」（[ADR 0063](docs/adr/0063-首页改为版本入册页-清单在前与分区分构图.md)，取代 0019 的首页形态）。

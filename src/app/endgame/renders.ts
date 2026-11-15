@@ -64,7 +64,7 @@ export function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
+      ? `<img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
       : '';
   }).join('');
 }

@@ -287,12 +287,12 @@ const eventLevelText = computed(() => {
 
 function elemTag(elem: string): string {
   const name = elemLabel(elem);
-  return `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
+  return `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
 }
 const weakHtml = computed(() => (d.value?.weak ?? []).map(elemTag).join(''));
 const resistHtml = computed(() =>
   Object.entries(d.value?.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join(''));
 const introHtml = computed(() => {
   if (!d.value) return '';
@@ -307,7 +307,7 @@ function skillMeta(s: MonsterSkillDetail): string {
   if (s.damage_type) {
     const name = elemLabel(s.damage_type);
     parts.push(
-      `<span class="nk-mob-skill__elem"><img src="${escHtml(elementIconUrl(s.damage_type))}" alt="${escHtml(name)}" title="${escHtml(name)}" loading="lazy">${escHtml(name)}</span>`,
+      `<span class="nk-mob-skill__elem"><img data-cdn-src="${escHtml(elementIconUrl(s.damage_type))}" alt="${escHtml(name)}" title="${escHtml(name)}" loading="lazy">${escHtml(name)}</span>`,
     );
   }
   if (s.type_desc) {
@@ -449,7 +449,7 @@ function tierLabel(worldLevel: number | null): string {
 function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
   if (kind === 'weak') return (phase.weak ?? []).map(elemTag).join('');
   return Object.entries(phase.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join('');
 }
 </script>

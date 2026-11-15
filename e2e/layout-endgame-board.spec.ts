@@ -230,7 +230,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(immRow.locator('.nk-egd-mon__resval'))
       .toHaveText(debuffs.map((d) => `${Math.round(d.value * 100)}%`));
     const immImg = immRow.locator('.nk-egd-mon__immicon').first();
-    await expect(immImg).toHaveAttribute('src', new RegExp(debuffs[0].icon));
+    await expect(immImg).toHaveAttribute('data-cdn-src', new RegExp(debuffs[0].icon));
     await expect(immImg).toHaveAttribute('data-cdn-fallback', /IconImmune.*\.png$/);
     await immImg.scrollIntoViewIfNeeded();
     await expect.poll(() => immImg.evaluate((el) => (el as HTMLImageElement).naturalWidth),
@@ -321,7 +321,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     const nodeBossImgs = nodeTabs.locator('.nk-egd-nodecard__img');
     await expect(nodeBossImgs).toHaveCount(tierceNodes.length);
     for (const nd of tierceNodes) {
-      await expect(nodeBossImgs.nth(nd.idx - 1)).toHaveAttribute('src', new RegExp(lastWaveMonster(nd).icon!));
+      await expect(nodeBossImgs.nth(nd.idx - 1)).toHaveAttribute('data-cdn-src', new RegExp(lastWaveMonster(nd).icon!));
     }
     for (let i = 0; i < tierceNodes.length; i += 1) {
       await nodeTabs.nth(i).scrollIntoViewIfNeeded();

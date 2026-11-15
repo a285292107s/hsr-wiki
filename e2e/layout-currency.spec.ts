@@ -124,7 +124,7 @@ test.describe('布局验收：货币战争主题', () => {
     expect(bottom, '第一幕的账头应落在首屏内').toBeLessThanOrEqual(1080);
     const art = premiere.locator('.nk-cwsc-premiere__art img');
     await expect(art).toBeVisible();
-    expect(await art.evaluate((el) => el.getAttribute('src'))).toMatch(/avatardrawcard\//);
+    expect(await art.evaluate((el) => el.getAttribute('data-cdn-src') || el.getAttribute('src'))).toMatch(/avatardrawcard\//);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -347,15 +347,15 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(page.locator('.nk-crole-skill').first()).toBeVisible();
     const icon = page.locator('.nk-crole-skill__icon').first();
     await expect(icon).toBeVisible();
-    await expect(icon).toHaveAttribute('src', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
+    await expect(icon).toHaveAttribute('data-cdn-src', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
     await expect(icon).toHaveAttribute('data-cdn-fallback', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
     const gmIcon = page.locator('.nk-crole-gm__label', { hasText: '基础前台强度' }).first().locator('.nk-crole-gm__icon');
     await expect(gmIcon).toBeVisible();
-    await expect(gmIcon).toHaveAttribute('src', /spriteoutput\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png/);
+    await expect(gmIcon).toHaveAttribute('data-cdn-src', /spriteoutput\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png/);
     const rankIcon = page.locator('.nk-crole-timeline__icon img').first();
     await expect(rankIcon).toBeVisible();
-    await expect(rankIcon).toHaveAttribute('src', /\/rank\/1001\/1001_Rank_1\.webp$/);
-    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /\/rank\/_dependencies\/textures\/1001\/1001_Rank_1\.webp$/);
+    await expect(rankIcon).toHaveAttribute('data-cdn-src', /\/rank\/1001\/1001_Rank_1\.webp$/);
+    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /\/rank\/1001\/1001_Rank_1\.webp$/);
     await expect(page.locator('[data-panel="cones"] .nk-slot-empty')).toHaveText('该角色没有专属光锥数据');
     await noUnknownOverflow(page);
     assertNoErrors();
@@ -382,7 +382,7 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(cone.locator('.nk-crole-cone__rarity')).toHaveText('★'.repeat(coneData!.rarity));
     await expect(cone.locator('.nk-crole-cone__path')).toHaveText(pathName!);
     await expect(cone.locator('.nk-crole-cone__icon'))
-      .toHaveAttribute('src', new RegExp(`/lightconemediumicon/${coneData!.id}\\.webp$`));
+      .toHaveAttribute('data-cdn-src', new RegExp(`/lightconemediumicon/${coneData!.id}\\.webp$`));
     await expect(page.locator('[data-panel="cones"] .nk-crole-equip')).toHaveCount(5);
     await noUnknownOverflow(page);
     assertNoErrors();

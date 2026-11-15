@@ -193,7 +193,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     await expect(mazeHalves).toHaveCount(2);
     await expect(mazeHalves.locator('.nk-egd-nodecard__name')).toHaveText(['上半场', '下半场']);
     await expect(mazeHalves.first().locator('.nk-egd-nodecard__img'))
-      .toHaveAttribute('src', new RegExp(lastWaveMonster(mazeFloor1.stage1).icon!));
+      .toHaveAttribute('data-cdn-src', new RegExp(lastWaveMonster(mazeFloor1.stage1).icon!));
     await expect(mazeHalves.first().locator('.nk-egd-nodecard__label'))
       .toHaveText(['推荐属性', '等级', '回合']);
     await expect(mazeHalves.first().locator('.nk-egd-nodecard__val'))
@@ -282,7 +282,7 @@ test.describe('布局验收：终局层级与看板 · 忘却之庭 / 虚构叙�
     );
     await expect(page.locator('.nk-egd-nodecards[aria-label="星启节点"] [role="tab"]').first()
       .locator('.nk-egd-nodecard__img'))
-      .toHaveAttribute('src', new RegExp(lastWaveMonster(maze.tierce!.nodes![0]).icon!));
+      .toHaveAttribute('data-cdn-src', new RegExp(lastWaveMonster(maze.tierce!.nodes![0]).icon!));
     await expect(page.locator('.nk-egd-nodecard').first().locator('.nk-egd-nodecard__val'))
       .toHaveText(String(maze.tierce!.nodes![0].level));
     const egIndent = await readTokenPx(page, '--eg-indent', '.nk-egd');

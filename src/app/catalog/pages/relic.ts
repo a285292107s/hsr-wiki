@@ -46,7 +46,7 @@ export const relicPage: CatalogPageConfig = {
     const tag = typeof item.set_tag === 'string' ? item.set_tag : '';
     return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" data-set="${escHtml(String(item.set_type))}" title="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-relic-card__plate">
-        <img class="nk-relic-card__img" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
+        <img class="nk-relic-card__img" data-cdn-src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         ${tag ? `<span class="nk-relic-card__tag">${escHtml(tag)}</span>` : ''}
       </div>
       <div class="nk-relic-card__info">

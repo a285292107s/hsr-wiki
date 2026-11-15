@@ -44,10 +44,12 @@ test.describe('布局验收：角色详情页', () => {
     await page.route('**/data/assets/icons/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.route('**/assets/hsr/skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.route('**/cdn.jsdelivr.net/**skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
+    await page.route('**/raw.githubusercontent.com/**skillicons/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.goto('/character/1212');
     await settleAnimations(page);
     const icon = page.locator('[data-panel="skills"] .nk-skill__icon').first();
     await expect(icon).toBeVisible();
+    await icon.scrollIntoViewIfNeeded();
     await expect.poll(async () => icon.getAttribute('data-cdn-placeholder'), { timeout: 15000 }).toBe('1');
     const state = await icon.evaluate((el) => ({
       src: el.getAttribute('src') || '',

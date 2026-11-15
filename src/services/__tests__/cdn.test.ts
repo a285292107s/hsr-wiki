@@ -5,6 +5,7 @@ import {
   JS_DELIVR_BASE,
   JS_DELIVR_UI3D_BASE,
   LOCAL_ICONS_BASE,
+  LOCAL_ICONS_FALLBACK_BASE,
   NANOKA_HUD,
   cdnFallbackFromPrimary,
   cdnImgFallbackAttr,
@@ -23,6 +24,7 @@ beforeAll(() => {
 });
 
 const BASE = `${CDN}${NANOKA_HUD}`;
+const RAW = LOCAL_ICONS_FALLBACK_BASE;
 
 describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
   it('nanokaUrl 按分类子路径拼接 CDN 基址', () => {
@@ -49,66 +51,66 @@ describe('resolveCdnUri 双源解析', () => {
     expect(r.source).toBe('nanoka');
   });
 
-  it('monstermiddleicon / monsterfigure（已全量入库）：local-first（怪物图鉴与立绘量大，仍全量随站）', () => {
+  it('monstermiddleicon / monsterfigure（已全量入库）：local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/monstermiddleicon/Monster_1002011.webp`,
-      fallback: `${BASE}/monstermiddleicon/Monster_1002011.webp`,
+      fallback: `${RAW}/monstermiddleicon/Monster_1002011.webp`,
       source: 'local',
     });
     expect(resolveCdnUri('monsterfigure', 'Monster_1002011.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/monsterfigure/Monster_1002011.webp`,
-      fallback: `${BASE}/monsterfigure/Monster_1002011.webp`,
+      fallback: `${RAW}/monsterfigure/Monster_1002011.webp`,
       source: 'local',
     });
   });
 
-  it('avatarshopicon / avatardrawcard（已全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
+  it('avatarshopicon / avatardrawcard（已全量入库）：local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('avatarshopicon', '1001.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatarshopicon/1001.webp`,
-      fallback: `${BASE}/avatarshopicon/1001.webp`,
+      fallback: `${RAW}/avatarshopicon/1001.webp`,
       source: 'local',
     });
     expect(resolveCdnUri('avatardrawcard', '1001.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatardrawcard/1001.webp`,
-      fallback: `${BASE}/avatardrawcard/1001.webp`,
+      fallback: `${RAW}/avatardrawcard/1001.webp`,
       source: 'local',
     });
   });
 
-  it('lightconemediumicon（光锥图标，全量入库）：local-first，本地缺失回退远端主源 nanoka', () => {
+  it('lightconemediumicon（光锥图标，全量入库）：local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('lightconemediumicon', '20000.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/lightconemediumicon/20000.webp`,
-      fallback: `${BASE}/lightconemediumicon/20000.webp`,
+      fallback: `${RAW}/lightconemediumicon/20000.webp`,
       source: 'local',
     });
   });
 
-  it('本地图标分类：element / pathicon local-first，本地缺失回退远端主源（nanoka，新增内容仅此源有）', () => {
+  it('本地图标分类：element / pathicon local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('element', 'fire.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/element/fire.webp`,
-      fallback: `${BASE}/element/fire.webp`,
+      fallback: `${RAW}/element/fire.webp`,
       source: 'local',
     });
-    expect(resolveCdnUri('pathicon', 'priest.webp').fallback).toBe(`${BASE}/pathicon/priest.webp`);
-    expect(resolveCdnUri('pathicon', 'elation.webp').fallback).toBe(`${BASE}/pathicon/elation.webp`);
+    expect(resolveCdnUri('pathicon', 'priest.webp').fallback).toBe(`${RAW}/pathicon/priest.webp`);
+    expect(resolveCdnUri('pathicon', 'elation.webp').fallback).toBe(`${RAW}/pathicon/elation.webp`);
     expect(resolveCdnUri('trace', 'IconAttack.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/trace/IconAttack.webp`,
-      fallback: `${JS_DELIVR_BASE}/ui/avatar/icon/IconAttack.png`,
+      fallback: `${RAW}/trace/IconAttack.webp`,
       source: 'local',
     });
     expect(resolveCdnUri('statusimmune', 'IconImmuneFrozen.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`,
-      fallback: `${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`,
+      fallback: `${RAW}/statusimmune/IconImmuneFrozen.webp`,
       source: 'local',
     });
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`))
-      .toBe(`${JS_DELIVR_BASE}/ui/avatar/icon/IconImmuneFrozen.png`);
+      .toBe(`${RAW}/statusimmune/IconImmuneFrozen.webp`);
   });
 
-  it('/voracity 缺图补入：bufficon / achievement 整分类本地，tutorialpic 白名单 local-first', () => {
+  it('/voracity 缺图补入：bufficon / achievement 整分类本地，tutorialpic 白名单 local-first（失败回退 raw 镜像）', () => {
     expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconBuffShield.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
-      fallback: `${BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
+      fallback: `${RAW}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`,
       source: 'local',
     });
     expect(resolveCdnUri('bufficon', 'BuffIcon/Inlevel/IconMonster_W5_StageInvasion.webp').source).toBe('local');
@@ -119,15 +121,15 @@ describe('resolveCdnUri 双源解析', () => {
     expect(resolveCdnUri('tutorialpic', 'TutorialPic/TutorialPage_1000001.webp').source).toBe('nanoka');
     expect(resolveCdnUri('gridfight-affix', 'icon_gridfight_affix_09.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/gridfight-affix/icon_gridfight_affix_09.webp`,
-      fallback: `${BASE}/gridfight/battleicon/bufficon/icon_gridfight_affix_09.webp`,
+      fallback: `${RAW}/gridfight-affix/icon_gridfight_affix_09.webp`,
       source: 'local',
     });
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/gridfight-affix/icon_gridfight_affix_09.webp`))
-      .toBe(`${BASE}/gridfight/battleicon/bufficon/icon_gridfight_affix_09.webp`);
+      .toBe(`${RAW}/gridfight-affix/icon_gridfight_affix_09.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`))
-      .toBe(`${BASE}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`);
+      .toBe(`${RAW}/bufficon/BuffIcon/Inlevel/IconBuffShield.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/tutorialpic/TutorialPic/TutorialPage_1050101.webp`))
-      .toBe(`${BASE}/tutorialpic/TutorialPic/TutorialPage_1050101.webp`);
+      .toBe(`${RAW}/tutorialpic/TutorialPic/TutorialPage_1050101.webp`);
   });
 
   it('jsDelivr 映射分类：skillicons 主源 nanoka 平铺，回退按角色 id 分目录', () => {
@@ -146,10 +148,10 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_BASE}/skillicons/avatar/8007/SkillIcon_18007_Servant01.png`);
   });
 
-  it('skillicons（技能图标，全量入库）：local-first，本地缺失回退 nanoka 主源', () => {
+  it('skillicons（技能图标，全量入库）：local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('skillicons', 'SkillIcon_1001_Normal.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/skillicons/SkillIcon_1001_Normal.webp`,
-      fallback: `${BASE}/skillicons/SkillIcon_1001_Normal.webp`,
+      fallback: `${RAW}/skillicons/SkillIcon_1001_Normal.webp`,
       source: 'local',
     });
   });
@@ -168,10 +170,10 @@ describe('resolveCdnUri 双源解析', () => {
       .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1510/1510_Rank_6.png`);
   });
 
-  it('rank（星魂图标，全量入库）：local-first，本地缺失回退 nanoka 主源', () => {
+  it('rank（星魂图标，全量入库）：local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('rank', '1403/1403_Rank_3.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/rank/1403/1403_Rank_3.webp`,
-      fallback: `${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`,
+      fallback: `${RAW}/rank/1403/1403_Rank_3.webp`,
       source: 'local',
     });
   });
@@ -185,17 +187,17 @@ describe('resolveCdnUri 双源解析', () => {
     expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('nanoka');
   });
 
-  it('avatarroundicon：全量入库（含 1503 真珠 override），本地缺失回退远端主源', () => {
+  it('avatarroundicon：全量入库（含 1503 真珠 override），local-first（jsdelivr 镜像），失败回退 raw 镜像', () => {
     expect(resolveCdnUri('avatarroundicon', '1503.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`,
-      fallback: `${BASE}/avatarroundicon/1503.webp`,
+      fallback: `${RAW}/avatarroundicon/1503.webp`,
       source: 'local',
     });
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/avatarroundicon/1503.webp`))
-      .toBe(`${BASE}/avatarroundicon/1503.webp`);
+      .toBe(`${RAW}/avatarroundicon/1503.webp`);
     expect(resolveCdnUri('avatarroundicon', '1502.webp')).toEqual({
       primary: `${LOCAL_ICONS_BASE}/avatarroundicon/1502.webp`,
-      fallback: `${BASE}/avatarroundicon/1502.webp`,
+      fallback: `${RAW}/avatarroundicon/1502.webp`,
       source: 'local',
     });
   });
@@ -275,17 +277,17 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
     expect(cdnFallbackFromPrimary('https://example.com/x.webp')).toBe('');
   });
 
-  it('本地主源反查远端回退（localFallbackFromPrimary，回退 = 远端主源 nanoka）', () => {
+  it('本地主源反查远端回退（localFallbackFromPrimary，回退 = raw 镜像）', () => {
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(`${BASE}/element/fire.webp`);
+      .toBe(`${RAW}/element/fire.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelicBody.webp`))
-      .toBe(`${BASE}/relicfigures/IconRelicBody.webp`);
+      .toBe(`${RAW}/relicfigures/IconRelicBody.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`)).toBe('');
     expect(localFallbackFromPrimary('https://example.com/x.webp')).toBe('');
     expect(cdnFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(`${BASE}/element/fire.webp`);
+      .toBe(`${RAW}/element/fire.webp`);
     expect(cdnImgFallbackAttr(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(` data-cdn-fallback="${BASE}/element/fire.webp"`);
+      .toBe(` data-cdn-fallback="${RAW}/element/fire.webp"`);
   });
 
   it('trace（jdPrimary）jsDelivr 主源反查 nanoka 回退属性', () => {
@@ -439,32 +441,32 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     }
   });
 
-  it('本地主源 img 失败：现场反查远端主源回退（不依赖 data-cdn-fallback 属性），远端再失败最终降级', () => {
+  it('本地主源 img 失败：现场反查 raw 镜像回退（不依赖 data-cdn-fallback 属性），再失败最终降级', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = `${LOCAL_ICONS_BASE}/element/fire.webp`;
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.src).toBe(`${BASE}/element/fire.webp`);
+      expect(img.src).toBe(`${RAW}/element/fire.webp`);
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');
-      expect(img.dataset.cdnSrc).toBe(`${BASE}/element/fire.webp`);
+      expect(img.dataset.cdnSrc).toBe(`${RAW}/element/fire.webp`);
     } finally {
       off();
       img.remove();
     }
   });
 
-  it('本地主源 img 失败且无远端回退（白名单外）→ 直接降级', () => {
+  it('镜像基址 + 白名单外文件名（无回退）→ 降级为占位图形', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = `${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`;
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
-      expect(img.getAttribute('src')).toBe(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`);
       expect(img.dataset.cdnDown).toBe('1');
+      expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
       off();
       img.remove();

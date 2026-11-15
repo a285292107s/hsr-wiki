@@ -255,7 +255,7 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
       const first = mono[0];
       await expect(card.locator('.nk-egd-mon__name')).toHaveText(first.name);
       await expect(card.locator('.nk-egd-mon__img'))
-        .toHaveAttribute('src', new RegExp(first.icon!));
+        .toHaveAttribute('data-cdn-src', new RegExp(first.icon!));
       await expect(card.locator('.nk-egd-mon__figlink'))
         .toHaveAttribute('aria-label', `查看 ${first.name} 详情`);
       const debuffs = first.debuff_resist ?? [];

@@ -37,7 +37,15 @@ export interface CdnCategorySpec {
 
 export const NANOKA_HUD = '/assets/hsr';
 
-export const LOCAL_ICONS_BASE = '/data/assets/icons';
+export const ICON_MIRROR_REF = 'main';
+
+export const ICON_GH_REPO = 'a285292107s/hsr-wiki';
+
+const ICON_GH_PATH = `public/data/assets/icons`;
+
+export const LOCAL_ICONS_BASE = `https://cdn.jsdelivr.net/gh/${ICON_GH_REPO}@${ICON_MIRROR_REF}/${ICON_GH_PATH}`;
+
+export const LOCAL_ICONS_FALLBACK_BASE = `https://raw.githubusercontent.com/${ICON_GH_REPO}/${ICON_MIRROR_REF}/${ICON_GH_PATH}`;
 
 export const OFFICIAL_BASE = '';
 

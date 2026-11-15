@@ -1,6 +1,6 @@
 import { CDN } from '../../lib/constants';
 import { escHtml } from '../../lib/html';
-import { CDN_CATEGORIES, LOCAL_ICONS_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
+import { CDN_CATEGORIES, LOCAL_ICONS_BASE, LOCAL_ICONS_FALLBACK_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
 import { JS_DELIVR_BASE, JS_DELIVR_RULES, JS_DELIVR_UI3D_BASE, jsdelivrToNanokaFile } from './jsdelivr';
 
 export interface CdnUri {
@@ -45,7 +45,7 @@ export function resolveCdnUri(
   if (spec.local && (!spec.localFiles || spec.localFiles.test(file))) {
     return {
       primary: `${LOCAL_ICONS_BASE}/${spec.local}/${file}`,
-      fallback: remoteCdnUri(category, file, spec).primary,
+      fallback: `${LOCAL_ICONS_FALLBACK_BASE}/${spec.local}/${file}`,
       source: 'local',
     };
   }
@@ -67,10 +67,10 @@ export function localFallbackFromPrimary(primary: string): string {
   if (slash <= 0) return '';
   const dir = rest.slice(0, slash);
   const file = rest.slice(slash + 1);
-  for (const [cat, spec] of Object.entries(CDN_CATEGORIES) as [CdnCategory, CdnCategorySpec][]) {
+  for (const spec of Object.values(CDN_CATEGORIES) as CdnCategorySpec[]) {
     if (spec.local !== dir) continue;
     if (spec.localFiles && !spec.localFiles.test(file)) continue;
-    return remoteCdnUri(cat, file, spec).primary;
+    return `${LOCAL_ICONS_FALLBACK_BASE}/${spec.local}/${file}`;
   }
   return '';
 }

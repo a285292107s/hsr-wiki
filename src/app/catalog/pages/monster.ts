@@ -101,7 +101,7 @@ export const monsterPage: CatalogPageConfig = {
     ? t('mob.badge.variant', { i: variantIndex, n: variantCount })
     : '';
     const weakHtml = weakKeys.length
-      ? weakKeys.map((e, k) => `<img src="${escHtml(elementIconUrl(e))}" alt="${escHtml(weakNames[k] || e)}" loading="lazy">`).join('')
+      ? weakKeys.map((e, k) => `<img data-cdn-src="${escHtml(elementIconUrl(e))}" alt="${escHtml(weakNames[k] || e)}" loading="lazy">`).join('')
       : `<span class="nk-mob-card__none">${escHtml(t('mob.noWeak'))}</span>`;
     const title = [
       item.name,
@@ -112,7 +112,7 @@ export const monsterPage: CatalogPageConfig = {
     ].filter(Boolean).join(' · ');
     return `<a class="nk-mob-card" data-type="${escHtml(typeKey)}" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" title="${escHtml(title)}" style="--i:${i}">
       <span class="nk-mob-card__fig">
-        <img src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        <img data-cdn-src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
       </span>
       <span class="nk-mob-card__info">
         <span class="nk-mob-card__name">${escHtml(item.name)}</span>

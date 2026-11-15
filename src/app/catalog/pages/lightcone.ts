@@ -71,9 +71,9 @@ export const lightconePage: CatalogPageConfig = {
     const skillName = String(item.skillName || '');
     return `<a class="nk-lc-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" data-name="${escHtml(item.name)}" data-path="${escHtml(path)}" title="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-lc-card__img">
-        <img class="lc-avatar" src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
+        <img class="lc-avatar" data-cdn-src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
         <div class="nk-sk nk-sk--shimmer nk-lc-card__shimmer" aria-hidden="true"></div>
-        ${item.pathImg ? `<div class="nk-lc-card__badge"><img src="${escHtml(item.pathImg)}" alt="${pathLabel(path)}"></div>` : ''}
+        ${item.pathImg ? `<div class="nk-lc-card__badge"><img data-cdn-src="${escHtml(item.pathImg)}" alt="${pathLabel(path)}"></div>` : ''}
         <div class="nk-lc-card__info">
           <span class="nk-lc-card__name">${escHtml(item.name)}</span>
           <span class="nk-lc-card__stars-row" aria-hidden="true">${stars}</span>

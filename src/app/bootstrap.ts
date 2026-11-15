@@ -3,7 +3,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import { i18n, setI18nLocale, translate } from './i18n';
 import { createNkRouter } from './router';
-import { installCdnImgFallback, startCdnHealthProbe, subscribeCdnHealth } from '../services/cdn';
+import { installCdnImgFallback, installImageGate, startCdnHealthProbe, subscribeCdnHealth } from '../services/cdn';
 import { useAppStore } from './stores/app';
 import { initAccent } from '../lib/theme';
 import { loadEnumLabels } from '../lib/enum-labels';
@@ -29,6 +29,7 @@ export async function bootstrap(): Promise<void> {
   app.use(createPinia());
   app.use(i18n);
   app.use(router);
+  installImageGate();
   app.mount('#app');
   installCdnImgFallback();
   startCdnHealthProbe();

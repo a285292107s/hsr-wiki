@@ -83,7 +83,7 @@ export const characterPage: CatalogPageConfig = {
     const element = String(item.element || '');
     const path = String(item.path || '');
     const avatarItem = String(item.avatar || '');
-    const avatar = `<img src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
+    const avatar = `<img data-cdn-src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
     return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" title="${escHtml(item.name)}" style="--i:${i}">
     <span class="nk-idx-card__portrait">
       ${avatar}
@@ -95,11 +95,11 @@ export const characterPage: CatalogPageConfig = {
       <span class="nk-idx-card__stars-row" aria-hidden="true">${stars}</span>
       <span class="nk-idx-card__meta">
         <span class="nk-idx-card__tag">
-          ${item.elemImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.elemImg)}" alt="">` : ''}
+          ${item.elemImg ? `<img class="nk-idx-card__icon" data-cdn-src="${escHtml(item.elemImg)}" alt="">` : ''}
           <span class="nk-idx-card__tag-text">${escHtml(elemLabel(element))}</span>
         </span>
         <span class="nk-idx-card__tag">
-          ${item.pathImg ? `<img class="nk-idx-card__icon" src="${escHtml(item.pathImg)}" alt="">` : ''}
+          ${item.pathImg ? `<img class="nk-idx-card__icon" data-cdn-src="${escHtml(item.pathImg)}" alt="">` : ''}
           <span class="nk-idx-card__tag-text">${escHtml(pathLabel(path))}</span>
         </span>
       </span>

@@ -30,7 +30,7 @@ function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
+      ? `<img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
       : '';
   }).join('');
 }
@@ -53,7 +53,7 @@ function resistRowHtml(m: MazeMonsterInfo): string {
     if (!src) return '';
     const label = elemLabel(d);
     const pct = `${Math.round(v * 100)}%`;
-    return `<span class="nk-egd-mon__resitem"><img class="nk-egd-elem" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(label)}" title="${escHtml(label)} ${pct}" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
+    return `<span class="nk-egd-mon__resitem"><img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(label)}" title="${escHtml(label)} ${pct}" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
 
@@ -62,7 +62,7 @@ function debuffResistHtml(m: MazeMonsterInfo): string {
     const src = cdnUri('statusimmune', `${d.icon}.webp`);
     const pct = `${Math.round(d.value * 100)}%`;
     const label = t('card.effectRes', { v: pct });
-    return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}"><img class="nk-egd-mon__immicon" src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="" aria-hidden="true" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
+    return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}"><img class="nk-egd-mon__immicon" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="" aria-hidden="true" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
 
