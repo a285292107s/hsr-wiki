@@ -6,17 +6,15 @@ import { useI18n } from 'vue-i18n';
 import { translate } from '../i18n';
 import { pageTitle } from '../seo';
 import { monsterRankKey } from '../../lib/enum-labels';
-import { elementIconUrl, escHtml, fmtDesc, itemIconUrl, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
+import { elementIconUrl, escHtml, fmtDesc, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
 import {
-  monsterEliteRatiosProduct,
   monsterMaxLevel,
   monsterStanceBreakdown,
-  monsterStatAt,
   monsterStatBreakdown,
 } from '../../lib/monster-stats';
 import { fmtStatValue } from '../../lib/format';
-import { atlasFormsOf, monsterFamilyKey, monsterFamilyOf } from '../../lib/monster-family';
+import { atlasFormsOf } from '../../lib/monster-family';
 import { loadLocalMonsterDetail, loadLocalMonsterEliteGroups, loadLocalMonsterLevelCurve, loadLocalMonsterList } from '../../services/api';
 import type { LocalMonsterEntry, MazeBossPhase, MonsterDetail, MonsterExtraEffect, MonsterPhase, MonsterSkillDetail } from '../../services/types';
 import { usePageData } from '../composables/use-page-data';
@@ -30,14 +28,14 @@ const { data, error, showSkeleton, run: load, retry } = usePageData<MonsterDetai
 );
 onMounted(() => {
   void load();
-  void loadFamily();
+  void loadAtlas();
 });
 watch(
   () => route.params.id,
   (id) => {
     if (id && String(id) !== String(data.value?.id)) {
       void load();
-      void loadFamily();
+      void loadAtlas();
     }
   },
 );
@@ -165,69 +163,19 @@ const figureUrl = computed(() => {
 });
 const rankLabel = computed(() => (d.value?.rank ? t(monsterRankKey(d.value.rank)) : ''));
 
-type VariantSigKey =
-  | 'weak' | 'resist' | 'stance' | 'hp' | 'atk' | 'def' | 'speed'
-  | 'skills' | 'camp' | 'rank' | 'intro' | 'figure';
-
-const VARIANT_SIG_KEY: Record<VariantSigKey, string> = {
-  weak: 'catalog.filter.weak', resist: 'catalog.sig.resist', stance: 'catalog.sig.stance',
-  hp: 'catalog.sig.hp', atk: 'catalog.sig.atk', def: 'catalog.sig.def', speed: 'catalog.charge.speed',
-  skills: 'catalog.sig.skills', camp: 'catalog.filter.camp', rank: 'catalog.filter.category',
-  intro: 'catalog.sig.intro', figure: 'catalog.sig.figure',
-};
-const VARIANT_SIG_KEYS = Object.keys(VARIANT_SIG_KEY) as VariantSigKey[];
-const VARIANT_CELL_KEYS: VariantSigKey[] = ['weak', 'stance', 'hp', 'speed', 'skills'];
-
-function variantSig(d: MonsterDetail): Record<VariantSigKey, string> {
-  return {
-    weak: JSON.stringify([...(d.weak || [])].sort()),
-    resist: JSON.stringify(d.resist || {}),
-    stance: String(d.stance ?? ''),
-    hp: String(d.stats?.hp ?? ''),
-    atk: String(d.stats?.atk ?? ''),
-    def: String(d.stats?.def ?? ''),
-    speed: String(d.stats?.speed ?? ''),
-    skills: (d.skills || []).map((s) => s.id).join(','),
-    camp: d.camp || '',
-    rank: d.rank || '',
-    intro: d.intro || '',
-    figure: d.figure || '',
-  };
-}
-
-const familyRows = ref<LocalMonsterEntry[]>([]);
-const familyDetails = ref<Record<string, MonsterDetail>>({});
-
-const atlasSelf = ref<LocalMonsterEntry | null>(null);
 const atlasRows = ref<LocalMonsterEntry[]>([]);
 const atlasCanonical = ref<MonsterDetail | null>(null);
 const atlasReady = ref(false);
 
-async function loadFamily(): Promise<void> {
+async function loadAtlas(): Promise<void> {
   const id = String(route.params.id);
   atlasReady.value = false;
-  try {
-    await loadAtlasAndFamily();
-  } finally {
-    if (String(route.params.id) === id) atlasReady.value = true;
-  }
-}
-
-async function loadAtlasAndFamily(): Promise<void> {
-  const id = String(route.params.id);
-  familyRows.value = [];
-  familyDetails.value = {};
-  atlasSelf.value = null;
   atlasRows.value = [];
   atlasCanonical.value = null;
-  let members: LocalMonsterEntry[];
-  let list: LocalMonsterEntry[];
   try {
-    list = await loadLocalMonsterList();
+    const list = await loadLocalMonsterList();
     const self = list.find((m) => String(m.id) === id);
     if (!self) return;
-    members = monsterFamilyOf(list, self);
-    atlasSelf.value = self;
     atlasRows.value = atlasFormsOf(list, self);
     const group = self.atlas_group;
     if (group != null && String(group) !== id) {
@@ -235,55 +183,10 @@ async function loadAtlasAndFamily(): Promise<void> {
       if (String(route.params.id) !== id) return;
       atlasCanonical.value = canon;
     }
-  } catch {
-    return;
+  } finally {
+    if (String(route.params.id) === id) atlasReady.value = true;
   }
-  if (String(route.params.id) !== id) return;
-  if (members.length < 2) return;
-  familyRows.value = members;
-  const loaded = await Promise.all(
-    members.map((m) => loadLocalMonsterDetail(String(m.id)).catch(() => null)),
-  );
-  if (String(route.params.id) !== id) return;
-  const out: Record<string, MonsterDetail> = {};
-  members.forEach((m, i) => {
-    const d = loaded[i];
-    if (d) out[String(m.id)] = d;
-  });
-  familyDetails.value = out;
 }
-
-const variants = computed(() => {  const cur = data.value;
-  if (!cur || familyRows.value.length < 2) return [];
-  const curSig = variantSig(cur);
-  return familyRows.value.map((row) => {
-    const key = String(row.id);
-    const det = familyDetails.value[key] ?? null;
-    const sig = det ? variantSig(det) : null;
-    const diffAll = sig ? VARIANT_SIG_KEYS.filter((k) => sig[k] !== curSig[k]) : [];
-    const diffCells = diffAll.filter((k) => VARIANT_CELL_KEYS.includes(k));
-    const isCurrent = key === String(cur.id);
-    const flag = isCurrent
-      ? t('mob.variant.current')
-      : diffAll.length
-        ? t('catalog.variantDiff', { list: diffAll.map((k) => t(VARIANT_SIG_KEY[k])).join(' / ') })
-        : t('mob.variant.same');
-    return { row, det, isCurrent, diffCells, flag };
-  });
-});
-
-const atlasOthers = computed(() => {
-  const self = atlasSelf.value;
-  if (!self || atlasRows.value.length < 2) return [];
-  const key = monsterFamilyKey(self);
-  return atlasRows.value.filter((r) => monsterFamilyKey(r) !== key);
-});
-
-const eventLevelText = computed(() => {
-  const levels = d.value?.event?.levels ?? [];
-  if (!levels.length) return '';
-  return levels.length > 1 ? `${levels[0]}–${levels[levels.length - 1]}` : String(levels[0]);
-});
 
 function elemTag(elem: string): string {
   const name = elemLabel(elem);
@@ -346,70 +249,6 @@ function fmtStatCell(v: number | string | null | undefined): string {
   return v == null ? '—' : fmtStatValue(v);
 }
 
-function variantCell(det: MonsterDetail | null, key: 'stance' | 'hp' | 'speed' | 'skills'): string {
-  if (!det) return '—';
-  if (key === 'stance') return fmtStatCell(det.stance);
-  if (key === 'hp') return fmtStatCell(det.stats.hp);
-  if (key === 'speed') return fmtStatCell(det.stats.speed);
-  return String(det.skills.length);
-}
-
-const drops = computed(() => d.value?.drops ?? []);
-const appearances = computed(() => d.value?.appearances ?? null);
-const appearGroups = computed(() => (appearances.value?.groups ?? []).filter((g) => g.count > 0));
-const appearSamples = computed(() => appearGroups.value.flatMap((g) => g.samples ?? []));
-const DOMAIN_LABEL_KEY: Record<string, string> = {
-  mainline: 'mob.dom.mainline',
-  simulated: 'mob.dom.simulated',
-  divergent: 'mob.dom.divergent',
-  endgame: 'mob.dom.endgame',
-  farm: 'mob.dom.farm',
-  trial: 'mob.dom.trial',
-  activity: 'mob.dom.activity',
-  other: 'mob.dom.other',
-};
-const SUB_LABEL_KEY: Record<string, string> = {
-  memory: 'mob.sub.memory',
-  fiction: 'mob.sub.fiction',
-  apocalypse: 'mob.sub.apocalypse',
-  anomaly: 'mob.sub.anomaly',
-  calyx: 'mob.sub.calyx',
-  cavern: 'mob.sub.cavern',
-  echo: 'mob.sub.echo',
-  shadow: 'mob.sub.shadow',
-};
-const domainLabel = (key: string): string => t(DOMAIN_LABEL_KEY[key] ?? 'mob.dom.other');
-const subLabel = (key: string): string => t(SUB_LABEL_KEY[key] ?? 'mob.dom.other');
-type MonsterSamplePanel = { hp: number; atk: number; def: number; speed: number };
-const samplePanels = computed<Record<number, MonsterSamplePanel | null> | null>(() => {
-  const v = d.value;
-  if (!v) return null;
-  const own = eliteRef.value?.[String(v.elite_group ?? 1)] ?? null;
-  const out: Record<number, MonsterSamplePanel | null> = {};
-  for (const s of appearSamples.value) {
-    if (s.level == null) {
-      out[s.id] = null;
-      continue;
-    }
-    const stageElite = eliteRef.value?.[String(s.elite_group ?? 1)] ?? null;
-    const meta = {
-      statRatio: v.stat_ratio ?? null,
-      levelGroup: s.level_group ?? 1,
-      eliteRatios: monsterEliteRatiosProduct(own, stageElite),
-      stats: v.stats,
-      curve: curveRef.value,
-      modify: v.speed_modify == null ? null : { speed: v.speed_modify },
-    };
-    const hp = monsterStatAt('hp', s.level, meta);
-    const atk = monsterStatAt('atk', s.level, meta);
-    const def = monsterStatAt('def', s.level, meta);
-    const speed = monsterStatAt('speed', s.level, meta);
-    out[s.id] = hp != null && atk != null && def != null && speed != null
-      ? { hp, atk, def, speed }
-      : null;
-  }
-  return out;
-});
 function phaseSig(weak: string[] | undefined, resist: Record<string, number> | undefined): string {
   return JSON.stringify([
     [...(weak ?? [])].sort(),
@@ -441,10 +280,6 @@ const phases = computed(() => {
   }
   return rows;
 });
-
-function tierLabel(worldLevel: number | null): string {
-  return worldLevel == null ? t('mob.levelBase') : t('mob.levelBalance', { n: worldLevel });
-}
 
 function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
   if (kind === 'weak') return (phase.weak ?? []).map(elemTag).join('');
@@ -759,156 +594,6 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
                 </header>
                 <p v-if="s.desc" class="nk-mob-status__desc" v-html="statusDesc(s.desc)"></p>
               </article>
-            </div>
-          </section>
-
-          <section class="nk-mob-sec">
-            <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">{{ t('mob.sec.appear') }}</h2>
-              <span class="nk-mob-sec__en">ENCOUNTERS</span>
-              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-            </header>
-            <template v-if="appearances">
-              <p class="nk-mob-appear__count">
-                {{ t('mob.appearIn') }} <strong>{{ appearances.total }}</strong>{{ t('mob.appearStages') }}<template v-if="appearGroups.length"> · {{ t('mob.appearModes', { n: appearGroups.length }) }}</template>
-              </p>
-              <ul v-if="appearGroups.length" class="nk-mob-appear__groups">
-                <li v-for="g in appearGroups" :key="g.key" class="nk-mob-appear__group" :data-domain="g.key">
-                  <div class="nk-mob-appear__group-head">
-                    <span class="nk-mob-appear__group-name">{{ domainLabel(g.key) }}</span>
-                    <span class="nk-mob-appear__group-count">{{ g.count }}</span>
-                  </div>
-                  <ul v-if="g.subs?.length" class="nk-mob-appear__subs">
-                    <li v-for="sub in g.subs" :key="sub.key" class="nk-mob-appear__sub">
-                      <span class="nk-mob-appear__sub-name">{{ subLabel(sub.key) }}</span>
-                      <span class="nk-mob-appear__sub-count">{{ sub.count }}</span>
-                    </li>
-                  </ul>
-                  <ul v-if="g.samples?.length" class="nk-mob-appear__samples">
-                    <li v-for="s in g.samples" :key="s.id" class="nk-mob-appear__sample">
-                      <span class="nk-mob-appear__sample-name"><template v-if="s.activity"><span class="nk-mob-appear__sample-from">{{ s.activity }}</span> · </template>{{ s.name }}</span>
-                      <span v-if="samplePanels?.[s.id]" class="nk-mob-appear__sample-panel"><span class="nk-mob-appear__sample-panel-lv">{{ t('mob.level', { n: s.level }) }}</span> · HP {{ fmtStatValue(samplePanels[s.id]!.hp) }} / ATK {{ fmtStatValue(samplePanels[s.id]!.atk) }} / DEF {{ fmtStatValue(samplePanels[s.id]!.def) }} / SPD {{ fmtStatValue(samplePanels[s.id]!.speed) }}</span>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-              <p class="nk-mob-appear__tip">
-                <template v-if="appearSamples.length">{{ t('mob.appearSourceNote') }}</template>
-                <template v-else>{{ t('mob.appearNoNameNote') }}</template>
-              </p>
-            </template>
-            <p v-else class="nk-mob-appear__count nk-mob-appear__count--none">{{ t('mob.empty.appear') }}</p>
-            <details class="nk-mob-appear__how">
-              <summary>{{ t('mob.census.k') }}</summary>
-              <p>{{ t('mob.appearCensus') }}</p>
-            </details>
-            <div v-if="d.event" class="nk-mob-event">
-              <p class="nk-mob-event__k">{{ t('mob.event.k') }}</p>
-              <p class="nk-mob-event__line">
-                <template v-if="d.event.count !== (appearances?.total ?? -1)">{{ t('mob.eventSome', { n: d.event.count, name: d.event.name }) }}</template>
-                <template v-else>{{ t('mob.eventAll', { name: d.event.name }) }}</template>
-                {{ t('mob.level', { n: eventLevelText }) }}<template v-if="d.event.tabs.length">{{ t('mob.eventTabs', { tabs: d.event.tabs.join(' / ') }) }}</template>。
-              </p>
-              <p v-if="d.art_shared" class="nk-mob-event__line">
-                <template v-if="d.art_shared.figure">{{ t('mob.artSharedFigure', { name: d.art_shared.name, n: d.art_shared.forms }) }}</template>
-                <template v-else>{{ t('mob.artSharedIcon', { name: d.art_shared.name, n: d.art_shared.forms }) }}</template>
-              </p>
-            </div>
-          </section>
-
-          <section v-if="drops.length" class="nk-mob-sec">
-            <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">{{ t('mob.sec.drop') }}</h2>
-              <span class="nk-mob-sec__en">DROPS</span>
-              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-            </header>
-            <p class="nk-mob-drop__lead">{{ t('mob.dropLead') }}</p>
-            <div class="nk-mob-drops">
-              <div v-for="t in drops" :key="String(t.world_level)" class="nk-mob-drop">
-                <div class="nk-mob-drop__head">
-                  <span class="nk-mob-drop__tier">{{ tierLabel(t.world_level) }}</span>
-                  <span v-if="t.avatar_exp" class="nk-mob-drop__exp">{{ translate('itemType.AvatarExp') }} {{ t.avatar_exp }}</span>
-                </div>
-                <div class="nk-mob-drop__items">
-                  <span v-for="it in t.items" :key="it.id" class="nk-mob-drop__item" :title="it.name">
-                    <img v-if="itemIconUrl(it.icon)" :src="itemIconUrl(it.icon)" :alt="it.name" loading="lazy">
-                    <span>{{ it.name }}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="variants.length || atlasOthers.length" class="nk-mob-sec">
-            <header class="nk-mob-sec__head">
-              <h2 class="nk-mob-sec__title">{{ t('mob.sec.variants') }}</h2>
-              <span class="nk-mob-sec__en">VARIANTS</span>
-              <span class="nk-mob-sec__rule" aria-hidden="true"></span>
-              <span v-if="variants.length" class="nk-mob-var__count">{{ t('mob.variantCount', { n: variants.length }) }}</span>
-            </header>
-            <p v-if="variants.length" class="nk-mob-var__lead">
-              {{ t('mob.variantLead', { n: variants.length }) }}
-              {{ t('catalog.variantDiffHelp') }}
-            </p>
-            <div class="nk-mob-var">
-              <RouterLink
-                v-for="v in variants"
-                :key="v.row.id"
-                class="nk-mob-var__row"
-                :class="{ 'is-current': v.isCurrent }"
-                :to="`/monster/${v.row.id}`"
-                :aria-current="v.isCurrent ? 'page' : undefined"
-                :title="`${v.row.name} №${v.row.id} · ${v.flag}`"
-              >
-                <span class="nk-mob-var__fig">
-                  <img :src="monsterIconUrl(v.row.icon)" :alt="v.row.name" loading="lazy">
-                </span>
-                <span class="nk-mob-var__id">№ {{ v.row.id }}</span>
-                <span class="nk-mob-var__cells">
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('weak') }">
-                    <span class="nk-mob-var__k">{{ t('catalog.filter.weak') }}</span>
-                    <span v-if="v.det" class="nk-mob-var__weak">
-                      <img
-                        v-for="e in v.det.weak"
-                        :key="e"
-                        :src="elementIconUrl(e)"
-                        :alt="elemLabel(e)"
-                        :title="elemLabel(e)"
-                        loading="lazy"
-                      >
-                      <span v-if="!v.det.weak.length" class="nk-mob-var__none">{{ t('common.none') }}</span>
-                    </span>
-                    <span v-else class="nk-mob-var__none">—</span>
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('stance') }">
-                    <span class="nk-mob-var__k">{{ t('catalog.sig.stance') }}</span>{{ variantCell(v.det, 'stance') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('hp') }">
-                    <span class="nk-mob-var__k">HP</span>{{ variantCell(v.det, 'hp') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('speed') }">
-                    <span class="nk-mob-var__k">{{ t('catalog.charge.speed') }}</span>{{ variantCell(v.det, 'speed') }}
-                  </span>
-                  <span class="nk-mob-var__cell" :class="{ 'is-diff': v.diffCells.includes('skills') }">
-                    <span class="nk-mob-var__k">{{ t('catalog.sig.skills') }}</span>{{ variantCell(v.det, 'skills') }}
-                  </span>
-                </span>
-                <span class="nk-mob-var__flag">{{ v.flag }}</span>
-              </RouterLink>
-            </div>
-            <div v-if="atlasOthers.length" class="nk-mob-atlas">
-              <span class="nk-mob-atlas__k">{{ t('mob.atlas.k') }}</span>
-              <span class="nk-mob-atlas__note">
-                {{ t('mob.atlasOthers', { n: atlasOthers.length, m: atlasRows.length }) }}
-              </span>
-              <span class="nk-mob-atlas__links">
-                <RouterLink
-                  v-for="f in atlasOthers"
-                  :key="f.id"
-                  class="nk-mob-atlas__link"
-                  :to="`/monster/${f.id}`"
-                >{{ f.name }}</RouterLink>
-              </span>
             </div>
           </section>
         </div>

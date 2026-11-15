@@ -169,7 +169,7 @@ test.describe('布局验收：多语言', () => {
     expect(parts.every((p) => chargeNames.includes(p)), `充能标签应取英文词典值：${parts.slice(0, 3)}`).toBe(true);
   });
 
-  test('/en/currency/trait 与 /en/monster/N：详情页标签走词典（羁绊层品质 + 变体差分）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
+  test('/en/currency/trait：详情页标签走词典（羁绊层品质）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     const en = msgs('en');
     const cn = msgs('cn');
 
@@ -186,14 +186,6 @@ test.describe('布局验收：多语言', () => {
     const expectQ = new Set(names.map((n) => en['catalog.qualityLabel']!.replace('{name}', n)));
     expect(qualities.every((q) => expectQ.has(q)), `层品质应是英文词典组合：${qualities.slice(0, 2)}`).toBe(true);
     expect(qualities.join('')).not.toContain(cn['catalog.qualityBase']!);
-
-    const detail = readJsonIn<{ id: number }[]>('en', 'public/data/cn/monsters.json');
-    await page.goto(`/en/monster/${detail[0]!.id}`);
-    const diff = await page.locator('.nk-mob-variant__diff, [data-variant-diff]').allTextContents();
-    if (diff.length) {
-      const prefix = en['catalog.variantDiff']!.split('{list}')[0]!.trim();
-      expect(diff.every((d) => d.trim().startsWith(prefix)), `差分标签应取英文模板：${diff[0]}`).toBe(true);
-    }
   });
 
   test('/en/currency/role/N：属性名与分组名走词典（官方 prop_name 缺失时的兜底）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {

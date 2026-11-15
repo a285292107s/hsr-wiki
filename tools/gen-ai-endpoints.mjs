@@ -275,12 +275,6 @@ function txt(raw, params, limit = SNAPSHOT_TEXT_LIMIT_DETAIL) {
   return esc(plain(raw, params, limit));
 }
 
-function eventLevelRange(levels) {
-  const list = Array.isArray(levels) ? levels.filter((n) => n != null) : [];
-  if (!list.length) return '';
-  return list.length > 1 ? `${list[0]}–${list[list.length - 1]}` : String(list[0]);
-}
-
 function txtSafe(raw, params, limit = SNAPSHOT_TEXT_LIMIT_ENTRY, paramsSemantics = false) {
   const expanded = plain(raw, params);
   if (/#\d+\[/.test(expanded)) return '';
@@ -1042,30 +1036,7 @@ function monsterPages(ctx) {
       ['攻击（基准值）', d.stats?.atk != null ? esc(String(d.stats.atk)) : ''],
       ['防御（基准值）', d.stats?.def != null ? esc(String(d.stats.def)) : ''],
       ['速度（基准值）', d.stats?.speed != null ? esc(String(d.stats.speed)) : ''],
-      [ui('mob.event.k', '活动出处'), d.event
-        ? txt(`${d.event.name}（${d.event.count} 个活动关卡，等级 ${eventLevelRange(d.event.levels)}${d.event.tabs.length ? `；页签 ${d.event.tabs.join('/')}` : ''}）`, null, 160)
-        : ''],
     ];
-    if (d.appearances && d.appearances.total) {
-      const groups = (d.appearances.groups || []).filter((g) => g.count > 0);
-      const modes = groups
-        .slice(0, 4)
-        .map((g) => `${ui(`mob.dom.${g.key}`, g.key)} ${g.count}`)
-        .join(' / ');
-      const more = groups.length > 4 ? ' …' : '';
-      const samples = groups
-        .flatMap((g) => (g.samples || []).map((s) => (s.activity ? `${s.activity} · ${s.name}` : s.name)))
-        .filter(Boolean)
-        .slice(0, 2);
-      const parts = [`${modes}${more}`, samples.length ? `如 ${esc(samples.join(' / '))}` : ''].filter(Boolean);
-      facts.push([ui('mob.sec.appear', '出没关卡'), `${d.appearances.total} 个${parts.length ? `（${esc(parts.join('；'))}）` : ''}`]);
-    }
-    if (Array.isArray(d.drops) && d.drops.length) {
-      const base = d.drops.find((t) => t.world_level == null) || d.drops[0];
-      const names = (base.items || []).map((i) => i.name).filter(Boolean).join(' / ');
-      const tiers = d.drops.length > 1 ? uiT('mob.dropsTiers', '（共 {n} 档均衡等级）', { n: d.drops.length }) : '';
-      if (names) facts.push([ui('mob.sec.drop', '掉落'), `${esc(names)}${esc(tiers)}`]);
-    }
     const statusHtml = (d.statuses || [])
       .filter((s) => s && s.name)
       .map((s) => {
@@ -1073,15 +1044,6 @@ function monsterPages(ctx) {
         const meta = `${statusLabel}${s.dispel ? ' · 可驱散' : ''}`;
       })
       .join('');
-    const atlasForms = entry.atlas_group == null
-      ? []
-      : list.filter((m) => m.atlas_group === entry.atlas_group)
-        .sort((a, b) => Number(a.id) - Number(b.id));
-    const atlasOthers = atlasForms.filter((m) => `${m.name}\u0000${(m.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`
-      !== `${name}\u0000${(entry.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`);
-    const atlasHtml = atlasOthers.length
-      ? `<ul class="nk-snapshot__list">${atlasOthers.map((m) => `<li><a href="/monster/${m.id}">${txt(m.name, null, 80)}</a></li>`).join('')}</ul>`
-      : '';
     const body = detailBody(ctx, {
       crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [CATALOG_TITLE['/monster'](), '/monster'], [name, null]]),
       h1: name,
@@ -1091,7 +1053,6 @@ function monsterPages(ctx) {
         { title: ui('mob.sec.record', '图鉴记录'), html: sourceSummary ? `<p>${txt(d.intro, null, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: '技能', html: skillHtml ? `<ul class="nk-snapshot__blocks">${skillHtml}</ul>` : '' },
         { title: ui('mob.sec.status', '状态词条'), html: statusHtml ? `<ul class="nk-snapshot__blocks">${statusHtml}</ul>` : '' },
-        { title: atlasHtml ? uiT('mob.atlasForms', '同图鉴其他形态（本族共 {n} 个形态）', { n: atlasForms.length }) : '', html: atlasHtml },
       ],
       links: siblingsOf(links, idx),
       listLabel: '同图鉴敌对物种',

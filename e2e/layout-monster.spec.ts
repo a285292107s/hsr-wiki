@@ -54,10 +54,6 @@ const familyOf = (id: number): MonsterListEntry[] => {
   return self ? list.filter((m) => key(m) === key(self)).sort((a, b) => a.id - b.id) : [];
 };
 const detailOf = (id: number): MonsterDetailJson => readJson<MonsterDetailJson>(`public/data/cn/monsters/${id}.json`);
-const sampleLabel = (s: { name: string; activity?: string }): string =>
-  s.activity ? `${s.activity} · ${s.name}` : s.name;
-const appearGroups = (mon: MonsterDetailJson) => mon.appearances?.groups ?? [];
-const appearSamples = (mon: MonsterDetailJson) => appearGroups(mon).flatMap((g) => g.samples ?? []);
 
 test.describe('布局验收：敌方详情页', () => {
   test(`/monster/${MONSTER_ID}：立绘延迟到达时 hero 高度不得变化`, async ({ page }) => {
@@ -110,71 +106,6 @@ test.describe('布局验收：敌方详情页', () => {
 
     assertNoErrors();
   });
-
-  test(
-    `/monster/${MONSTER_ID}：同族变体条覆盖全部同族档，「差分」标注逐格与详情数据一致`,
-    { tag: '@viewport-independent' },
-    async ({ page }) => {
-      const { assertNoErrors } = collectConsoleIssues(page);
-      const fam = familyOf(Number(MONSTER_ID));
-      expect(fam.length, '冰锋族应有 4 档（断言的数据前提）').toBe(4);
-      const cur = detailOf(Number(MONSTER_ID));
-      const curSig = [
-        JSON.stringify([...cur.weak].sort()),
-        String(cur.stance),
-        String(cur.stats.hp),
-        String(cur.stats.speed),
-        cur.skills.map((s) => s.id).join(','),
-      ];
-
-      await page.goto(`/monster/${MONSTER_ID}`);
-      await settleAnimations(page);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const rows = page.locator('.nk-mob-var__row');
-      await expect(rows, '同族条必须列出全部同族档（缺档 = 用户仍然走不到那一档）').toHaveCount(fam.length);
-
-      const seen = await rows.evaluateAll((els) => els.map((el) => ({
-        no: (el.querySelector('.nk-mob-var__id')?.textContent || '').replace(/\D/g, ''),
-        current: el.classList.contains('is-current'),
-        flag: (el.querySelector('.nk-mob-var__flag')?.textContent || '').trim(),
-        diffCells: [...el.querySelectorAll('.nk-mob-var__cell')].map((c) => c.classList.contains('is-diff')),
-        cellValues: [...el.querySelectorAll('.nk-mob-var__cell')].map((c) => {
-          const k = c.querySelector('.nk-mob-var__k')?.textContent || '';
-          return c.textContent.replace(k, '').trim();
-        }),
-      })));
-
-      const num = (s: string): number => Number(s.replace(/[^\d.-]/g, ''));
-      fam.forEach((m, i) => {
-        const row = seen[i];
-        const o = detailOf(m.id);
-        const isCur = m.id === Number(MONSTER_ID);
-        expect(row.no, `第 ${i + 1} 行必须是同族按 id 升序的第 ${i + 1} 档`).toBe(String(m.id));
-        expect(row.current, `${m.id} 的「当前档」标记`).toBe(isCur);
-        if (isCur) {
-          expect(row.flag, '当前档必须有显式标记（不是靠颜色）').toBe('当前档');
-        } else {
-          expect(row.flag, `${m.id} 必须列出与当前档的差异字段`).toContain('差分');
-        }
-        expect(
-          row.diffCells,
-          `${m.id} 的差分格必须与详情数据逐格一致（谎报「一致」会让用户以为两档没差别）`,
-        ).toEqual([
-          JSON.stringify([...o.weak].sort()) !== curSig[0],
-          String(o.stance) !== curSig[1],
-          String(o.stats.hp) !== curSig[2],
-          String(o.stats.speed) !== curSig[3],
-          o.skills.map((s) => s.id).join(',') !== curSig[4],
-        ]);
-        expect(num(row.cellValues[1]), `${m.id} 韧性值`).toBe(o.stance);
-        expect(num(row.cellValues[2]), `${m.id} HP 值`).toBe(o.stats.hp);
-        expect(num(row.cellValues[3]), `${m.id} 速度值`).toBe(o.stats.speed);
-        expect(num(row.cellValues[4]), `${m.id} 技能条数`).toBe(o.skills.length);
-      });
-
-      assertNoErrors();
-    },
-  );
 
   test(
     '/monster/<实例>：修正值按「基准值 × 实例倍率 × 精英组倍率 × 等级曲线倍率 ＋ 修正值」合成，缺省等级 = 该组曲线最高档',
@@ -477,142 +408,6 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
-    '/monster/<id>：出没样本按关卡语境合成实战面板（Π精英组 = 自身组 × 关卡指派组）',
-    { tag: '@viewport-independent' },
-    async ({ page }) => {
-      const { assertNoErrors } = collectConsoleIssues(page);
-      const elite = readJson<Record<string, Record<string, number>>>('public/data/cn/monster-elite-group.json');
-      const curve = readJson<Record<string, Record<string, Record<string, number>>>>('public/data/cn/monster-level-curve.json');
-      const entry = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json')
-        .map((m) => ({ m, mon: detailOf(m.id) }))
-        .find(({ mon }) => appearSamples(mon).some(
-          (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
-        ));
-      expect(entry, '应有样本带完整关卡语境的目录条目（断言前提）').toBeTruthy();
-      const { m: entryMeta, mon } = entry!;
-      const sample = appearSamples(mon).find(
-        (s) => s.level != null && s.elite_group != null && curve[String(s.level_group ?? 1)]?.[String(s.level)],
-      )!;
-
-      const own = elite[String(mon.elite_group ?? 1)] ?? {};
-      const stg = elite[String(sample.elite_group!)] ?? {};
-      const row = curve[String(sample.level_group ?? 1)][String(sample.level!)];
-      const v = (p: 'hp' | 'atk' | 'def' | 'speed'): string => {
-        const add = p === 'speed' ? (mon.speed_modify ?? 0) : 0;
-        const raw = mon.stats[p] * (mon.stat_ratio?.[p] ?? 1) * (own[p] ?? 1) * (stg[p] ?? 1) * row[p] + add;
-        return (Math.round(raw * 10) / 10).toLocaleString('en-US');
-      };
-      const wantPanel = `等级 ${sample.level} · HP ${v('hp')} / ATK ${v('atk')} / DEF ${v('def')} / SPD ${v('speed')}`;
-
-      await page.goto(`/monster/${entryMeta.id}`);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      await expect(
-        page.locator('.nk-mob-appear__sample-panel').first(),
-        '样本面板逐字等于关卡语境独立折算（等级 + 四维）',
-      ).toHaveText(wantPanel);
-
-      assertNoErrors();
-    },
-  );
-
-  test(
-    '/monster/<id>：活动出处备注逐项等于数据（活动名/页签/档位来自源文本，非自撰）',
-    { tag: '@viewport-independent' },
-    async ({ page }) => {
-      const { assertNoErrors } = collectConsoleIssues(page);
-      const list = readJson<{ id: number; name: string }[]>('public/data/cn/monsters.json');
-      let target: { id: number; name: string } | undefined;
-      for (const m of list.slice(0, 200)) {
-        if (detailOf(m.id).event) { target = m; break; }
-      }
-      expect(target, '前 200 个目录条目里应有带活动出处的怪物（断言前提）').toBeTruthy();
-      const ev = detailOf(target!.id).event!;
-
-      await page.goto(`/monster/${target!.id}`);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const note = page.locator('.nk-mob-event');
-      await expect(note).toHaveCount(1);
-      const text = ((await note.innerText()) || '').replace(/\s+/g, ' ');
-      expect(text, '活动名来自源 ActivityPanel.TitleName').toContain(`「${ev.name}」`);
-      if (ev.count === detailOf(target!.id).appearances?.total) {
-        expect(text, '数量与总数相同时不重复报数').toContain('全部关卡都在');
-        expect(text, '数量与总数相同时不重复报数').not.toContain(`${ev.count} 个`);
-      } else {
-        expect(text, '活动内关卡数来自源关卡引用次数').toContain(`其中 ${ev.count} 个`);
-      }
-      expect(text, '等级区间单档时只写一个数').not.toMatch(/等级 (\d+)–\1/);
-      for (const tab of ev.tabs) expect(text, `页签「${tab}」来自源 ActivityQuestRewardData`).toContain(tab);
-
-      const artTarget = list.slice(0, 200).find((m) => {
-        const d = detailOf(m.id);
-        return !!d.event && !!d.art_shared;
-      });
-      expect(artTarget, '前 200 个目录条目里应有「活动出处 + 同卡面同伴」的怪物（断言前提）').toBeTruthy();
-      const art = detailOf(artTarget!.id).art_shared!;
-      await page.goto(`/monster/${artTarget!.id}`);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const artText = ((await page.locator('.nk-mob-event').innerText()) || '').replace(/\s+/g, ' ');
-      expect(artText, '立绘相同 → 说「卡面与立绘与其共用」').toContain(
-        art.figure
-          ? `卡面与立绘与「${art.name}」共用（同卡面共 ${art.forms} 个形态）`
-          : `与「${art.name}」等 ${art.forms} 个形态同卡面图标，立绘不同`,
-      );
-      expect(artText, '不得声称站点证不了的「技能组复用」').not.toContain('技能组');
-
-      const none = list.find((m) => !detailOf(m.id).event && m.id < 200);
-      if (none) {
-        await page.goto(`/monster/${none.id}`);
-        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-        await expect(page.locator('.nk-mob-event'), '无活动出处时不渲染备注').toHaveCount(0);
-      }
-
-      assertNoErrors();
-    },
-  );
-
-  test(
-    '/monster/<id>：图鉴族互链逐项等于数据（官方 TemplateGroupID，排除同卡面档位）',
-    { tag: '@viewport-independent' },
-    async ({ page }) => {
-      const { assertNoErrors } = collectConsoleIssues(page);
-      const list = readJson<{ id: number; name: string; icon?: string; atlas_group?: number }[]>(
-        'public/data/cn/monsters.json',
-      );
-      const key = (m: { name: string; icon?: string }): string =>
-        `${m.name}\u0000${(m.icon || '').split('/').pop()?.replace(/\.png$/i, '') || ''}`;
-      const othersOf = (self: typeof list[number]): typeof list =>
-        list.filter((r) => r.atlas_group === self.atlas_group)
-          .sort((a, b) => Number(a.id) - Number(b.id))
-          .filter((r) => key(r) !== key(self));
-
-      const target = list.find((m) => m.atlas_group != null && othersOf(m).length >= 2);
-      expect(target, '应存在带图鉴族且含 ≥2 个非同卡面形态的怪物（断言前提）').toBeTruthy();
-      const want = othersOf(target!);
-
-      await page.goto(`/monster/${target!.id}`);
-      await settleAnimations(page);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const links = await page.locator('.nk-mob-atlas__link').evaluateAll((els) => els.map((e) => ({
-        name: (e.textContent || '').trim(),
-        href: e.getAttribute('href') || '',
-      })));
-      expect(links.map((l) => l.name), '图鉴族互链的名称与顺序').toEqual(want.map((r) => r.name));
-      expect(links.map((l) => l.href)).toEqual(want.map((r) => `/monster/${r.id}`));
-
-      const soloGroup = list.find((m) => m.atlas_group != null
-        && list.filter((r) => r.atlas_group === m.atlas_group).length > 1
-        && othersOf(m).length === 0);
-      if (soloGroup) {
-        await page.goto(`/monster/${soloGroup.id}`);
-        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-        await expect(page.locator('.nk-mob-atlas')).toHaveCount(0);
-      }
-
-      assertNoErrors();
-    },
-  );
-
-  test(
     '/monster/<id>：状态词条逐项等于数据（命名约定归属的安全子集，非外键）',
     { tag: '@viewport-independent' },
     async ({ page }) => {
@@ -690,108 +485,36 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
-    '/monster/<id>：掉落 / 出没 / 额外阶段三块逐项等于详情数据（期望值全部数据派生）',
+    '/monster/<id>：额外阶段逐项等于详情数据；已下线的掉落 / 出没 / 活动出处 / 同族变体区块不渲染',
     { tag: '@viewport-independent' },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
 
       const dropMon = detailOf(Number(MONSTER_ID));
-      expect(dropMon.drops?.length, `${MONSTER_ID} 应有掉落（断言前提）`).toBeGreaterThan(0);
-      expect(dropMon.appearances?.total, `${MONSTER_ID} 应有出没统计（断言前提）`).toBeGreaterThan(0);
+      expect(dropMon.drops?.length, `${MONSTER_ID} 数据里仍有掉落（断言前提）`).toBeGreaterThan(0);
+      expect(dropMon.appearances?.total, `${MONSTER_ID} 数据里仍有出没统计（断言前提）`).toBeGreaterThan(0);
+      expect(familyOf(Number(MONSTER_ID)).length, `${MONSTER_ID} 数据里仍有 4 个同族档（断言前提）`).toBe(4);
+      const eventMon = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
+        .map((m) => ({ m, d: detailOf(m.id) }))
+        .find(({ d }) => d.event);
+      expect(eventMon, '目录里应有带活动出处的条目（断言前提）').toBeTruthy();
 
       await page.goto(`/monster/${MONSTER_ID}`);
       await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-
-      const tiers = page.locator('.nk-mob-drop');
-      await expect(tiers, '掉落档数 = 数据档数（少一档就是静默丢数据）').toHaveCount(dropMon.drops!.length);
-      const rendered = await tiers.evaluateAll((els) => els.map((el) => ({
-        tier: (el.querySelector('.nk-mob-drop__tier')?.textContent || '').trim(),
-        items: [...el.querySelectorAll('.nk-mob-drop__item')].map((i) => (i.querySelector('span')?.textContent || '').trim()),
-      })));
-      dropMon.drops!.forEach((t, i) => {
-        expect(rendered[i].tier, `第 ${i + 1} 档标签`).toBe(t.world_level == null ? '基准档' : `均衡等级 ${t.world_level}`);
-        expect(rendered[i].items, `第 ${i + 1} 档物品名与顺序`).toEqual(t.items.map((x) => x.name));
-      });
-      await expect(
-        page.locator('.nk-mob-appear__count strong'),
-        '出没关卡数 = 数据 total',
-      ).toHaveText(String(dropMon.appearances!.total));
-
-      const cnDict = readJson<Record<string, string>>('src/lib/i18n/messages/cn.json');
-      const dropGroups = appearGroups(dropMon);
-      await expect(
-        page.locator('.nk-mob-appear__group'),
-        '玩法域行数 = 数据域数（少一行就是静默丢玩法）',
-      ).toHaveCount(dropGroups.length);
-      const renderedGroups = await page.locator('.nk-mob-appear__group').evaluateAll((els) => els.map((el) => ({
-        key: el.getAttribute('data-domain'),
-        name: (el.querySelector('.nk-mob-appear__group-name')?.textContent || '').trim(),
-        count: (el.querySelector('.nk-mob-appear__group-count')?.textContent || '').trim(),
-        subs: [...el.querySelectorAll('.nk-mob-appear__sub')].map((s) => ({
-          name: (s.querySelector('.nk-mob-appear__sub-name')?.textContent || '').trim(),
-          count: (s.querySelector('.nk-mob-appear__sub-count')?.textContent || '').trim(),
-        })),
-      })));
-      dropGroups.forEach((g, i) => {
-        expect(renderedGroups[i].key, `第 ${i + 1} 个玩法域键与数据一致`).toBe(g.key);
-        expect(renderedGroups[i].name, `第 ${i + 1} 个玩法域名 = 词典 ${`mob.dom.${g.key}`}`).toBe(cnDict[`mob.dom.${g.key}`]);
-        expect(renderedGroups[i].count, `第 ${i + 1} 个玩法域计数与数据一致`).toBe(String(g.count));
-        expect(renderedGroups[i].subs.map((s) => s.name), `第 ${i + 1} 个玩法域子模式 = 词典`).toEqual(
-          (g.subs ?? []).map((s) => cnDict[`mob.sub.${s.key}`]),
-        );
-        expect(renderedGroups[i].subs.map((s) => s.count), `第 ${i + 1} 个玩法域子模式计数与数据一致`).toEqual(
-          (g.subs ?? []).map((s) => String(s.count)),
-        );
-      });
-
-      const chips = page.locator('.nk-mob-appear__sample');
-      await expect(chips, '样本 chip 数 = 数据样本数').toHaveCount(appearSamples(dropMon).length);
-      expect(
-        (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim()),
-        '样本名逐项与数据一致（顺序同 DOM；活动关卡为「活动名 · 关卡名」）',
-      ).toEqual(appearSamples(dropMon).map(sampleLabel));
-
-      const actMon = detailOf(1002015);
-      await page.goto('/monster/1002015');
+      await expect(page.locator('.nk-mob-drop'), '掉落区块已下线').toHaveCount(0);
+      await expect(page.locator('.nk-mob-appear__count'), '出没区块已下线').toHaveCount(0);
+      await expect(page.locator('.nk-mob-appear__sample'), '出没区块已下线').toHaveCount(0);
+      await expect(page.locator('.nk-mob-var'), '同族变体条已下线').toHaveCount(0);
+      await expect(page.locator('.nk-mob-atlas'), '图鉴族互链已下线').toHaveCount(0);
+      const secTitles = (await page.locator('.nk-mob-sec__title').allTextContents()).map((t) => t.trim());
+      expect(secTitles, '区块标题里不得再有出没关卡 / 掉落 / 同族变体').not.toContain('出没关卡');
+      expect(secTitles, '区块标题里不得再有出没关卡 / 掉落 / 同族变体').not.toContain('掉落');
+      expect(secTitles, '区块标题里不得再有出没关卡 / 掉落 / 同族变体').not.toContain('同族变体');
+      await page.goto(`/monster/${eventMon!.m.id}`);
+      await settleAnimations(page);
       await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      const actSamples = appearSamples(actMon);
-      const festNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
-      expect(festNames, '活动关卡样本名逐项与数据一致').toEqual(actSamples.map(sampleLabel));
-      expect(actSamples.filter((s) => s.activity).length, '1002015 应有带活动名的关卡样本（断言前提）').toBeGreaterThan(0);
-      expect(festNames.some((n) => n.includes(' · ')), '活动链样本名应带「活动名 · 关卡名」前缀').toBe(true);
-
-      for (const id of [1002011, 1002012]) {
-        const mon = detailOf(id);
-        expect(mon.appearances!.total, `${id} 应有出没计数（断言前提）`).toBeGreaterThan(0);
-        expect(appearSamples(mon).map((s) => s.name), `${id} 数据里不得出现自己名字`).not.toContain(mon.name);
-        await page.goto(`/monster/${id}`);
-        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-        const chipNames = (await page.locator('.nk-mob-appear__sample .nk-mob-appear__sample-name').allTextContents()).map((t) => t.trim());
-        expect(chipNames, `${id} 自己名字不得上屏`).not.toContain(mon.name);
-        expect(chipNames, `${id} chip 逐项等于数据`).toEqual(appearSamples(mon).map(sampleLabel));
-      }
-
-      const noChipId = readJson<MonsterListEntry[]>('public/data/cn/monsters.json')
-        .map((m) => m.id)
-        .find((id) => {
-          const a = detailOf(id).appearances;
-          return !!a && a.total > 0 && appearSamples(detailOf(id)).length === 0;
-        });
-      expect(noChipId, '应有「有计数、无样本」的目录条目（断言前提）').toBeTruthy();
-      const noChipMon = detailOf(noChipId!);
-      await page.goto(`/monster/${noChipId}`);
-      await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-      await expect(page.locator('.nk-mob-appear__count strong')).toHaveText(String(noChipMon.appearances!.total));
-      await expect(page.locator('.nk-mob-appear__sample'), '无实名源的关卡不得产出 chip').toHaveCount(0);
-      await expect(
-        page.locator('.nk-mob-appear__group'),
-        '无实名源的页面仍按玩法域拆开（只给计数，不臆造关卡名）',
-      ).toHaveCount(appearGroups(noChipMon).length);
-      await expect(
-        page.locator('.nk-mob-appear__tip'),
-        '无样本时必须说明「游戏内没有关卡名」，不能用沉默代替口径',
-      ).toContainText('没有关卡名');
+      await expect(page.locator('.nk-mob-event'), '活动出处区块已下线').toHaveCount(0);
 
       const sig = (weak: string[], resist: Record<string, number>): string => JSON.stringify([
         [...(weak || [])].sort(),
@@ -849,13 +572,6 @@ test.describe('布局验收：敌方详情页', () => {
       };
 
       await checkPhases(4014010);
-      const sibling = 4034014;
-      await page.goto(`/monster/4034013`);
-      await expect(page.locator('.nk-mob-atlas__links')).toBeVisible();
-      expect(
-        (await page.locator('.nk-mob-atlas__link').allTextContents()).map((t) => t.trim()),
-        '同条目成员必须仍在「图鉴族」互链里',
-      ).toContain(detailOf(sibling).name);
       await checkPhases(4034013);
       await checkPhases(4034014);
 

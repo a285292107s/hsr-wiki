@@ -63,12 +63,7 @@ LABELS: dict[str, str] = {
     "catalog.cost.5": "5费",
     "catalog.cost.special": "特殊",
     "catalog.sig.resist": "抗性",
-    "catalog.sig.stance": "韧性",
-    "catalog.sig.atk": "攻击",
-    "catalog.sig.def": "防御",
     "catalog.sig.skills": "技能",
-    "catalog.sig.intro": "图鉴介绍",
-    "catalog.sig.figure": "立绘",
     "catalog.sig.invaded": "侵蚀名单",
     "catalog.quality.multicolor": "彩",
     "catalog.quality.unique": "独特",
@@ -429,15 +424,11 @@ LABELS: dict[str, str] = {
     "mob.sec.stats": "战斗数值",
     "mob.sec.skills": "技能",
     "mob.sec.status": "状态词条",
-    "mob.sec.appear": "出没关卡",
-    "mob.sec.drop": "掉落",
-    "mob.sec.variants": "同族变体",
     "mob.resist.stance": "韧性弱点",
     "mob.resist.damage": "伤害抗性",
     "mob.empty.weak": "无弱点信息",
     "mob.empty.resist": "无抗性信息",
     "mob.empty.intro": "暂无图鉴介绍",
-    "mob.empty.appear": "暂无关卡出场记录。",
     "mob.phase.other": "其他形态",
     "mob.stat.hp": "HP 生命",
     "mob.stat.atk": "ATK 攻击",
@@ -445,9 +436,6 @@ LABELS: dict[str, str] = {
     "mob.stat.spd": "SPD 速度",
     "mob.stat.stance": "韧性",
     "mob.status.dispel": "可驱散",
-    "mob.atlas.k": "图鉴族",
-    "mob.event.k": "活动出处",
-    "mob.census.k": "统计口径",
     "mob.error.title": "怪物数据加载失败",
     "propGroup.power": "强度",
     "propGroup.survival": "生存",
@@ -506,19 +494,6 @@ LABELS: dict[str, str] = {
     "prop.HPAddedRatio": "生命增幅",
     "ui.footerMotto": "愿此行，终抵群星",
     "catalog.currencyWar": "货币战争",
-    "mob.dom.mainline": "主线剧情",
-    "mob.dom.simulated": "模拟宇宙",
-    "mob.dom.divergent": "差分宇宙",
-    "mob.dom.trial": "角色试用",
-    "mob.dom.activity": "活动",
-    "mob.sub.memory": "忘却之庭",
-    "mob.sub.fiction": "虚构叙事",
-    "mob.sub.apocalypse": "末日幻影",
-    "mob.sub.anomaly": "异相仲裁",
-    "mob.sub.calyx": "拟造花萼",
-    "mob.sub.cavern": "侵蚀隧洞",
-    "mob.sub.echo": "历战余响",
-    "mob.sub.shadow": "凝滞虚影",
 }
 
 # 同形多义：人工指定义项（命途 → 界面义的 Path，而不是剧情义的 Fate）
@@ -581,6 +556,61 @@ REMOVED_KEYS: set[str] = {
     "formula.growth.tab.enemy",
     "formula.growth.trace",
     "formula.growth.traceNote",
+    # `/monster/:id` 的掉落 / 出没 / 活动出处三块下线后遗留（数据仍在详情产物里，页面与快照不再渲染）
+    "mob.appearCensus",
+    "mob.appearIn",
+    "mob.appearModes",
+    "mob.appearNoNameNote",
+    "mob.appearSourceNote",
+    "mob.appearStages",
+    "mob.artSharedFigure",
+    "mob.artSharedIcon",
+    "mob.census.k",
+    "mob.dom.activity",
+    "mob.dom.divergent",
+    "mob.dom.endgame",
+    "mob.dom.farm",
+    "mob.dom.mainline",
+    "mob.dom.other",
+    "mob.dom.simulated",
+    "mob.dom.trial",
+    "mob.dropLead",
+    "mob.dropsTiers",
+    "mob.empty.appear",
+    "mob.event.k",
+    "mob.eventAll",
+    "mob.eventSome",
+    "mob.eventTabs",
+    "mob.levelBalance",
+    "mob.levelBase",
+    "mob.sec.appear",
+    "mob.sec.drop",
+    "mob.sub.anomaly",
+    "mob.sub.apocalypse",
+    "mob.sub.calyx",
+    "mob.sub.cavern",
+    "mob.sub.echo",
+    "mob.sub.fiction",
+    "mob.sub.memory",
+    "mob.sub.shadow",
+    # `/monster/:id` 的「同族变体」整块（差分条 + 图鉴族互链）下线后遗留
+    "catalog.variantDiff",
+    "catalog.variantDiffHelp",
+    "mob.atlas.k",
+    "mob.atlasOthers",
+    "mob.sec.variants",
+    "mob.variant.current",
+    "mob.variant.same",
+    "mob.variantCount",
+    "mob.variantLead",
+    # 「同族变体」差分标签只由被删掉的差分表组装（VARIANT_SIG_KEY）
+    "catalog.sig.atk",
+    "catalog.sig.def",
+    "catalog.sig.figure",
+    "catalog.sig.intro",
+    "catalog.sig.stance",
+    # 图鉴族快照分区（同图鉴其他形态）随同下线
+    "mob.atlasForms",
 }
 
 AUTHORED: dict[str, dict[str, str]] = {
@@ -779,11 +809,6 @@ AUTHORED: dict[str, dict[str, str]] = {
         "es": "Base", "fr": "Base", "de": "Basis", "pt": "Base", "ru": "Базовое",
         "th": "พื้นฐาน", "vi": "Cơ bản", "id": "Dasar",
     },
-    "catalog.sig.figure": {
-        "cn": "立绘", "cht": "立繪", "en": "Artwork", "jp": "立ち絵", "kr": "일러스트",
-        "es": "Ilustración", "fr": "Illustration", "de": "Artwork", "pt": "Ilustração", "ru": "Арт",
-        "th": "ภาพตัวละคร", "vi": "Hình ảnh", "id": "Gambar",
-    },
     "catalog.sig.invaded": {
         "cn": "侵蚀名单", "cht": "侵蝕名單", "en": "Corruption list", "jp": "侵食リスト", "kr": "침식 목록",
         "es": "Lista de corrupción", "fr": "Liste de corruption", "de": "Korruptionsliste",
@@ -794,21 +819,6 @@ AUTHORED: dict[str, dict[str, str]] = {
         "cn": "HP", "cht": "HP", "en": "HP", "jp": "HP", "kr": "HP",
         "es": "HP", "fr": "HP", "de": "HP", "pt": "HP", "ru": "HP",
         "th": "HP", "vi": "HP", "id": "HP",
-    },
-    "catalog.variantDiffHelp": {
-        "cn": "「差分」列出的字段是本档与本页当前档不同的全部差异。",
-        "cht": "「差分」列出的欄位是本檔與本頁當前檔不同的全部差異。",
-        "en": "“Differs” lists every field that differs between this entry and the one shown on this page.",
-        "jp": "「差分」はこの項目と本ページの項目で異なる全フィールドを列挙します。",
-        "kr": "「차이」는 이 항목과 현재 페이지 항목에서 다른 모든 필드를 나열합니다.",
-        "es": "«Diferencias» enumera todos los campos que difieren entre esta entrada y la de esta página.",
-        "fr": "« Écarts » liste tous les champs qui diffèrent entre cette entrée et celle de cette page.",
-        "de": "„Abweichung“ listet alle Felder, die sich von dem auf dieser Seite gezeigten Eintrag unterscheiden.",
-        "pt": "“Diferenças” lista todos os campos que diferem entre esta entrada e a desta página.",
-        "ru": "«Отличия» перечисляет все поля, отличающиеся от записи на этой странице.",
-        "th": "“ต่างจาก” จะแสดงทุกฟิลด์ที่แตกต่างจากรายการในหน้านี้",
-        "vi": "“Khác biệt” liệt kê mọi trường khác với mục trên trang này.",
-        "id": "“Beda” mencantumkan semua bidang yang berbeda dengan entri di halaman ini.",
     },
     # ─── 物品类别（官方无对应词条；事件/机制名用官方译名：Aetherium Wars / Simulated Universe / Pixel Plane） ───
     "itemType.Material": {
@@ -1427,12 +1437,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     "cmp.changedCount": {
         "cn": "变化 {n} 项", "cht": "變化 {n} 項", "en": "{n} changed", "jp": "変更 {n} 件", "kr": "변경 {n}개", "es": "{n} cambios", "fr": "{n} changements", "de": "{n} geändert", "pt": "{n} alterações", "ru": "Изменено: {n}", "th": "เปลี่ยน {n} รายการ", "vi": "{n} thay đổi", "id": "{n} berubah",
     },
-    "mob.variant.current": {
-        "cn": "当前档", "cht": "當前檔", "en": "This entry", "jp": "現在の項目", "kr": "현재 항목", "es": "Esta entrada", "fr": "Cette entrée", "de": "Dieser Eintrag", "pt": "Esta entrada", "ru": "Эта запись", "th": "รายการนี้", "vi": "Mục này", "id": "Entri ini",
-    },
-    "mob.variant.same": {
-        "cn": "与当前档一致", "cht": "與當前檔一致", "en": "Same as this entry", "jp": "現在の項目と同一", "kr": "현재 항목과 동일", "es": "Igual que esta entrada", "fr": "Identique à cette entrée", "de": "Gleich wie dieser Eintrag", "pt": "Igual a esta entrada", "ru": "Совпадает с этой записью", "th": "เหมือนรายการนี้", "vi": "Giống mục này", "id": "Sama dengan entri ini",
-    },
     "mob.status.buff": {
         "cn": "增益", "cht": "增益", "en": "Buff", "jp": "強化", "kr": "버프", "es": "Mejora", "fr": "Amélioration", "de": "Buff", "pt": "Melhoria", "ru": "Усиление", "th": "บัฟ", "vi": "Tăng cường", "id": "Buff",
     },
@@ -1441,12 +1445,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "mob.status.other": {
         "cn": "其他", "cht": "其他", "en": "Other", "jp": "その他", "kr": "기타", "es": "Otro", "fr": "Autre", "de": "Sonstige", "pt": "Outro", "ru": "Прочее", "th": "อื่น ๆ", "vi": "Khác", "id": "Lainnya",
-    },
-    "mob.levelBase": {
-        "cn": "基准档", "cht": "基準檔", "en": "Base tier", "jp": "基準", "kr": "기준", "es": "Nivel base", "fr": "Palier de base", "de": "Basistufe", "pt": "Nível base", "ru": "Базовый уровень", "th": "ระดับพื้นฐาน", "vi": "Bậc cơ sở", "id": "Tingkat dasar",
-    },
-    "mob.levelBalance": {
-        "cn": "均衡等级 {n}", "cht": "均衡等級 {n}", "en": "Equilibrium Level {n}", "jp": "均衡レベル {n}", "kr": "균형 레벨 {n}", "es": "Nivel de equilibrio {n}", "fr": "Niveau d'équilibre {n}", "de": "Gleichgewichtsstufe {n}", "pt": "Nível de equilíbrio {n}", "ru": "Уровень равновесия {n}", "th": "ระดับสมดุล {n}", "vi": "Cấp cân bằng {n}", "id": "Level keseimbangan {n}",
     },
     "mob.level": {
         "cn": "等级 {n}", "cht": "等級 {n}", "en": "Lv. {n}", "jp": "レベル {n}", "kr": "레벨 {n}", "es": "Nv. {n}", "fr": "Niv. {n}", "de": "Stufe {n}", "pt": "Nv. {n}", "ru": "Ур. {n}", "th": "เลเวล {n}", "vi": "Cấp {n}", "id": "Lv. {n}",
@@ -1462,54 +1460,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "mob.statusLead": {
         "cn": "口径：按状态配置名与怪物配置名的命名约定归属；数值或动态名称未公开的词条只列名称与类型。", "cht": "口徑：依狀態配置名與怪物配置名的命名慣例歸屬；數值或動態名稱未公開的詞條只列名稱與類型。", "en": "Assigned by the naming convention between status and monster config names. Entries whose values or dynamic names are not public list only name and type.", "jp": "状態設定名と敵設定名の命名規則で分類。数値や動的 name が非公開の詞条は名称と種類のみ記載します。", "kr": "상태 설정명과 적 설정명의 명명 규칙으로 분류합니다. 수치나 동적 이름이 비공개인 항목은 이름과 유형만 표시합니다.", "es": "Se asignan por la convención entre nombres de estado y de enemigo. Las entradas sin valores ni nombres dinámicos públicos solo muestran nombre y tipo.", "fr": "Attribués selon la convention de nommage des statuts et des ennemis. Les entrées sans valeurs ni noms dynamiques publics n'affichent que nom et type.", "de": "Zuordnung über die Namenskonvention von Status- und Gegnerkonfiguration. Einträge ohne öffentliche Werte oder dynamische Namen zeigen nur Name und Typ.", "pt": "Atribuídos pela convenção entre nomes de status e de inimigo. Entradas sem valores ou nomes dinâmicos públicos mostram apenas nome e tipo.", "ru": "Привязка по соглашению об именах статусов и противников. Записи без публичных значений или динамических имён показывают только имя и тип.", "th": "จัดกลุ่มตามธรรมเนียมการตั้งชื่อสถานะและศัตรู รายการที่ไม่มีค่าหรือชื่อไดนามิกเปิดเผยจะแสดงแค่ชื่อและประเภท", "vi": "Gán theo quy ước đặt tên trạng thái và kẻ địch. Mục không có giá trị hoặc tên động công khai chỉ hiển thị tên và loại.", "id": "Dipetakan menurut konvensi nama status dan musuh. Entri tanpa nilai atau nama dinamis publik hanya menampilkan nama dan tipe.",
-    },
-    "mob.dom.endgame": {
-        "cn": "终局挑战", "cht": "終局挑戰", "en": "Endgame", "jp": "終局チャレンジ", "kr": "종국 도전", "es": "Desafíos finales", "fr": "Défis de fin de partie", "de": "Endgame-Herausforderungen", "pt": "Desafios finais", "ru": "Испытания эндгейма", "th": "ความท้าทายท้ายเกม", "vi": "Thử thách cuối game", "id": "Tantangan akhir",
-    },
-    "mob.dom.farm": {
-        "cn": "常驻副本", "cht": "常駐副本", "en": "Permanent Dungeons", "jp": "常設ダンジョン", "kr": "상시 던전", "es": "Mazmorras permanentes", "fr": "Donjons permanents", "de": "Dauerhafte Dungeons", "pt": "Masmorras permanentes", "ru": "Постоянные подземелья", "th": "ดันเจี้ยนถาวร", "vi": "Phó bản thường trực", "id": "Dungeon permanen",
-    },
-    "mob.dom.other": {
-        "cn": "其他玩法", "cht": "其他玩法", "en": "Other Modes", "jp": "その他", "kr": "기타 콘텐츠", "es": "Otros modos", "fr": "Autres modes", "de": "Weitere Modi", "pt": "Outros modos", "ru": "Другие режимы", "th": "โหมดอื่น", "vi": "Chế độ khác", "id": "Mode lain",
-    },
-    "mob.appearModes": {
-        "cn": "{n} 个玩法", "cht": "{n} 個玩法", "en": "{n} modes", "jp": "{n} 種類", "kr": "{n}개 콘텐츠", "es": "{n} modos", "fr": "{n} modes", "de": "{n} Modi", "pt": "{n} modos", "ru": "{n} режима", "th": "{n} โหมด", "vi": "{n} chế độ", "id": "{n} mode",
-    },
-    "mob.appearSourceNote": {
-        "cn": "关卡名取自游戏内（终局层级 / 常驻副本 / 活动关卡），每个玩法至多列 2 处；没有关卡名的玩法只显示数量。", "cht": "關卡名取自遊戲內（終局層級 / 常駐副本 / 活動關卡），每個玩法至多列 2 處；沒有關卡名的玩法只顯示數量。", "en": "Stage names come from the game (endgame tiers / permanent dungeons / event stages), at most 2 per mode; modes without stage names show counts only.", "jp": "ステージ名はゲーム内表記（終局階層 / 常設ダンジョン / イベントステージ）。各モード最大2件まで。名前のないモードは数のみ表示します。", "kr": "스테이지 이름은 게임 내 표기(종국 계층 / 상시 던전 / 이벤트 스테이지)이며 각 콘텐츠 최대 2곳까지 표시합니다. 이름이 없는 콘텐츠는 수치만 표시합니다.", "es": "Los nombres provienen del juego (niveles de endgame / mazmorras permanentes / etapas de evento); hasta 2 por modo. Los modos sin nombres muestran solo el recuento.", "fr": "Noms issus du jeu (paliers endgame / donjons permanents / étapes d'événement) ; 2 au maximum par mode. Les modes sans noms n'affichent que le nombre.", "de": "Stufennamen stammen aus dem Spiel (Endgame-Ebenen / dauerhafte Dungeons / Event-Stufen), max. 2 pro Modus. Modi ohne Stufennamen zeigen nur die Anzahl.", "pt": "Nomes vêm do jogo (níveis de endgame / masmorras permanentes / etapas de evento); no máximo 2 por modo. Modos sem nomes mostram apenas a contagem.", "ru": "Названия этапов из игры (уровни эндгейма / постоянные подземелья / этапы событий), не более 2 на режим. Режимы без названий показывают только число.", "th": "ชื่อด่านมาจากในเกม (ชั้น Endgame / ดันเจี้ยนถาวร / ด่านอีเวนต์) แสดงไม่เกิน 2 ต่อโหมด โหมดที่ไม่มีชื่อจะแสดงเฉพาะจำนวน", "vi": "Tên màn lấy từ game (tầng endgame / phó bản thường trực / màn sự kiện), tối đa 2 mỗi chế độ. Chế độ không có tên chỉ hiển thị số lượng.", "id": "Nama stage dari dalam game (tier endgame / dungeon permanen / stage event), maksimal 2 per mode. Mode tanpa nama stage hanya menampilkan jumlah.",
-    },
-    "mob.appearNoNameNote": {
-        "cn": "这些关卡在游戏内没有关卡名，只计入上面的数量。", "cht": "這些關卡在遊戲內沒有關卡名，只計入上面的數量。", "en": "These stages have no in-game name and only count toward the total above.", "jp": "これらのステージはゲーム内名がなく、上の数にのみ計上されます。", "kr": "이 스테이지들은 게임 내 이름이 없어 위 수치에만 포함됩니다.", "es": "Estas etapas no tienen nombre en el juego y solo cuentan para el total.", "fr": "Ces étapes n'ont pas de nom en jeu et comptent seulement dans le total.", "de": "Diese Stufen haben keinen Spielnamen und zählen nur zur Summe oben.", "pt": "Estes estágios não têm nome no jogo e contam apenas no total.", "ru": "У этих этапов нет игрового названия, они учтены только в общем числе.", "th": "ด่านเหล่านี้ไม่มีชื่อในเกม นับเฉพาะยอดรวมด้านบน", "vi": "Các màn này không có tên trong game, chỉ tính vào tổng ở trên.", "id": "Stage ini tidak punya nama dalam game dan hanya dihitung di total.",
-    },
-    "mob.appearCensus": {
-        "cn": "按关卡波次统计，被其他敌人召唤出场的关卡也算；同一个关卡只算一次，一个关卡名可能覆盖多个难度档或上下半场。玩法按关卡所属玩法归档；无限波次玩法里随机抽取的编组不算关卡，不计入。", "cht": "按關卡波次統計，被其他敵人召喚出場的關卡也算；同一個關卡只算一次，一個關卡名可能覆蓋多個難度檔或上下半場。玩法按關卡所屬玩法歸檔；無限波次玩法裡隨機抽取的編組不算關卡，不計入。", "en": "Counted by stage waves; stages where this enemy is summoned by others count too. A stage counts once, and one name may cover several difficulty tiers or halves. Modes follow the stage's own mode; randomly drawn lineups in endless-wave modes are not stages and are excluded.", "jp": "ステージのウェーブ単位で集計。他の敵に召喚されるステージも含む。同じステージは1回だけ数え、1つの名が複数の難易度や前半・後半を指すこともある。モードはステージの所属で分類し、無限ウェーブのランダム編成はステージ扱いしない。", "kr": "스테이지 웨이브 기준 집계이며 다른 적이 소환한 스테이지도 포함합니다. 같은 스테이지는 1회만 세고, 한 이름이 여러 난이도나 전·후반을 포함할 수 있습니다. 콘텐츠는 스테이지 소속으로 분류하며, 무한 웨이브의 무작위 편성은 제외합니다.", "es": "Se cuenta por oleadas; también las etapas donde otro enemigo lo invoca. Una etapa cuenta una vez y un nombre puede cubrir varios niveles o mitades. Los modos siguen el modo de la etapa; las formaciones aleatorias de modos infinitos no cuentan.", "fr": "Compté par vagues ; les étapes où il est invoqué comptent aussi. Une étape compte une fois, un nom peut couvrir plusieurs paliers ou mi-temps. Les modes suivent celui de l'étape ; les compositions aléatoires des modes infinis ne comptent pas.", "de": "Nach Stufenwellen gezählt; auch Stufen, in denen er beschworen wird. Eine Stufe zählt einmal, ein Name kann mehrere Stufen oder Hälften abdecken. Modi folgen dem Modus der Stufe; zufällige Aufstellungen in Endloswellen zählen nicht.", "pt": "Contado por ondas; também etapas em que é invocado. Uma etapa conta uma vez e um nome pode cobrir vários níveis ou metades. Os modos seguem o modo da etapa; formações aleatórias de modos infinitos não contam.", "ru": "Считается по волнам этапа; этапы, где его призывают, тоже. Этап считается один раз, одно название может покрывать несколько сложностей или половин. Режим берётся из самого этапа; случайные составы бесконечных волн не учитываются.", "th": "นับตามเวฟของด่าน รวมด่านที่ถูกศัตรูอื่นเรียกออกมา หนึ่งด่านนับครั้งเดียว ชื่อหนึ่งอาจครอบคลุมหลายระดับหรือครึ่งแรก/หลัง โหมดยึดตามสังกัดของด่าน การสุ่มจัดทีมในโหมดเวฟไม่จำกัดไม่นับ", "vi": "Tính theo đợt của màn; màn được triệu hồi bởi kẻ địch khác cũng tính. Mỗi màn tính một lần, một tên có thể gồm nhiều độ khó hoặc hai hiệp. Chế độ lấy theo chế độ của màn; đội hình ngẫu nhiên ở chế độ vô hạn không tính.", "id": "Dihitung per gelombang stage; stage tempat ia dipanggil juga dihitung. Satu stage dihitung sekali, satu nama bisa mencakup beberapa tingkat atau babak. Mode mengikuti mode stage; formasi acak di mode gelombang tak terbatas tidak dihitung.",
-    },
-    "mob.eventSome": {
-        "cn": "其中 {n} 个在「{name}」活动里，", "cht": "其中 {n} 個在「{name}」活動裡，", "en": "{n} of them are in the “{name}” event;", "jp": "うち {n} 件は「{name}」イベント内、", "kr": "그중 {n}개는 「{name}」 이벤트에 있으며,", "es": "{n} de ellas están en el evento «{name}»;", "fr": "{n} d'entre elles dans l'événement « {name} » ;", "de": "{n} davon im Event „{name}“;", "pt": "{n} delas no evento “{name}”;", "ru": "{n} из них в событии «{name}»;", "th": "{n} รายการอยู่ในอีเวนต์ “{name}”", "vi": "{n} trong số đó thuộc sự kiện “{name}”;", "id": "{n} di antaranya di event “{name}”;",
-    },
-    "mob.eventAll": {
-        "cn": "全部关卡都在「{name}」活动里，", "cht": "全部關卡都在「{name}」活動裡，", "en": "All stages are in the “{name}” event;", "jp": "すべてのステージが「{name}」イベント内、", "kr": "모든 스테이지가 「{name}」 이벤트에 있으며,", "es": "Todas las etapas están en el evento «{name}»;", "fr": "Toutes les étapes sont dans l'événement « {name} » ;", "de": "Alle Stufen sind im Event „{name}“;", "pt": "Todos os estágios estão no evento “{name}”;", "ru": "Все этапы в событии «{name}»;", "th": "ทุกด่านอยู่ในอีเวนต์ “{name}”", "vi": "Tất cả màn đều thuộc sự kiện “{name}”;", "id": "Semua stage ada di event “{name}”;",
-    },
-    "mob.eventTabs": {
-        "cn": "；页签：{tabs}。", "cht": "；頁籤：{tabs}。", "en": "; tabs: {tabs}.", "jp": "；タブ：{tabs}。", "kr": "; 탭: {tabs}.", "es": "; pestañas: {tabs}.", "fr": "; onglets : {tabs}.", "de": "; Tabs: {tabs}.", "pt": "; abas: {tabs}.", "ru": "; вкладки: {tabs}.", "th": "; แท็บ: {tabs}.", "vi": "; thẻ: {tabs}.", "id": "; tab: {tabs}.",
-    },
-    "mob.artSharedFigure": {
-        "cn": "本形态没有独立美术：卡面与立绘与「{name}」共用（同卡面共 {n} 个形态）。", "cht": "本形態沒有獨立美術：卡面與立繪與「{name}」共用（同卡面共 {n} 個形態）。", "en": "This form has no separate art: its portrait and artwork are shared with “{name}” ({n} forms share the same portrait).", "jp": "この形態に独立したアートはなく、カード絵と立ち絵は「{name}」と共通です（同カード {n} 形態）。", "kr": "이 형태는 독립 아트가 없으며 카드와 일러스트를 「{name}」와 공유합니다(동일 카드 {n}개 형태).", "es": "Esta forma no tiene arte propio: comparte retrato e ilustración con «{name}» ({n} formas con el mismo retrato).", "fr": "Cette forme n'a pas d'art propre : visuel et illustration partagés avec « {name} » ({n} formes au même visuel).", "de": "Diese Form hat keine eigene Grafik: Kartenbild und Artwork sind mit „{name}“ geteilt ({n} Formen mit gleichem Kartenbild).", "pt": "Esta forma não tem arte própria: carta e ilustração são compartilhadas com “{name}” ({n} formas com a mesma carta).", "ru": "У этой формы нет своей графики: карта и арт общие с «{name}» ({n} форм с той же картой).", "th": "ร่างนี้ไม่มีอาร์ตแยก การ์ดและภาพใช้ร่วมกับ “{name}” (การ์ดเดียวกัน {n} ร่าง)", "vi": "Dạng này không có art riêng: thẻ và hình dùng chung với “{name}” ({n} dạng cùng thẻ).", "id": "Bentuk ini tidak punya art sendiri: kartu dan gambar dipakai bersama “{name}” ({n} bentuk berkartu sama).",
-    },
-    "mob.artSharedIcon": {
-        "cn": "本形态与「{name}」等 {n} 个形态同卡面图标，立绘不同。", "cht": "本形態與「{name}」等 {n} 個形態同卡面圖示，立繪不同。", "en": "This form shares the portrait icon with “{name}” and {n} forms in total, but the artwork differs.", "jp": "この形態は「{name}」など {n} 形態とカードアイコンが同じで、立ち絵が異なります。", "kr": "이 형태는 「{name}」 등 {n}개 형태와 카드 아이콘이 같고 일러스트는 다릅니다.", "es": "Esta forma comparte el icono de carta con «{name}» y {n} formas en total, pero la ilustración difiere.", "fr": "Cette forme partage l'icône avec « {name} » et {n} formes au total, mais l'illustration diffère.", "de": "Diese Form teilt das Kartenbild-Symbol mit „{name}“ und insgesamt {n} Formen, das Artwork unterscheidet sich.", "pt": "Esta forma compartilha o ícone da carta com “{name}” e {n} formas no total, mas a ilustração difere.", "ru": "У этой формы общая иконка карты с «{name}» и всего {n} формами, но арт отличается.", "th": "ร่างนี้ใช้ไอคอนการ์ดร่วมกับ “{name}” และรวม {n} ร่าง แต่ภาพต่างกัน", "vi": "Dạng này dùng chung icon thẻ với “{name}” và tổng {n} dạng, nhưng hình khác.", "id": "Bentuk ini berbagi ikon kartu dengan “{name}” dan total {n} bentuk, tetapi gambarnya berbeda.",
-    },
-    "mob.dropLead": {
-        "cn": "按均衡等级分档；「基准档」为无均衡等级限制的那一档。", "cht": "按均衡等級分檔；「基準檔」為無均衡等級限制的那一檔。", "en": "Tiered by Equilibrium Level; the “base tier” is the one without an Equilibrium Level requirement.", "jp": "均衡レベルで区分。「基準」は均衡レベルの制限がない段階です。", "kr": "균형 레벨로 구분하며, 「기준」은 균형 레벨 제한이 없는 단계입니다.", "es": "Se divide por nivel de equilibrio; el «nivel base» es el que no tiene requisito.", "fr": "Réparti par niveau d'équilibre ; le « palier de base » n'a aucune exigence.", "de": "Nach Gleichgewichtsstufe gestaffelt; die „Basistufe“ hat keine Anforderung.", "pt": "Dividido por nível de equilíbrio; o “nível base” não tem exigência.", "ru": "Разбито по уровню равновесия; «базовый» — без требований.", "th": "แบ่งตามระดับสมดุล “ระดับพื้นฐาน” คือระดับที่ไม่ต้องใช้ระดับสมดุล", "vi": "Chia theo Cấp Cân Bằng; “bậc cơ sở” là bậc không yêu cầu cấp.", "id": "Dibagi per Level Keseimbangan; “tingkat dasar” tanpa syarat level.",
-    },
-    "mob.variantCount": {
-        "cn": "{n} 档", "cht": "{n} 檔", "en": "{n} entry | {n} entries", "jp": "{n} 件", "kr": "{n}개", "es": "{n} entrada | {n} entradas", "fr": "{n} entrée | {n} entrées", "de": "{n} Eintrag | {n} Einträge", "pt": "{n} entrada | {n} entradas", "ru": "{n} запись | {n} записей", "th": "{n} รายการ", "vi": "{n} mục", "id": "{n} entri",
-    },
-    "mob.variantLead": {
-        "cn": "名称与卡面相同的 {n} 个数值档，弱点／韧性／数值／技能各不相同。", "cht": "名稱與卡面相同的 {n} 個數值檔，弱點／韌性／數值／技能各不相同。", "en": "{n} stat variants share the same name and portrait; weakness, toughness, stats and abilities differ.", "jp": "名前とカードが同じ {n} 件の数値違い。弱点／靭性／数値／スキルが異なります。", "kr": "이름과 카드가 같은 {n}개 수치 단계로, 약점/강인도/수치/스킬이 다릅니다.", "es": "{n} variantes con el mismo nombre y carta; debilidad, robustez, valores y habilidades difieren.", "fr": "{n} variantes de même nom et visuel ; faiblesse, robustesse, valeurs et compétences diffèrent.", "de": "{n} Wertevarianten mit gleichem Namen und Kartenbild; Schwäche, Robustheit, Werte und Fähigkeiten unterscheiden sich.", "pt": "{n} variantes com mesmo nome e carta; fraqueza, robustez, valores e habilidades diferem.", "ru": "{n} вариантов с тем же именем и картой; уязвимость, прочность, значения и навыки различаются.", "th": "{n} ระดับที่ชื่อและการ์ดเดียวกัน ต่างกันที่จุดอ่อน/ความแข็งแกร่ง/ค่า/สกิล", "vi": "{n} bậc cùng tên và thẻ; điểm yếu/Độ Bền/chỉ số/kỹ năng khác nhau.", "id": "{n} varian dengan nama dan kartu sama; kelemahan, ketangguhan, stat, skill berbeda.",
-    },
-    "mob.atlasOthers": {
-        "cn": "官方登记的同一条目下另有 {n} 个形态（共 {m} 个，含本页）", "cht": "官方登記的同一個條目下另有 {n} 個形態（共 {m} 個，含本頁）", "en": "The official entry lists {n} other forms ({m} in total, including this page)", "jp": "公式の同一項目には他に {n} 形態（本ページを含め計 {m} 件）", "kr": "공식 동일 항목에 다른 형태가 {n}개 있습니다(이 페이지 포함 총 {m}개)", "es": "La entrada oficial incluye {n} formas más ({m} en total, incluida esta)", "fr": "La fiche officielle liste {n} autres formes ({m} au total, cette page comprise)", "de": "Der offizielle Eintrag führt {n} weitere Formen ({m} insgesamt, diese Seite inbegriffen)", "pt": "A entrada oficial lista {n} outras formas ({m} no total, incluindo esta)", "ru": "В официальной записи ещё {n} форм (всего {m}, включая эту)", "th": "รายการทางการมีอีกร่าง {n} ร่าง (รวมทั้งหมด {m} รวมหน้านี้)", "vi": "Mục chính thức có thêm {n} dạng (tổng {m}, gồm trang này)", "id": "Entri resmi mencantumkan {n} bentuk lain (total {m}, termasuk halaman ini)",
     },
     "mob.derive.lead": {
         "cn": "拖动等级滑条，等级曲线倍率与战斗值同步重算。", "cht": "拖動等級滑桿，等級曲線倍率與戰鬥值同步重算。", "en": "Drag the level slider to recompute the level curve multiplier and combat values together.", "jp": "レベルスライダーをドラッグすると、レベル曲線倍率と戦闘値が同時に再計算されます。", "kr": "레벨 슬라이더를 드래그하면 레벨 곡선 배율과 전투 수치가 함께 다시 계산됩니다.",
@@ -1603,12 +1553,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "mob.stage": {
         "cn": "阶段 {n}", "cht": "階段 {n}", "en": "Phase {n}", "jp": "フェーズ {n}", "kr": "페이즈 {n}", "es": "Fase {n}", "fr": "Phase {n}", "de": "Phase {n}", "pt": "Fase {n}", "ru": "Фаза {n}", "th": "เฟส {n}", "vi": "Giai đoạn {n}", "id": "Fase {n}",
-    },
-    "mob.appearIn": {
-        "cn": "出现在", "cht": "出現在", "en": "Appears in", "jp": "出現：", "kr": "출현:", "es": "Aparece en", "fr": "Apparaît dans", "de": "Kommt vor in", "pt": "Aparece em", "ru": "Появляется на", "th": "ปรากฏใน", "vi": "Xuất hiện ở", "id": "Muncul di",
-    },
-    "mob.appearStages": {
-        "cn": "个关卡", "cht": "個關卡", "en": " stages", "jp": " ステージ", "kr": "개 스테이지", "es": " etapas", "fr": " étapes", "de": " Stufen", "pt": " estágios", "ru": " этапах", "th": " ด่าน", "vi": " màn", "id": " stage",
     },
     "card.value.stance": {
         "cn": "韧性 {v}", "cht": "韌性 {v}", "en": "Toughness {v}", "jp": "靭性 {v}", "kr": "강인도 {v}", "es": "Robustez {v}", "fr": "Robustesse {v}", "de": "Robustheit {v}", "pt": "Robustez {v}", "ru": "Прочность {v}", "th": "ความแข็งแกร่ง {v}", "vi": "Độ Bền {v}", "id": "Ketangguhan {v}",
@@ -1919,15 +1863,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     "mob.sec.status": {
         "cn": "状态词条", "cht": "狀態詞條", "en": "Status Effects", "jp": "状態効果", "kr": "상태 효과", "es": "Estados", "fr": "Effets de statut", "de": "Statuseffekte", "pt": "Efeitos de status", "ru": "Эффекты состояния", "th": "เอฟเฟกต์สถานะ", "vi": "Hiệu ứng trạng thái", "id": "Efek status",
     },
-    "mob.sec.appear": {
-        "cn": "出没关卡", "cht": "出沒關卡", "en": "Stage Appearances", "jp": "出現ステージ", "kr": "출현 스테이지", "es": "Apariciones", "fr": "Apparitions", "de": "Stufen-Auftritte", "pt": "Aparições", "ru": "Появления на этапах", "th": "ด่านที่ปรากฏ", "vi": "Màn xuất hiện", "id": "Kemunculan stage",
-    },
-    "mob.sec.drop": {
-        "cn": "掉落", "cht": "掉落", "en": "Drops", "jp": "ドロップ", "kr": "드롭", "es": "Botín", "fr": "Butin", "de": "Beute", "pt": "Drops", "ru": "Добыча", "th": "ดรอป", "vi": "Rơi", "id": "Drop",
-    },
-    "mob.sec.variants": {
-        "cn": "同族变体", "cht": "同族變體", "en": "Family Variants", "jp": "同族バリエーション", "kr": "동족 변형", "es": "Variantes de familia", "fr": "Variantes de famille", "de": "Familienvarianten", "pt": "Variantes de família", "ru": "Варианты семейства", "th": "ร่างแปรสายพันธุ์", "vi": "Biến thể cùng loài", "id": "Varian keluarga",
-    },
     "mob.resist.stance": {
         "cn": "韧性弱点", "cht": "韌性弱點", "en": "Toughness Weakness", "jp": "靭性弱点", "kr": "강인도 약점", "es": "Debilidad de robustez", "fr": "Faiblesse de robustesse", "de": "Robustheitsschwäche", "pt": "Fraqueza de robustez", "ru": "Уязвимость прочности", "th": "จุดอ่อนความแข็งแกร่ง", "vi": "Điểm yếu Độ Bền", "id": "Kelemahan Ketangguhan",
     },
@@ -1939,9 +1874,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "mob.empty.intro": {
         "cn": "暂无图鉴介绍", "cht": "暫無圖鑑介紹", "en": "No bestiary entry yet", "jp": "図鑑説明はまだありません", "kr": "도감 설명 없음", "es": "Sin ficha de bestiario", "fr": "Pas encore de fiche", "de": "Noch kein Bestiariumseintrag", "pt": "Ainda sem ficha", "ru": "Описания пока нет", "th": "ยังไม่มีคำอธิบาย", "vi": "Chưa có mô tả", "id": "Belum ada keterangan",
-    },
-    "mob.empty.appear": {
-        "cn": "暂无关卡出场记录。", "cht": "暫無關卡出場記錄。", "en": "No stage appearances recorded.", "jp": "ステージ出現記録はありません。", "kr": "스테이지 출현 기록이 없습니다.", "es": "Sin apariciones registradas.", "fr": "Aucune apparition enregistrée.", "de": "Keine Stufen-Auftritte erfasst.", "pt": "Sem aparições registradas.", "ru": "Появлений на этапах нет.", "th": "ไม่มีบันทึกการปรากฏตัว", "vi": "Chưa có ghi nhận xuất hiện.", "id": "Belum ada kemunculan tercatat.",
     },
     "mob.phase.other": {
         "cn": "其他形态", "cht": "其他形態", "en": "Other form", "jp": "その他の形態", "kr": "기타 형태", "es": "Otra forma", "fr": "Autre forme", "de": "Andere Form", "pt": "Outra forma", "ru": "Другая форма", "th": "ร่างอื่น", "vi": "Dạng khác", "id": "Bentuk lain",
@@ -1960,15 +1892,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     },
     "mob.status.dispel": {
         "cn": "可驱散", "cht": "可驅散", "en": "Dispellable", "jp": "解除可能", "kr": "해제 가능", "es": "Disipable", "fr": "Dissipable", "de": "Bannbar", "pt": "Dispensável", "ru": "Снимается", "th": "ลบได้", "vi": "Có thể giải", "id": "Dapat dihapus",
-    },
-    "mob.atlas.k": {
-        "cn": "图鉴族", "cht": "圖鑑族", "en": "Bestiary Group", "jp": "図鑑グループ", "kr": "도감 그룹", "es": "Grupo de bestiario", "fr": "Groupe de bestiaire", "de": "Bestiariumsgruppe", "pt": "Grupo de bestiário", "ru": "Группа бестиария", "th": "กลุ่มสารานุกรม", "vi": "Nhóm sách quái", "id": "Grup bestiari",
-    },
-    "mob.event.k": {
-        "cn": "活动出处", "cht": "活動出處", "en": "Event Source", "jp": "イベント出典", "kr": "이벤트 출처", "es": "Origen del evento", "fr": "Origine de l'événement", "de": "Event-Herkunft", "pt": "Origem do evento", "ru": "Источник события", "th": "ที่มาของอีเวนต์", "vi": "Nguồn sự kiện", "id": "Sumber event",
-    },
-    "mob.census.k": {
-        "cn": "统计口径", "cht": "統計口徑", "en": "Counting Method", "jp": "集計基準", "kr": "집계 기준", "es": "Criterio de conteo", "fr": "Méthode de comptage", "de": "Zählweise", "pt": "Critério de contagem", "ru": "Методика подсчёта", "th": "เกณฑ์การนับ", "vi": "Cách thống kê", "id": "Metode penghitungan",
     },
     "mob.error.title": {
         "cn": "怪物数据加载失败", "cht": "怪物資料載入失敗", "en": "Failed to load monster data", "jp": "敵データの読み込みに失敗", "kr": "적 데이터 로드 실패", "es": "No se pudieron cargar los datos", "fr": "Échec du chargement des données", "de": "Gegnerdaten konnten nicht geladen werden", "pt": "Falha ao carregar dados", "ru": "Не удалось загрузить данные", "th": "โหลดข้อมูลศัตรูไม่สำเร็จ", "vi": "Không tải được dữ liệu", "id": "Gagal memuat data musuh",
@@ -2086,12 +2009,6 @@ AUTHORED: dict[str, dict[str, str]] = {
     "egm.fact.choiceMode": {
         "cn": "选择方式", "cht": "選擇方式", "en": "Selection", "jp": "選択方式", "kr": "선택 방식", "es": "Selección", "fr": "Sélection", "de": "Auswahl", "pt": "Seleção", "ru": "Выбор", "th": "วิธีเลือก", "vi": "Cách chọn", "id": "Cara Memilih",
     },
-    "mob.dropsTiers": {
-        "cn": "（共 {n} 档均衡等级）", "cht": "（共 {n} 檔均衡等級）", "en": " ({n} Equilibrium Levels)", "jp": "（均衡レベル {n} 段階）", "kr": " (균형 레벨 {n}단계)", "es": " ({n} niveles de equilibrio)", "fr": " ({n} niveaux d'équilibre)", "de": " ({n} Gleichgewichtsstufen)", "pt": " ({n} níveis de equilíbrio)", "ru": " ({n} уровней равновесия)", "th": " (ระดับสมดุล {n} ระดับ)", "vi": " ({n} bậc cân bằng)", "id": " ({n} tingkat keseimbangan)",
-    },
-    "mob.atlasForms": {
-        "cn": "同图鉴其他形态（本族共 {n} 个形态）", "cht": "同圖鑑其他形態（本族共 {n} 個形態）", "en": "Other forms in this entry ({n} in this family)", "jp": "同図鑑の他の形態（本族 {n} 形態）", "kr": "같은 도감의 다른 형태 (본계열 {n}개)", "es": "Otras formas de esta entrada ({n} en la familia)", "fr": "Autres formes de cette entrée ({n} dans la famille)", "de": "Weitere Formen dieses Eintrags ({n} in der Familie)", "pt": "Outras formas desta entrada ({n} na família)", "ru": "Другие формы в записи ({n} в семействе)", "th": "รูปแบบอื่นในสารบบนี้ (สายนี้ {n} รูปแบบ)", "vi": "Dạng khác trong mục này ({n} trong họ)", "id": "Bentuk lain di entri ini ({n} dalam keluarga)",
-    },
     "snapshot.sum.cwPortal": {
         "cn": "{site}货币战争投资环境图鉴：共 {n} 个投资环境。", "cht": "{site}貨幣戰爭投資環境圖鑑：共 {n} 個投資環境。", "en": "{site} Currency Wars portals: {n} entries.", "jp": "{site} 貨幣戦争の投資環境図鑑：{n} 件。", "kr": "{site} 통화 전쟁 투자 환경 도감: {n}개.", "es": "{site} portales de Guerras Monetarias: {n} entradas.", "fr": "{site} portails de Guerre Monétaire : {n} entrées.", "de": "{site} Währungskrieg-Portale: {n} Einträge.", "pt": "{site} portais de Guerra Monetária: {n} entradas.", "ru": "{site} порталы Валютной войны: {n} записей.", "th": "{site} พอร์ทัลสงครามcurrency: {n} รายการ", "vi": "{site} cổng Chiến tranh Tiền tệ: {n} mục.", "id": "{site} portal Currency Wars: {n} entri.",
     },
@@ -2190,12 +2107,6 @@ AUTHORED: dict[str, dict[str, str]] = {
         "es": "Usable", "fr": "Utilisable", "de": "Verwendbar", "pt": "Utilizável", "ru": "Используемое",
         "th": "ใช้ได้", "vi": "Có thể dùng", "id": "Dapat dipakai",
     },
-    "catalog.sig.intro": {
-        "cn": "图鉴介绍", "cht": "圖鑑介紹", "en": "Bestiary entry", "jp": "図鑑説明", "kr": "도감 설명",
-        "es": "Ficha de bestiario", "fr": "Fiche du bestiaire", "de": "Bestiarium-Eintrag",
-        "pt": "Ficha do bestiário", "ru": "Описание в бестиарии", "th": "คำอธิบายสารานุกรม",
-        "vi": "Mô tả sách quái", "id": "Keterangan bestiari",
-    },
     "catalog.qualityLabel": {
         "cn": "{name}品质", "cht": "{name}品質", "en": "{name} quality", "jp": "{name}品質",
         "kr": "{name} 품질", "es": "Calidad {name}", "fr": "Qualité {name}", "de": "Qualität {name}",
@@ -2213,12 +2124,6 @@ AUTHORED: dict[str, dict[str, str]] = {
         "kr": "≥N명 활성화", "es": "≥N activa", "fr": "≥N active", "de": "≥N aktiviert",
         "pt": "≥N ativa", "ru": "Активация при ≥N", "th": "≥N เปิดใช้",
         "vi": "≥N kích hoạt", "id": "≥N aktif",
-    },
-    "catalog.variantDiff": {
-        "cn": "差分 {list}", "cht": "差分 {list}", "en": "Differs: {list}", "jp": "差分 {list}",
-        "kr": "차이 {list}", "es": "Diferencias: {list}", "fr": "Écarts : {list}", "de": "Abweichung: {list}",
-        "pt": "Diferenças: {list}", "ru": "Отличия: {list}", "th": "ต่างจาก: {list}",
-        "vi": "Khác biệt: {list}", "id": "Beda: {list}",
     },
     "monster.rank.minion": {
         "cn": "普通", "cht": "普通", "en": "Normal", "jp": "通常", "kr": "일반",

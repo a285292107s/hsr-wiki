@@ -105,13 +105,16 @@ test.describe('布局验收：跨模式入口文案', () => {
     ).toBe(true);
     const order = await page.evaluate(() => {
       const kids = [...document.querySelector('.ui-sidebar')!.children];
+      const navIdx = kids
+        .map((k, i) => (k.matches('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)') ? i : -1))
+        .filter((i) => i >= 0);
       return {
         swapIdx: kids.findIndex((k) => k.classList.contains('ui-sidebar-swap')),
-        monsterIdx: kids.findIndex((k) => k.getAttribute('href') === '/monster'),
+        lastNavIdx: navIdx[navIdx.length - 1] ?? -1,
       };
     });
-    expect(order.monsterIdx, '常规模式应渲染敌人项').toBeGreaterThanOrEqual(0);
-    expect(order.swapIdx, '切换按钮应排在敌人项之后').toBeGreaterThan(order.monsterIdx);
+    expect(order.lastNavIdx, '常规模式应渲染章节项').toBeGreaterThanOrEqual(0);
+    expect(order.swapIdx, '切换按钮应排在最后一个章节项之后').toBeGreaterThan(order.lastNavIdx);
 
     await swap.click();
     await expect(page).toHaveURL(/\/currency\/role$/);
