@@ -76,6 +76,7 @@
 - **回退链两端必须同 ref**：jsdelivr 与 raw 的 ref（`ICON_MIRROR_REF`，现为 `main`）要一致，否则主源与回退各取不同提交，数据更新后可能一张新一张旧。
 - **`index.html` 的 `preconnect` 指向 jsdelivr、`dns-prefetch` 指向 raw.githubusercontent**：不要再 `preconnect` `static.nanoka.cc`——该 Cloudflare 域在目标网络常不可达（connect/TLS 超时），首屏 LCP 图会先卡在死主源上等超时才回退。
 - **构建产物里基址是模板字面量拼接，grep 完整 URL 会 0 命中**：minify 后形如 ``a=`https://cdn.jsdelivr.net/gh/${repo}@${ref}/public/data/assets/icons` ``，核对时 grep `hsr-wiki` 或 `raw.githubusercontent` 片段，别因整串 grep 无果就以为没改到。
+- **改走 jsDelivr 后本地图标源文件不能再随构建产物投递**：Vite 会把整个 `public/` 原样复制进 `dist/`，于是 4,585 个已不经过 Vercel 的图标（约 263 MB）在每个部署里白存一遍，按部署数线性吃 Deployment Storage（12 个部署 = 3.16 GB）。`pnpm build` 末步 `tools/prune-dist-icons.mjs` 在 `dist/index.html` 已生成后删除 `dist/data/assets/icons`，源文件留在 `public/` 供 jsDelivr 读取。判据：dev 无此裁剪（走 `public/` 目录直读）、任何 e2e 若断言 `/data/assets/icons` 同源 200，在 build 档必然假红——该断言只对 dev 有意义。
 
 ## 图片并发闸门（避免一次性大量加载被 jsdelivr 限流）
 

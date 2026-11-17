@@ -35,7 +35,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 ```bash
 pnpm install            # 依赖安装（版本口径 → tech-stack.md）
 pnpm dev                # → http://localhost:6188/（固定端口，禁止换回默认端口；「改了不生效」先自愈，见 commands.md）
-pnpm build              # 守卫链 → vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫（守卫清单唯一落位 commands.md）
+pnpm build              # 守卫链 → vue-tsc -b → vite build → AI 端点生成 + AI 端点守卫 → 构建产物裁剪（守卫清单唯一落位 commands.md）
 pnpm test               # 运行全部测试（Vitest）
 pnpm vitest run <文件>   # 运行单个测试文件
 pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「禁全量 e2e」的落地命令）

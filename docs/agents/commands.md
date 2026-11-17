@@ -26,7 +26,7 @@ pnpm dev       # → http://localhost:6188/
 ## 构建与预览
 
 ```bash
-pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 + 守卫 → dist/
+pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 + 守卫 → dist/ 图标裁剪
 pnpm preview   # 预览构建产物
 ```
 
