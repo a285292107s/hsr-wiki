@@ -156,6 +156,7 @@ const PROP_GROUP_KEY: Record<string, string> = {
   ExtraEnergyBar: 'mechanic',
   ExtraLuckChance: 'mechanic',
   ExtraLuckDamage: 'mechanic',
+  ExtraComboRate: 'mechanic',
   BackEnergyBar: 'mechanic',
   BackInitialEnergyBar: 'mechanic',
   BackMaxSP: 'mechanic',
@@ -330,8 +331,9 @@ export const TRAIT_CATEGORY = {
 export type TraitCat = keyof typeof TRAIT_CATEGORY;
 
 export function catOfTrait(id: number): TraitCat {
+  const base = id >= 100000 ? Math.floor(id / 100) : id;
   for (const [key, cfg] of Object.entries(TRAIT_CATEGORY)) {
-    if (id >= cfg.range[0] && id < cfg.range[1]) return key as TraitCat;
+    if (base >= cfg.range[0] && base < cfg.range[1]) return key as TraitCat;
   }
   return 'special';
 }
@@ -355,9 +357,26 @@ export function resolveServantAttr(
   if (typeof ref === 'number') return String(ref);
   if (!/^#\d+$/.test(ref)) return String(ref);
   const idx = parseInt(ref.slice(1), 10) - 1;
-  const pl = charData?.skills?.[String(skillId)]?.level?.['1']?.param_list;
+  const sk = servantSkillRef(skillId, charData);
+  const pl = sk?.level?.['1']?.param_list;
   if (pl && pl[idx] != null) return String(pl[idx]);
   return null;
+}
+
+function servantSkillRef(
+  skillId: number | null | undefined,
+  charData: CharacterData | null,
+): { level?: Record<string, { param_list: number[] }> } | undefined {
+  if (skillId == null || !charData?.skills) return undefined;
+  const direct = charData.skills[String(skillId)];
+  if (direct) return direct;
+  const s = String(skillId);
+  const bodyId =
+    s.length === 10 ? Number(s.slice(0, 4) + s.slice(6, 8)) :
+    s.length === 9 ? Number(s.slice(1, 5) + s.slice(5, 7)) :
+    NaN;
+  if (!Number.isNaN(bodyId) && charData.skills[String(bodyId)]) return charData.skills[String(bodyId)];
+  return undefined;
 }
 
 export function buildServantAttrs(

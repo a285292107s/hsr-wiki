@@ -252,3 +252,16 @@ class TestLinkTraitPackages:
         slots = cc.link_trait_packages({1001: "", 1002: "追击"}, {}, {})
         assert set(slots) == {1001, 1002}
         assert all(slot["invite"] is None for slot in slots.values())
+
+
+class TestTraitCat:
+    def test_six_digit_ids_reduce_to_base(self):
+        assert cur._trait_cat(100502) == "faction"
+        assert cur._trait_cat(200302) == "combat"
+        assert cur._trait_cat(201002) == "combat"
+        assert cur._trait_cat(300602) == "special"
+
+    def test_legacy_four_digit_ids_unchanged(self):
+        assert cur._trait_cat(1001) == "faction"
+        assert cur._trait_cat(2007) == "combat"
+        assert cur._trait_cat(3006) == "special"

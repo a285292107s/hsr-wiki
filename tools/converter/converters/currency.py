@@ -17,9 +17,12 @@ logger = logging.getLogger("converter.currency")
 OUT_SUBDIR = "currency"
 
 def _trait_cat(tid: int) -> str:
-    if 1000 <= tid < 2000:
+    from converters.currency_catalog import trait_cat_base
+
+    base = trait_cat_base(tid)
+    if 1000 <= base < 2000:
         return "faction"
-    if 2000 <= tid < 3000:
+    if 2000 <= base < 3000:
         return "combat"
     return "special"
 
@@ -426,7 +429,10 @@ def convert() -> None:
                 if bsk["id"] not in seen_ids:
                     back_skills_out.append(bsk)
                     seen_ids.add(bsk["id"])
-
+            back_skills_out = [
+                sk for sk in back_skills_out
+                if sk.get("name") or sk.get("desc") or sk.get("simple_desc")
+            ]
             servant_skills_out: list[dict] = []
             servant_node: dict | None = None
             sv_key = (rid, star_entry["Star"])

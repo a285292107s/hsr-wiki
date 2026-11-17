@@ -333,6 +333,13 @@ describe('catOfTrait / groupTraits', () => {
     expect(catOfTrait(9999)).toBe('special');
   });
 
+  it('reduces six-digit season-suffixed ids to base before classifying', () => {
+    expect(catOfTrait(100502)).toBe('faction');
+    expect(catOfTrait(200302)).toBe('combat');
+    expect(catOfTrait(201002)).toBe('combat');
+    expect(catOfTrait(300602)).toBe('special');
+  });
+
   it('groups in fixed category order and skips empty categories', () => {
     const groups = groupTraits([trait(3001), trait(1001), trait(2001)]);
     expect(groups.map((g) => g.cat)).toEqual(['faction', 'combat', 'special']);
@@ -366,6 +373,17 @@ describe('resolveServantAttr / buildServantAttrs', () => {
     expect(resolveServantAttr('#2', 7, charData)).toBe('0.3');
     expect(resolveServantAttr('#9', 7, charData)).toBeNull();
     expect(resolveServantAttr('#1', 999, charData)).toBeNull();
+  });
+
+  it('resolves a 10-digit currency-format skill id to the body skill (S2 servants)', () => {
+    const data = {
+      name: 'x',
+      skills: {
+        '151204': { id: 151204, name: 's', level: { '1': { level: 1, param_list: [0.7, 1.8, 0.1, 0.005] } } },
+      },
+    } as unknown as CharacterData;
+    expect(resolveServantAttr('#1', 1512020401, data)).toBe('0.7');
+    expect(resolveServantAttr('#2', 1512020401, data)).toBe('1.8');
   });
 
   it('builds display items with percent conversion for inherit ratios', () => {
