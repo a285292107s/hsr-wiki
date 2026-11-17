@@ -94,6 +94,8 @@ const coneInfo = computed(() => {
 
 const growthMatrix = computed(() => buildGrowthMatrix(data.value?.stars, propIcons.value));
 
+const footerBgUrl = resolveCdnUri('bgpic', 'BgDataBank.webp').primary;
+
 const charData = ref<CharacterData | null>(null);
 const charDataFailed = ref(false);
 
@@ -575,6 +577,10 @@ function hideOnError(e: Event) {
         </div>
 
       </div>
+
+      <footer class="nk-crole-foot" :style="{ '--nk-crole-foot-bg': `url(${footerBgUrl})` }" aria-hidden="true">
+        <div class="nk-crole-foot__band"></div>
+      </footer>
     </template>
   </div>
 </template>
