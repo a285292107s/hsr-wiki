@@ -357,11 +357,9 @@ test.describe('布局验收：货币战争主题', () => {
     await expect(rankIcon).toHaveAttribute('data-cdn-src', /\/rank\/1001\/1001_Rank_1\.webp$/);
     await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /\/rank\/1001\/1001_Rank_1\.webp$/);
     await expect(page.locator('[data-panel="cones"] .nk-slot-empty')).toHaveText('该角色没有专属光锥数据');
-    const foot = page.locator('.nk-crole-foot');
-    await expect(foot).toHaveCount(1);
-    const footBox = await foot.boundingBox();
-    expect(footBox!.height, '页脚背景图应有可见高度').toBeGreaterThan(100);
-    await expect(foot).toHaveCSS('background-image', /bgpic\/BgDataBank\.webp/);
+    const crole = page.locator('.nk-crole');
+    await expect(crole).toHaveCSS('background-attachment', /fixed/);
+    await expect(crole).toHaveCSS('background-image', /bgpic\/BgDataBank\.webp/);
     await noUnknownOverflow(page);
     assertNoErrors();
   });

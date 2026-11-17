@@ -213,24 +213,12 @@
 .nk-crole-recitem__icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .nk-crole-recitem__name { font-size: var(--nk-fs-4); font-weight: 600; color: var(--text); }
 
-.nk-crole-foot {
-  position: relative;
-  flex: 0 0 auto;
-  margin-top: auto;
-  margin-bottom: calc(-72px - env(safe-area-inset-bottom, 0px));
-  width: 100%;
-  height: clamp(150px, 22vw, 240px);
-  overflow: hidden;
-  pointer-events: none;
-  background-image: var(--nk-crole-foot-bg);
-  background-size: cover;
-  background-position: 50% 62%;
-  background-repeat: no-repeat;
-}
-.nk-crole-foot__band {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 18%, transparent) 34%, transparent 100%),
-    linear-gradient(0deg, color-mix(in srgb, var(--blk-950) 70%, transparent) 0%, transparent 60%);
+.nk-crole {
+  background-image:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 34%, transparent) 0%, color-mix(in srgb, var(--bg) 62%, transparent) 55%, var(--bg) 100%),
+    var(--nk-crole-bg);
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
 }

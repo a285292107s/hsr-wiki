@@ -94,7 +94,7 @@ const coneInfo = computed(() => {
 
 const growthMatrix = computed(() => buildGrowthMatrix(data.value?.stars, propIcons.value));
 
-const footerBgUrl = resolveCdnUri('bgpic', 'BgDataBank.webp').primary;
+const pageBgUrl = resolveCdnUri('bgpic', 'BgDataBank.webp').primary;
 
 const charData = ref<CharacterData | null>(null);
 const charDataFailed = ref(false);
@@ -193,7 +193,7 @@ function hideOnError(e: Event) {
 </script>
 
 <template>
-  <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading">
+  <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading" :style="{ '--nk-crole-bg': `url(${pageBgUrl})` }">
 
     <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" :aria-label="t('cwRole.loadingAria')">
       <div class="nk-crole__sk-bar">
@@ -577,10 +577,6 @@ function hideOnError(e: Event) {
         </div>
 
       </div>
-
-      <footer class="nk-crole-foot" :style="{ '--nk-crole-foot-bg': `url(${footerBgUrl})` }" aria-hidden="true">
-        <div class="nk-crole-foot__band"></div>
-      </footer>
     </template>
   </div>
 </template>
