@@ -12,9 +12,9 @@
   align-items: baseline;
   gap: 12px;
   font-family: var(--font-hud);
-  font-size: var(--nk-fs-4);
+  font-size: var(--nk-fs-6);
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0 0 18px;
   color: var(--text-bright);
@@ -125,7 +125,7 @@
   background: var(--crole-step-bg);
 }
 .nk-crole-timeline__name { font-weight: 600; font-size: var(--nk-fs-4); color: var(--text-bright); }
-.nk-crole-timeline__desc { font-size: var(--nk-fs-4); color: var(--text2); line-height: 1.6; margin: 0; }
+.nk-crole-timeline__desc { font-size: var(--nk-fs-5); color: var(--text2); line-height: 1.7; margin: 0; max-width: var(--nk-prose-max); }
 .nk-crole-timeline__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-timeline__mech {
   margin-top: 8px;

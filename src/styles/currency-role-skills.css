@@ -235,8 +235,8 @@
   flex-wrap: wrap;
 }
 .nk-crole-skill__star {
-  min-width: 28px;
-  height: 22px;
+  min-width: 34px;
+  height: 34px;
   padding: 0 5px;
   border-radius: var(--nk-radius-2);
   border: 1px solid var(--line-1);
@@ -273,9 +273,9 @@
   border-bottom: 1px solid var(--line-1);
 }
 .nk-crole-skill__cost b { color: var(--crole-num); font-weight: 600; }
-.nk-crole-skill__simple { font-size: var(--nk-fs-4); color: var(--text); margin: 8px 0; line-height: 1.55; }
+.nk-crole-skill__simple { font-size: var(--nk-fs-5); color: var(--text); margin: 8px 0; line-height: 1.6; max-width: var(--nk-prose-max); }
 .nk-crole-skill__simple span { color: var(--crole-num); font-weight: 600; }
-.nk-crole-skill__desc { font-size: var(--nk-fs-4); color: var(--text2); line-height: 1.7; }
+.nk-crole-skill__desc { font-size: var(--nk-fs-5); color: var(--text2); line-height: 1.7; max-width: var(--nk-prose-max); }
 .nk-crole-skill__desc span { color: var(--crole-num); font-weight: 600; }
 .nk-crole-skill__extra {
   margin-top: 10px;
@@ -311,13 +311,16 @@
 
 @media (max-width: 767px) {
   .nk-crole-grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }
+  .nk-crole-gm__table { min-width: 0; }
+  .nk-crole-gm__table th,
+  .nk-crole-gm__table td { padding: 6px 4px; }
+  .nk-crole-gm__label,
+  .nk-crole-gm__table thead th:first-child { width: 76px; white-space: normal; overflow-wrap: break-word; }
+  .nk-crole-gm__table th.nk-crole-gm__star { min-width: 48px; }
 }
 @media (min-width: 768px) {
-  .nk-crole {
-    max-width: calc(980px + var(--nk-content-offset));
-    padding-left: var(--nk-content-offset);
-  }
   .nk-crole-hero { min-height: 360px; }
+  .nk-crole-bar .nk-secnav { justify-content: center; }
   .nk-crole-hero__bg { background-position: right center; }
   .nk-crole-hero__content { padding: 44px 32px 34px; }
   .nk-crole-hero__portrait { width: 132px; height: 132px; }
@@ -327,7 +330,6 @@
   .nk-crole__sk-role > .nk-sk:last-child { display: none; }
 }
 @media (min-width: 1024px) {
-  .nk-crole { max-width: calc(1040px + var(--nk-content-offset)); padding-left: var(--nk-content-offset); }
   .nk-crole-hero { min-height: 400px; }
   .nk-crole-hero__content { padding: 48px 40px 38px; }
   .nk-crole-hero__portrait { width: 150px; height: 150px; }

@@ -267,9 +267,9 @@
 .nk-crole-card:hover .nk-crole-tcard-trait--special { color: color-mix(in srgb, var(--cw-special) 80%, var(--text-bright) 20%); }
 
 .nk-crole {
-  max-width: 980px;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
+  padding: 47px 0 calc(72px + env(safe-area-inset-bottom, 0px));
 }
 .nk-crole {
   scrollbar-width: none;
@@ -307,8 +307,12 @@
 }
 .nk-crole-bar__progress {
   height: 2px;
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin: 0 auto;
+  transform-origin: left center;
   background: linear-gradient(90deg, var(--primary), var(--accent));
-  transition: width 0.2s linear;
+  transition: transform 0.2s linear;
 }
 .nk-crole-bar .nk-secnav__btn--active { color: var(--primary); }
 .nk-crole-bar .nk-secnav__btn--active::after { background: var(--primary); }
@@ -428,6 +432,11 @@
   min-height: 330px;
   display: flex;
   align-items: flex-end;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: var(--nk-detail-max);
+  margin-left: auto;
+  margin-right: auto;
 }
 .nk-crole-hero__bg {
   position: absolute;
@@ -490,7 +499,7 @@
   font-size: var(--nk-fs-3);
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.62);
 }
 .nk-crole-slot {
   display: inline-grid;

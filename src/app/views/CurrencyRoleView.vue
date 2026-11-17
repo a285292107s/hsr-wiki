@@ -172,7 +172,7 @@ const { activeId, progress, showTop, jumpTo, scrollTop, refresh } = useScrollSpy
   pageRef,
   () => SECTIONS.map((s) => s.id),
   (id) => panels.find((p) => p.dataset.panel === id) || null,
-  { offset: () => (barRef.value?.offsetHeight || 0) + 12 },
+  { offset: () => (barRef.value?.offsetHeight || 0) + 12, fallbackFirst: true, activateLastAtEnd: true },
 );
 
 watch(data, async () => {
@@ -316,7 +316,7 @@ function hideOnError(e: Event) {
             </button>
           </nav>
         </div>
-        <div class="nk-crole-bar__progress" aria-hidden="true" :style="{ width: `${progress}%` }"></div>
+        <div class="nk-crole-bar__progress" aria-hidden="true" :style="{ transform: `scaleX(${progress * 0.01})` }"></div>
       </div>
 
       <button
@@ -357,8 +357,13 @@ function hideOnError(e: Event) {
                       v-for="c in starKeys"
                       :key="c"
                       scope="col"
+                      role="button"
+                      :tabindex="0"
+                      :aria-pressed="c === selectedStar"
                       :class="['nk-crole-gm__star', { 'is-active': c === selectedStar }]"
                       @click="selectedStar = c"
+                      @keydown.enter.prevent="selectedStar = c"
+                      @keydown.space.prevent="selectedStar = c"
                     >{{ c }}★</th>
                   </tr>
                 </thead>

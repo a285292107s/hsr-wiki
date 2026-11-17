@@ -4,6 +4,7 @@ export interface ScrollSpyOptions {
   offset?: number | (() => number);
   topThreshold?: number;
   fallbackFirst?: boolean;
+  activateLastAtEnd?: boolean;
 }
 
 export interface ScrollSpy {
@@ -24,7 +25,7 @@ export function useScrollSpy(
   const activeId = ref('');
   const progress = ref(0);
   const showTop = ref(false);
-  const { topThreshold = 480, fallbackFirst = false } = opts;
+  const { topThreshold = 480, fallbackFirst = false, activateLastAtEnd = false } = opts;
   const LANDING_SLACK = 8;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -52,6 +53,7 @@ export function useScrollSpy(
       const top = el.getBoundingClientRect().top - cTop;
       if (top <= offset && top > currentTop) { currentTop = top; current = id; }
     }
+    if (activateLastAtEnd && c.scrollHeight - c.clientHeight - c.scrollTop <= 2) return ids[ids.length - 1] || current;
     return current || (fallbackFirst ? ids[0] || '' : '');
   }
 
@@ -112,6 +114,7 @@ export function useScrollSpy(
 
   onMounted(() => {
     container.value?.addEventListener('scroll', onScroll, { passive: true });
+    refresh();
   });
   onBeforeUnmount(() => {
     container.value?.removeEventListener('scroll', onScroll);
