@@ -413,7 +413,7 @@ def convert() -> None:
             back_show_ids: list[int] = star_entry.get("BackShowSkillIDList") or []
 
             front_skills_out = [
-                _build_skill(sid, front_skills, {}, skill_extra, avatar_skill_index, avatar_id)
+                _build_skill(sid, front_skills, {}, None, avatar_skill_index, avatar_id)
                 for sid in front_skill_ids
             ]
             back_skills_out = [

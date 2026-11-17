@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -265,3 +266,18 @@ class TestTraitCat:
         assert cur._trait_cat(1001) == "faction"
         assert cur._trait_cat(2007) == "combat"
         assert cur._trait_cat(3006) == "special"
+
+
+class TestFrontSkillTriggerCondition:
+    def test_front_skills_carry_no_trigger_condition(self):
+        from config import OUTPUT_DIR
+
+        role_dir = OUTPUT_DIR / "currency" / "role"
+        offenders = []
+        for path in role_dir.glob("*.json"):
+            data = json.loads(path.read_text(encoding="utf-8"))
+            for star in data.get("stars", {}).values():
+                for skill in star.get("front_show_skill") or []:
+                    if (skill.get("extra") or {}).get("condition"):
+                        offenders.append((data["id"], skill["id"]))
+        assert offenders == [], f"前台技能不应带触发条件：{offenders[:5]}"

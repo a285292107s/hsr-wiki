@@ -23,6 +23,7 @@
 
 - **货币战争羁绊 id 自 4.7（赛季2）变 6 位，判类别前必须先取基底**：`100502` / `200302` 前四位才是原编号、末两位是赛季号。`currency_catalog.py` 的 `trait_cat_base`（`id>=100000` 时 `id//100`）早已正确；但**角色绑定层 `currency.py:_trait_cat` 与前端 `lib/currency-role.ts` 的 `catOfTrait` 曾直接按原始 id 判区间**，把本赛季 34 条羁绊全落 `special`——62 个本赛季角色里 61 个至少一羁绊配色 / 筛选错，且与羁绊页（读 `traits.json` 里已正确的 `cat`）自相矛盾。两处现已改为先取基底。**详情页 `role/<id>.json` 不落 `cat` 字段，是前端从原始 id 现算**，故前端那份也必须取基底，只修转换器不够。
 - **货币战争「后台技能」展示位会混入内部技能的无名空卡**：`back_show_skill` 合并 `BESkillIDList ∪ BackShowSkillIDList` 后必须**丢掉无任何文本（`name`/`desc`/`simple_desc` 均空）的条目**。S2 新角色的 `BESkillIDList` 夹带战斗内部子技能（乱破 131702）与迷迷（110702）的无名条目；但**不能改成只取 `BackShowSkillIDList`**——S1 刃 1205 的强化基础技（`112050801` 等）只在 `BESkillIDList` 且有名，改后会丢。规则与判据在 [转换器字段映射.md「currency.py」段](../data/转换器字段映射.md)（只此一处）。
+- **货币战争「前台技能」不能带触发条件（`extra.condition`）**：`GridFightBackSkillExtraDesc` 从名字到语义都是**后台 BE 技能**的附加描述（`行动时施放…` / `满能量时施放…` / `战斗开始时施放…`），前台技能是玩家主动施放、没有施放条件。前后台共用同一 SkillID（瓦尔特 `1004020201`–`1004020204` 同时在 `FrontShowSkillIDList` 与 `BESkillIDList`），把 extra 表也喂给前台那一路会让前台冒出一行 `触发条件：行动时施放。`。口径与唯一落点见 [转换器字段映射.md「currency.py」段](../data/转换器字段映射.md)。
 - **货币战争忆灵（servant）的 HP/速度继承引用是技能 id，S2 改成了货币格式、前端必须兼容**：`GridFightServantStar.HPSkill/SpeedSkill` 在 S1 是本体格式（`140204` = `AvatarID×100+序`），S2 角色（151202 迷迷的忆灵）直接写货币格式 `1512020401`——后者在 `characters/<avatar>.json` 的技能表里不存在。前端 `resolveServantAttr` 必须先直查、再按 10 位（`前4+第7-8位` → `avatar×100+序`）或 9 位（`1+后4` → `avatar×100+序`）反解，否则该忆灵的 HP%/速度% 继承值静默不渲染（源表有 `#1`/`#2` 引用，属于「数据有、页面没有」类缺陷）。
 
 ## 目录卡字段与渲染
