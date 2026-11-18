@@ -203,6 +203,16 @@ describe('data-driven filter contract (real data)', () => {
     expect((qianHtml.match(/class="nk-cwtp__tier"/g) ?? []).length).toBe(6);
     expect(qianHtml).toContain('第 1 级');
     expect(qianHtml).not.toContain('人激活');
+
+    const season1 = await cfg.fetchData!({ version: '', cwSeason: 1 });
+    const byId = (id: string) => season1.find((it) => it.id === id)!;
+    for (const [id, panels] of [['1010', 7], ['3007', 7]] as const) {
+      const h = cfg.split!.renderDetail(byId(id));
+      expect((h.match(/class="nk-cwtp__rule-panel"/g) ?? []).length, `${id} 变体数`).toBe(panels);
+    }
+    const shengbei = cfg.split!.renderDetail(byId('1013'));
+    expect(shengbei).not.toContain('nk-cwtp__rule-panel');
+    expect((shengbei.match(/class="nk-cwtp__tier"/g) ?? []).length).toBe(4);
   }, 30000);
 
   it('endgame 赛季排序：单边排期参与排序，当期赛季不沉底（ADR 0038 回归）', async () => {

@@ -1633,14 +1633,23 @@ function currencyTraitPages(ctx) {
     const description = sourceSummary
       ? cut(sourceSummary, 150)
       : cut(factMeta([cwCatLabel(entry.cat), entry.activation_type], CATALOG_TITLE['/currency/trait'](), name), 150);
-    const layerHtml = (entry.layers || [])
-      .map((l) => {
-        const props = [...(l.member_props || []), ...(l.all_props || [])]
-          .map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
-        const quality = l.quality ? `${cwQualityLabel(l.quality)} · ` : '';
-        return `<li><span>${esc(`${quality}${l.layer} 人`)}</span><p>${txt(l.desc, l.params)}${l.buff_desc ? ` ${txt(l.buff_desc, l.buff_params)}` : ''}</p>${props ? `<p>${txt(props, null, 600)}</p>` : ''}</li>`;
-      })
-      .join('');
+    const layerItem = (l, actLabel) => {
+      const props = [...(l.member_props || []), ...(l.all_props || [])]
+        .map((p) => `${propLabel(p)} ${propValue(p.value)}`).join('、');
+      const quality = l.quality ? `${cwQualityLabel(l.quality)} · ` : '';
+      return `<li><span>${esc(`${quality}${actLabel}`)}</span><p>${txt(l.desc, l.params)}${l.buff_desc ? ` ${txt(l.buff_desc, l.buff_params)}` : ''}</p>${props ? `<p>${txt(props, null, 600)}</p>` : ''}</li>`;
+    };
+    const special = entry.special || null;
+    const astro = !!special && special.kind === 'astropolis';
+    const actLabelOf = (l) => (astro ? `第 ${l.layer} 级` : `${l.layer} 人`);
+    const layerHtml = (entry.layers || []).map((l) => layerItem(l, actLabelOf(l))).join('');
+    const rulesHtml = special && special.kind === 'rules'
+      ? (special.rules || []).map((rule) => {
+          const inner = (rule.layers || []).map((l) => layerItem(l, `${l.layer} 人`)).join('');
+          const rdesc = txt(rule.rule_desc, rule.rule_params || []);
+          return `<li><p><b>${esc(rule.name)}</b></p>${rdesc ? `<p>${rdesc}</p>` : ''}${inner ? `<ul class="nk-snapshot__blocks">${inner}</ul>` : ''}</li>`;
+        }).join('')
+      : '';
     const remarkHtml = (entry.remarks || [])
       .map((r) => txtSafe(r.desc, r.params, SNAPSHOT_TEXT_LIMIT_DETAIL))
       .filter(Boolean)
@@ -1653,13 +1662,14 @@ function currencyTraitPages(ctx) {
       facts: [
         [ui('catalog.filter.category', '分类'), txt(cwCatLabel(entry.cat), null, 40)],
         ['激活方式', txt(entry.activation_type, null, 60)],
-        ['层级数', esc(String((entry.layers || []).length))],
+        [astro ? '档位数' : '层级数', esc(String((entry.layers || []).length))],
         ['成员数', esc(String(members.length))],
         ['所属赛季', entry.season_id != null ? esc(String(entry.season_id)) : ''],
       ],
       sections: [
         { title: ui('ctrait.sec.effect', '效果说明'), html: clean(entry.desc) ? `<p>${txt(entry.desc, entry.base_params, SNAPSHOT_TEXT_LIMIT_DETAIL)}</p>` : '' },
         { title: ui('ctrait.sec.layers', '层级效果'), html: layerHtml ? `<ul class="nk-snapshot__blocks">${layerHtml}</ul>` : '' },
+        { title: ui('ctrait.sec.rules', '规则效果'), html: rulesHtml ? `<ul class="nk-snapshot__blocks">${rulesHtml}</ul>` : '' },
         { title: ui('ctrait.sec.mechanics', '机制详情'), html: remarkHtml ? `<ul class="nk-snapshot__blocks">${remarkHtml}</ul>` : '' },
         {
           title: ui('ctrait.sec.members', '羁绊成员'),

@@ -423,9 +423,6 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
             return [dict(node) for node in fallback]
         return own
 
-    def _fixed_params(mb: dict, layer: dict) -> list:
-        return [_unwrap(p, 0) for p in (mb.get("ParamList") or [])] or [_unwrap(p, 0) for p in (layer.get("PropertyParamList") or [])]
-
     subtrait_basic = _load_optional("GridFightSubTraitBasicInfo.json")
     subtrait_by_father: dict[int, list[dict]] = {}
     for row in subtrait_basic:
@@ -433,10 +430,18 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         if father is not None:
             subtrait_by_father.setdefault(father, []).append(row)
 
+    def _own_has_property_desc(tid: int) -> bool:
+        for row in layer_raw:
+            if row.get("TraitID") == tid and resolve_text(row.get("PropertyDesc", {})).strip():
+                return True
+        return False
+
     def _rules_model(entry: dict) -> dict | None:
         tid = entry["ID"]
         subs = subtrait_by_father.get(tid)
         if not subs:
+            return None
+        if _own_has_property_desc(tid):
             return None
         rule_layers = _resolve_layers(entry)
         main_thresholds = [t["layer"] for t in rule_layers]
