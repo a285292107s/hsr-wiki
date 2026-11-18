@@ -423,6 +423,69 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
             return [dict(node) for node in fallback]
         return own
 
+    def _fixed_params(mb: dict, layer: dict) -> list:
+        return [_unwrap(p, 0) for p in (mb.get("ParamList") or [])] or [_unwrap(p, 0) for p in (layer.get("PropertyParamList") or [])]
+
+    subtrait_basic = _load_optional("GridFightSubTraitBasicInfo.json")
+    subtrait_by_father: dict[int, list[dict]] = {}
+    for row in subtrait_basic:
+        father = row.get("FatherTraitID")
+        if father is not None:
+            subtrait_by_father.setdefault(father, []).append(row)
+
+    def _rules_model(entry: dict) -> dict | None:
+        tid = entry["ID"]
+        subs = subtrait_by_father.get(tid)
+        if not subs:
+            return None
+        rule_layers = _resolve_layers(entry)
+        main_thresholds = [t["layer"] for t in rule_layers]
+        rules: list[dict] = []
+        for sub in sorted(subs, key=lambda r: r["ID"]):
+            raw_layers = sorted(effect_layers_by_effect.get(sub["ID"], []), key=lambda x: x["layer"])
+            if not raw_layers:
+                continue
+            layers = raw_layers
+            if main_thresholds and len(raw_layers) == len(main_thresholds):
+                layers = []
+                for lv, node in zip(main_thresholds, raw_layers):
+                    patched = dict(node)
+                    patched["layer"] = lv
+                    layers.append(patched)
+            rules.append({
+                "id": str(sub["ID"]),
+                "name": resolve_text(sub.get("SubTraitName", {})),
+                "rule_desc": resolve_text(sub.get("TraitBaseDesc", {})),
+                "rule_params": [_unwrap(p, 0) for p in (sub.get("BaseDescParamList") or [])],
+                "rule_simple_desc": resolve_text(sub.get("TraitBaseSimpleDesc", {})),
+                "layers": layers,
+            })
+        if not rules:
+            return None
+        return {"kind": "rules", "thresholds": rule_layers, "rules": rules}
+
+    astropolis_raw = _load_optional("GridFightTraitAstropolis.json")
+    astropolis_layers = sorted(
+        [
+            {
+                "layer": row.get("ThreeStarNum", 0),
+                "quality": row.get("TraitQuality") or None,
+                "desc": resolve_text(row.get("DetailDesc", {})),
+                "simple_desc": resolve_text(row.get("SimpleDesc", {})),
+                "params": [_unwrap(p, 0) for p in (row.get("EffectParamList") or [])],
+            }
+            for row in astropolis_raw
+        ],
+        key=lambda x: x["layer"],
+    )
+
+    def _astropolis_model(entry: dict) -> dict | None:
+        if entry["ID"] != 100602 or not astropolis_layers:
+            return None
+        return {"kind": "astropolis", "thresholds": astropolis_layers}
+
+
+
     remark_by_trait: dict[int, list[dict]] = {}
     for entry in remark_raw:
         tid = entry.get("ID")
@@ -463,6 +526,7 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         else:
             cat = "special"
 
+        special = _rules_model(entry) or _astropolis_model(entry)
         out.append({
             "id": tid,
             "name": name,
@@ -475,7 +539,8 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
             "base_params": base_params,
             "season_id": season_id,
             "sort_priority": sort_priority,
-            "layers": _resolve_layers(entry),
+            "layers": special["thresholds"] if special else _resolve_layers(entry),
+            "special": special,
             "remarks": remark_by_trait.get(tid, []),
         })
 

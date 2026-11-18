@@ -267,6 +267,22 @@ export interface CurrencyTraitLayer {
   all_props: CurrencyEquipProp[];
   buff_desc?: string;
   buff_params?: number[];
+  simple_desc?: string;
+}
+
+export interface CurrencyTraitRule {
+  id: string;
+  name: string;
+  rule_desc: string;
+  rule_params: number[];
+  rule_simple_desc: string;
+  layers: CurrencyTraitLayer[];
+}
+
+export interface CurrencyTraitSpecial {
+  kind: 'rules' | 'astropolis';
+  thresholds: CurrencyTraitLayer[];
+  rules?: CurrencyTraitRule[];
 }
 
 export interface CurrencyTraitRemark {
@@ -294,6 +310,7 @@ export interface CurrencyTraitEntry {
   season_id: number;
   sort_priority: number;
   layers: CurrencyTraitLayer[];
+  special?: CurrencyTraitSpecial | null;
   remarks: CurrencyTraitRemark[];
   is_season_new?: boolean;
   package?: CurrencyTraitPackage;

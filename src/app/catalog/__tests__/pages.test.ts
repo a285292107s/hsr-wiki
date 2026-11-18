@@ -190,6 +190,17 @@ describe('data-driven filter contract (real data)', () => {
     expect((html.match(/class="nk-cwtp__tier"/g) ?? []).length).toBe(layers.length);
     expect((html.match(/class="nk-cwtp__member"/g) ?? []).length).toBe(members.length);
     expect(html).toContain('nk-cwtp__effect');
+
+    const huan = items.find((it) => it.id === '100302')!;
+    const huanHtml = cfg.split!.renderDetail(huan);
+    expect((huanHtml.match(/class="nk-cwtp__rule"/g) ?? []).length).toBe(3);
+    expect(huanHtml).toContain('nk-cwtp__rule-name');
+
+    const qian = items.find((it) => it.id === '100602')!;
+    const qianHtml = cfg.split!.renderDetail(qian);
+    expect((qianHtml.match(/class="nk-cwtp__tier"/g) ?? []).length).toBe(6);
+    expect(qianHtml).toContain('第 1 级');
+    expect(qianHtml).not.toContain('人激活');
   }, 30000);
 
   it('endgame 赛季排序：单边排期参与排序，当期赛季不沉底（ADR 0038 回归）', async () => {

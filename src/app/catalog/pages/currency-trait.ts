@@ -20,6 +20,22 @@ interface TraitLayer {
   all_props: Array<{ property_type?: string; prop_name?: string; name?: string; value: number }>;
   buff_desc?: string;
   buff_params?: number[];
+  simple_desc?: string;
+}
+
+interface TraitRule {
+  id: string;
+  name: string;
+  rule_desc: string;
+  rule_params: number[];
+  rule_simple_desc: string;
+  layers: TraitLayer[];
+}
+
+interface TraitSpecial {
+  kind: 'rules' | 'astropolis';
+  thresholds: TraitLayer[];
+  rules?: TraitRule[];
 }
 
 interface TraitRemark {
@@ -84,21 +100,24 @@ function renderProps(layer: TraitLayer): string {
   return `<div class="nk-cwtp__props">${rows.map(({ prop, scope }) => `<span class="nk-cwtp__prop"><i>${escHtml(scope)}</i><span>${escHtml(propLabel(prop))}</span><b>+${escHtml(propValue(prop.value))}</b></span>`).join('')}</div>`;
 }
 
-function renderTier(layer: TraitLayer): string {
+function tierBody(layer: TraitLayer): string {
   const desc = layer.desc ? fmtDesc(layer.desc, layer.params) : '';
   const buff = layer.buff_desc ? fmtDesc(layer.buff_desc, layer.buff_params || []) : '';
   const props = desc ? '' : renderProps(layer);
+  return `${desc ? `<div class="nk-cwtp__tier-desc">${desc}</div>` : ''}${buff ? `<div class="nk-cwtp__tier-buff">${buff}</div>` : ''}${props}`;
+}
+
+function renderTier(layer: TraitLayer, mode: 'people' | 'level' = 'people'): string {
+  const act = mode === 'level' ? t('ctrait.levelActivation', { n: layer.layer }) : t('catalog.activation', { n: layer.layer });
   return `<li class="nk-cwtp__tier" data-quality="${qualityClass(layer.quality)}">
       <span class="nk-cwtp__tier-node"><b>${layer.layer}</b></span>
       <div class="nk-cwtp__tier-body">
         <div class="nk-cwtp__tier-head">
           <span class="nk-cwtp__tier-quality">${escHtml(qualityLabel(layer.quality))}</span>
-          <span class="nk-cwtp__tier-act">${escHtml(t('catalog.activation', { n: layer.layer }))}</span>
+          <span class="nk-cwtp__tier-act">${escHtml(act)}</span>
           <span class="nk-cwtp__tier-rule"></span>
         </div>
-        ${desc ? `<div class="nk-cwtp__tier-desc">${desc}</div>` : ''}
-        ${buff ? `<div class="nk-cwtp__tier-buff">${buff}</div>` : ''}
-        ${props}
+        ${tierBody(layer)}
       </div>
     </li>`;
 }
@@ -116,15 +135,29 @@ function renderMembers(members: TraitMember[]): string {
   }).join('')}</div>`;
 }
 
+function renderRules(rules: TraitRule[]): string {
+  return `<div class="nk-cwtp__rules">${rules.map((rule) => {
+    const ruleDesc = fmtDesc(rule.rule_desc, rule.rule_params);
+    const tiers = rule.layers.map((layer) => renderTier(layer)).join('');
+    return `<section class="nk-cwtp__rule" data-rule="${escHtml(rule.id)}">
+        <h4 class="nk-cwtp__rule-name">${escHtml(rule.name)}</h4>
+        ${ruleDesc ? `<p class="nk-cwtp__rule-desc">${ruleDesc}</p>` : ''}
+        <ol class="nk-cwtp__tiers nk-cwtp__tiers--rule">${tiers}</ol>
+      </section>`;
+  }).join('')}</div>`;
+}
+
 function renderTraitDetail(item: CatalogItem): string {
   const cat = (item.cat as TraitCat) || 'special';
+  const special = (item.special as TraitSpecial | null) || null;
   const layers = (item.layers as TraitLayer[]) || [];
   const remarks = (item.remarks as TraitRemark[]) || [];
   const members = (item.members as TraitMember[]) || [];
   const id = String(item.id);
   const detailHref = escHtml(activeHref(`/currency/trait/${id}`));
   const icon = escHtml(gridFightTraitIconUrl(item.icon as string));
-  const thresholds = layers.map((layer) => `<span class="nk-cwtp__threshold" data-quality="${qualityClass(layer.quality)}">${layer.layer}</span>`).join('<span class="nk-cwtp__threshold-sep">/</span>');
+  const thresholdLayers = special ? special.thresholds : layers;
+  const thresholds = thresholdLayers.map((layer) => `<span class="nk-cwtp__threshold" data-quality="${qualityClass(layer.quality)}">${layer.layer}</span>`).join('<span class="nk-cwtp__threshold-sep">/</span>');
   const baseFull = fmtDesc(item.desc as string, item.base_params as number[]);
   const baseSimple = fmtDesc((item.simple_desc as string) || (item.desc as string), item.base_params as number[]);
   const notesFull = remarks
@@ -159,10 +192,17 @@ function renderTraitDetail(item: CatalogItem): string {
           ${notesFull || notesSimple ? `<div class="nk-cwtp__notes">${notesFull}${notesSimple}</div>` : ''}
         </section>
 
-        ${layers.length ? `<section class="nk-cwtp__sec">
+        ${special && special.kind === 'rules'
+          ? `<section class="nk-cwtp__sec">
+          <h3 class="nk-cwtp__sec-title">${escHtml(t('ctrait.sec.rules'))}</h3>
+          ${renderRules(special.rules || [])}
+        </section>`
+          : layers.length
+            ? `<section class="nk-cwtp__sec">
           <h3 class="nk-cwtp__sec-title">${escHtml(t('ctrait.sec.layers'))}</h3>
-          <ol class="nk-cwtp__tiers">${layers.map(renderTier).join('')}</ol>
-        </section>` : ''}
+          <ol class="nk-cwtp__tiers">${layers.map((layer) => renderTier(layer, special && special.kind === 'astropolis' ? 'level' : 'people')).join('')}</ol>
+        </section>`
+            : ''}
 
         ${members.length ? `<section class="nk-cwtp__sec">
           <h3 class="nk-cwtp__sec-title">${escHtml(t('ctrait.sec.members'))}<span class="nk-cwtp__sec-note">${escHtml(t('ctrait.memberCount', { n: members.length }))}</span></h3>
@@ -212,6 +252,7 @@ export const currencyTraitPage: CatalogPageConfig = {
       activation_type: trait.activation_type,
       season_id: trait.season_id,
       layers: trait.layers,
+      special: (trait as { special?: unknown }).special ?? null,
       remarks: trait.remarks,
       package: trait.package,
       members: membersByTrait.get(trait.id) ?? [],

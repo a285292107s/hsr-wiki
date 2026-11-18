@@ -474,18 +474,28 @@ test.describe('布局验收：货币战争主题', () => {
 
     const db = readJson<{
       season?: { id: number | null };
-      traits: { id: number; name: string; cat: string; season_id: number; layers: unknown[] }[];
+      traits: {
+        id: number; name: string; cat: string; season_id: number; layers: unknown[];
+        special?: { kind: 'rules' | 'astropolis'; thresholds: unknown[]; rules?: { layers: unknown[] }[] } | null;
+      }[];
     }>('public/data/cn/currency/traits.json');
     const seasonId = db.season?.id ?? null;
     const pool = seasonId == null ? db.traits : db.traits.filter((trait) => trait.season_id === seasonId);
     const faction = pool.filter((trait) => trait.cat === 'faction');
     const combat = pool.filter((trait) => trait.cat === 'combat');
 
+    const first = faction[0]!;
+    const expectedTiers = first.special
+      ? (first.special.kind === 'rules'
+        ? (first.special.rules || []).reduce((sum, rule) => sum + rule.layers.length, 0)
+        : first.special.thresholds.length)
+      : first.layers.length;
+
     await expect(page.locator('.nk-cat-split__tab')).toHaveCount(3);
     await expect(page.locator('.nk-cat-split__tab.is-active')).toHaveText(/阵营/);
     await expect(page.locator('.nk-cw-trait-card')).toHaveCount(faction.length);
-    await expect(page.locator('.nk-cwtp__name')).toContainText(faction[0]!.name);
-    await expect(page.locator('.nk-cwtp__tier')).toHaveCount(faction[0]!.layers.length);
+    await expect(page.locator('.nk-cwtp__name')).toContainText(first.name);
+    await expect(page.locator('.nk-cwtp__tier')).toHaveCount(expectedTiers);
     await expect(page.locator('.nk-cw-trait-card.is-selected')).toHaveCount(1);
 
     await page.locator('.nk-cat-split__tab').filter({ hasText: '流派' }).click();

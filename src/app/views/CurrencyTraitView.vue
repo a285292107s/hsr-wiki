@@ -8,7 +8,7 @@ import { propLabel } from '../../lib/currency-role';
 import { cwTraitCatKey, cwTraitQualityKey, cwCostKey } from '../../lib/enum-labels';
 import { usePageData } from '../composables/use-page-data';
 import { loadLocalCurrencyTraits, loadLocalCurrencyRoles } from '../../services/api';
-import type { CurrencyTraitEntry, CurrencyRoleEntry } from '../../services/types';
+import type { CurrencyTraitEntry, CurrencyTraitLayer, CurrencyRoleEntry } from '../../services/types';
 import '../../styles/currency-trait-detail.css';
 
 const route = useRoute();
@@ -34,7 +34,39 @@ const catLabel = computed(() => {
   return k ? t(k) : cat.value;
 });
 const actLabel = computed(() =>
-  data.value?.activation_type === 'GreaterEqualThan' ? t('catalog.activationType.ge') : '');
+  data.value?.activation_type === 'GreaterEqualThan' && !data.value?.special ? t('catalog.activationType.ge') : '');
+
+
+const special = computed(() => data.value?.special || null);
+function activationLabel(layer: number): string {
+  return special.value && special.value.kind === 'astropolis'
+    ? t('ctrait.levelActivation', { n: layer })
+    : t('catalog.activation', { n: layer });
+}
+
+function qualityName(quality: string | null): string {
+  return t('catalog.qualityLabel', {
+    name: quality ? (cwTraitQualityKey(quality) ? t(cwTraitQualityKey(quality)!) : quality) : t('catalog.qualityBase'),
+  });
+}
+
+function renderLayerHtml(layer: CurrencyTraitLayer): string {
+  const desc = layer.desc ? fmtDesc(layer.desc, layer.params) : '';
+  const buff = layer.buff_desc ? fmtDesc(layer.buff_desc, layer.buff_params || []) : '';
+  const props = desc ? '' : renderLayerProps(layer);
+  return `${desc ? `<div class="nk-ctrait-layer__desc">${desc}</div>` : ''}${buff ? `<div class="nk-ctrait-layer__buff">${buff}</div>` : ''}${props}`;
+}
+
+function renderLayerProps(layer: CurrencyTraitLayer): string {
+  if (layer.member_props.length === 0 && layer.all_props.length === 0) return '';
+  const member = layer.member_props
+    .map((p) => `<div class="nk-ctrait-prop"><span class="nk-ctrait-prop__scope">${t('ctrait.scope.member')}</span><span class="nk-ctrait-prop__name">${propLabel(p)}</span><b class="nk-ctrait-prop__val">+${propValue(p.value)}</b></div>`)
+    .join('');
+  const all = layer.all_props
+    .map((p) => `<div class="nk-ctrait-prop"><span class="nk-ctrait-prop__scope nk-ctrait-prop__scope--all">${t('cwRole.scopeAll')}</span><span class="nk-ctrait-prop__name">${propLabel(p)}</span><b class="nk-ctrait-prop__val">+${propValue(p.value)}</b></div>`)
+    .join('');
+  return `<div class="nk-ctrait-layer__props">${member}${all}</div>`;
+}
 
 
 const { data, error, showSkeleton, run, retry } = usePageData<CurrencyTraitEntry>(async () => {
@@ -148,7 +180,36 @@ watch(data, (d) => {
         </div>
       </section>
 
-      <section v-if="data.layers && data.layers.length" class="nk-ctrait-section">
+      <section v-if="special && special.kind === 'rules'" class="nk-ctrait-section">
+        <h2 class="nk-ctrait-section__title">{{ t('ctrait.sec.rules') }}</h2>
+        <div class="nk-ctrait-rules">
+          <section v-for="rule in special.rules" :key="rule.id" class="nk-ctrait-rule">
+            <h3 class="nk-ctrait-rule__name">{{ rule.name }}</h3>
+            <div class="nk-ctrait-rule__desc" v-html="fmtDesc(rule.rule_desc, rule.rule_params)"></div>
+            <div class="nk-ctrait-layers">
+              <article
+                v-for="ly in rule.layers"
+                :key="ly.layer"
+                class="nk-ctrait-layer"
+                :class="`nk-ctrait-layer--${ly.quality ? (QUALITY_CSS[ly.quality] || '') : 'base'}`"
+              >
+                <div class="nk-ctrait-layer__mark">
+                  <span class="nk-ctrait-layer__node"><span class="nk-ctrait-layer__num">{{ ly.layer }}</span></span>
+                </div>
+                <div class="nk-ctrait-layer__body">
+                  <header class="nk-ctrait-layer__head">
+                    <span class="nk-ctrait-layer__quality"><i class="nk-ctrait-layer__qdot"></i>{{ qualityName(ly.quality) }}</span>
+                    <span class="nk-ctrait-layer__act">{{ activationLabel(ly.layer) }}</span>
+                  </header>
+                  <div v-html="renderLayerHtml(ly)"></div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section v-else-if="data.layers && data.layers.length" class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">{{ t('ctrait.sec.layers') }}<span v-if="actLabel" class="nk-ctrait-section__note">（{{ actLabel }}）</span></h2>
         <div class="nk-ctrait-layers">
           <article
@@ -162,25 +223,10 @@ watch(data, (d) => {
             </div>
             <div class="nk-ctrait-layer__body">
               <header class="nk-ctrait-layer__head">
-                <span class="nk-ctrait-layer__quality">
-                  <i class="nk-ctrait-layer__qdot"></i>{{ t('catalog.qualityLabel', { name: ly.quality ? (cwTraitQualityKey(ly.quality) ? t(cwTraitQualityKey(ly.quality)!) : ly.quality) : t('catalog.qualityBase') }) }}
-                </span>
-                <span class="nk-ctrait-layer__act">{{ t('catalog.activation', { n: ly.layer }) }}</span>
+                <span class="nk-ctrait-layer__quality"><i class="nk-ctrait-layer__qdot"></i>{{ qualityName(ly.quality) }}</span>
+                <span class="nk-ctrait-layer__act">{{ activationLabel(ly.layer) }}</span>
               </header>
-              <div v-if="ly.desc" class="nk-ctrait-layer__desc" v-html="fmtDesc(ly.desc, ly.params)"></div>
-              <div v-if="ly.buff_desc" class="nk-ctrait-layer__buff" v-html="fmtDesc(ly.buff_desc, ly.buff_params || [])"></div>
-              <div v-if="!ly.desc && (ly.member_props.length || ly.all_props.length)" class="nk-ctrait-layer__props">
-                <div v-for="(p, pi) in ly.member_props" :key="'m'+pi" class="nk-ctrait-prop">
-                  <span class="nk-ctrait-prop__scope">{{ t('ctrait.scope.member') }}</span>
-                  <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
-                  <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
-                </div>
-                <div v-for="(p, pi) in ly.all_props" :key="'a'+pi" class="nk-ctrait-prop">
-                  <span class="nk-ctrait-prop__scope nk-ctrait-prop__scope--all">{{ t('cwRole.scopeAll') }}</span>
-                  <span class="nk-ctrait-prop__name">{{ propLabel(p) }}</span>
-                  <b class="nk-ctrait-prop__val">+{{ propValue(p.value) }}</b>
-                </div>
-              </div>
+              <div v-html="renderLayerHtml(ly)"></div>
             </div>
           </article>
         </div>

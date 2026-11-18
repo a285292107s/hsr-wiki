@@ -154,6 +154,8 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightRolePropertyConfig.json",
                           "GridFightTraitLayer.json", "GridFightTraitMazebuff.json",
                           "GridFightTraitLayerOld.json",
+                          "GridFightSubTraitBasicInfo.json",
+                          "GridFightTraitAstropolis.json",
                           "GridFightTraitRemark.json", "GridFightAugment.json",
                           "GridFightConsumables.json", "GridFightForge.json",
                           "GridFightPortalBuff.json",
