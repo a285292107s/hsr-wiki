@@ -39,6 +39,13 @@ export interface CatalogTab {
 
 export type CatalogSkeletonVariant = 'card' | 'text' | 'row' | 'columns';
 
+export interface CatalogSplitLayout {
+  tabFilterKey: string;
+  tabGroupLabelKey?: string;
+  railLabelKey?: string;
+  renderDetail: (item: CatalogItem) => string;
+}
+
 export interface CatalogSkeleton {
   variant?: CatalogSkeletonVariant;
   count?: number;
@@ -56,6 +63,7 @@ export interface CatalogPageConfig {
   subtitle?: string;
   gridClass?: string;
   skeleton?: CatalogSkeleton;
+  split?: CatalogSplitLayout;
   virtualMinColW?: number;
   virtualImgRatio?: number;
   virtualInfoH?: number;

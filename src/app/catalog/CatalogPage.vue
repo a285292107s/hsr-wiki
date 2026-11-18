@@ -11,7 +11,7 @@ import { getSavedCwSeason } from '../../lib/cw-season';
 import { useScrollRestore } from '../composables/use-scroll-restore';
 import CatalogToolbar from './CatalogToolbar.vue';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
-import type { CatalogItem, CatalogPageConfig } from './types';
+import type { CatalogItem, CatalogPageConfig, CatalogFilterOption } from './types';
 
 const props = defineProps<{ config: CatalogPageConfig }>();
 
@@ -41,6 +41,8 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const scrollerRef = ref<HTMLElement | null>(null);
 const gridRef = ref<HTMLElement | null>(null);
+const splitRef = ref<HTMLElement | null>(null);
+const selectedId = ref<string | null>(null);
 
 const scroll = useScrollRestore(scrollerRef, `nk-scroll:${props.config.id}`);
 const noReveal = ref(scroll.hasArchive);
@@ -102,6 +104,28 @@ const gridHtml = computed(() =>
     : filtered.value.map((item, i) => props.config.renderCard(item, i)).join(''),
 );
 
+const split = computed(() => props.config.split ?? null);
+
+const splitTabs = computed<CatalogFilterOption[]>(() => {
+  const cfg = split.value;
+  if (!cfg) return [];
+  return filters.value.find((f) => f.key === cfg.tabFilterKey)?.options ?? [];
+});
+
+const splitVal = computed(() => split.value ? activeFilters.value[split.value.tabFilterKey] || '' : '');
+
+const selectedItem = computed<CatalogItem | null>(() => {
+  if (!split.value) return null;
+  const list = filtered.value;
+  return list.find((item) => String(item.id) === selectedId.value) ?? list[0] ?? null;
+});
+
+const detailHtml = computed(() => {
+  const cfg = split.value;
+  const item = selectedItem.value;
+  return cfg && item ? cfg.renderDetail(item) : '';
+});
+
 const { cells, gridMinHeight, fastJump, start, stop, refresh } = useVirtualGrid({
   filtered,
   config: () => props.config,
@@ -135,6 +159,7 @@ async function softSwitchTab(): Promise<void> {
     if (!loadGen.isCurrent(gen) || cancelled.value) return;
     items.value = data;
     phase.value = 'ready';
+    ensureSplitTab();
     scrollerRef.value?.scrollTo({ top: 0 });
   } catch {
     if (!loadGen.isCurrent(gen) || cancelled.value) return;
@@ -169,7 +194,9 @@ function markImagesLoaded(): void {
 
 watch(phase, async (p) => {
   if (p !== 'ready') return;
+  ensureSplitTab();
   await nextTick();
+  void syncSplitSelection();
   if (useVirtual.value) {
     start();
     if (scroll.hasArchive) {
@@ -187,11 +214,72 @@ watch(gridHtml, async () => {
     await nextTick();
     markImagesLoaded();
   }
+  void syncSplitSelection();
 });
 
 function onFilterSelect(filterKey: string, val: string): void {
   activeFilters.value = { ...activeFilters.value, [filterKey]: val };
   if (useVirtual.value) refresh();
+}
+
+function ensureSplitTab(): void {
+  const key = split.value?.tabFilterKey;
+  if (!key || activeFilters.value[key]) return;
+  const first = splitTabs.value.find((opt) => opt.val);
+  if (!first) return;
+  activeFilters.value = { ...activeFilters.value, [key]: first.val };
+}
+
+function splitTabLabel(opt: CatalogFilterOption): string {
+  return (opt.label ?? '') + (opt.labelKey ? t(opt.labelKey) : '');
+}
+
+
+function selectSplitTab(val: string): void {
+  const key = split.value?.tabFilterKey;
+  if (!key) return;
+  selectedId.value = null;
+  onFilterSelect(key, val);
+  if (gridRef.value) gridRef.value.scrollTop = 0;
+  resetSplitScroll();
+}
+
+function selectSplitItem(id: string): void {
+  if (selectedId.value === id) return;
+  selectedId.value = id;
+  void nextTick(syncSplitSelection);
+  scrollSplitTop();
+}
+
+async function syncSplitSelection(): Promise<void> {
+  if (!split.value) return;
+  await nextTick();
+  const root = gridRef.value;
+  if (!root) return;
+  const id = selectedItem.value ? String(selectedItem.value.id) : '';
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[data-id]')) {
+    const on = link.dataset.id === id;
+    link.classList.toggle('is-selected', on);
+    if (on) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  }
+}
+
+function scrollSplitTop(): void {
+  const scroller = scrollerRef.value;
+  const el = splitRef.value;
+  if (!scroller || !el) return;
+  const delta = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+  if (scroller.scrollTop <= delta + 8) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  scroller.scrollTo({ top: scroller.scrollTop + delta - 64, behavior: reduce ? 'auto' : 'smooth' });
+}
+
+function resetSplitScroll(): void {
+  const scroller = scrollerRef.value;
+  if (!scroller) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  scroller.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
 }
 
 function onSearch(value: string): void {
@@ -204,6 +292,7 @@ const hasFilters = computed(() => Object.values(activeFilters.value).some(Boolea
 function resetSearchAndFilters(): void {
   query.value = '';
   activeFilters.value = {};
+  ensureSplitTab();
   if (useVirtual.value) refresh();
 }
 
@@ -229,6 +318,16 @@ watch([activeFilters, query], () => {
 function onContentClick(e: MouseEvent): void {
   const a = (e.target as HTMLElement).closest('a[href]');
   if (!a) return;
+
+  const id = a.getAttribute('data-id');
+  if (id && split.value && splitRef.value?.contains(a) && a.closest('.nk-cat-split__rail')) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!window.matchMedia('(min-width: 1024px)').matches) return;
+    e.preventDefault();
+    selectSplitItem(id);
+    return;
+  }
+
   const href = a.getAttribute('href') || '';
   if (!href || href === '#' || href.startsWith('http')) return;
   e.preventDefault();
@@ -282,7 +381,7 @@ onBeforeUnmount(() => {
         :placeholder="t(config.searchKey)"
         :query="query"
         :count-text="phase === 'loading' ? '—' : `${filtered.length} / ${items.length}`"
-        :filters="filters"
+        :filters="split ? [] : filters"
         :active-filters="activeFilters"
         :disabled="phase === 'loading'"
         @search="onSearch"
@@ -328,28 +427,63 @@ onBeforeUnmount(() => {
       </div>
 
       <template v-else-if="phase === 'ready'">
-      <div
-        v-if="useVirtual"
-        ref="gridRef"
-        :class="[config.gridClass, 'nk-virtual-grid', { 'nk-fast-jump': fastJump, 'nk-no-reveal': noReveal }]"
-        :style="{ minHeight: gridMinHeight }"
-      >
-        <div
-          v-for="cell in cells"
-          :key="cell.key"
-          v-reveal
-          class="nk-virtual-cell"
-          :style="cell.style"
-          v-html="cell.html"
-        ></div>
+      <div v-if="split" ref="splitRef" class="nk-cat-split">
+        <aside class="nk-cat-split__rail" :aria-label="split.railLabelKey ? t(split.railLabelKey) : undefined">
+          <div
+            v-if="splitTabs.length"
+            class="nk-cat-split__tabs"
+            :aria-label="split.tabGroupLabelKey ? t(split.tabGroupLabelKey) : undefined"
+          >
+            <button
+              v-for="opt in splitTabs"
+              :key="opt.val"
+              type="button"
+              class="nk-cat-split__tab"
+              :class="{ 'is-active': splitVal === opt.val }"
+              :aria-pressed="splitVal === opt.val"
+              @click="selectSplitTab(opt.val)"
+            >
+              <span class="nk-cat-split__tab-label">{{ splitTabLabel(opt) }}</span>
+            </button>
+          </div>
+          <div ref="gridRef" :class="[config.gridClass, 'nk-cat-split__list']" v-html="gridHtml"></div>
+        </aside>
+        <section class="nk-cat-split__main">
+          <div
+            v-if="selectedItem"
+            :key="String(selectedItem.id)"
+            class="nk-cat-split__detail"
+            role="region"
+            :aria-label="String(selectedItem.name)"
+            v-html="detailHtml"
+          ></div>
+        </section>
       </div>
 
-      <div
-        v-else
-        ref="gridRef"
-        :class="[config.gridClass, { 'nk-no-reveal': noReveal }]"
-        v-html="gridHtml"
-      ></div>
+      <template v-else>
+        <div
+          v-if="useVirtual"
+          ref="gridRef"
+          :class="[config.gridClass, 'nk-virtual-grid', { 'nk-fast-jump': fastJump, 'nk-no-reveal': noReveal }]"
+          :style="{ minHeight: gridMinHeight }"
+        >
+          <div
+            v-for="cell in cells"
+            :key="cell.key"
+            v-reveal
+            class="nk-virtual-cell"
+            :style="cell.style"
+            v-html="cell.html"
+          ></div>
+        </div>
+
+        <div
+          v-else
+          ref="gridRef"
+          :class="[config.gridClass, { 'nk-no-reveal': noReveal }]"
+          v-html="gridHtml"
+        ></div>
+      </template>
 
       <div class="nk-cat-empty" :class="{ show: filtered.length === 0 }" role="status">
         <span class="nk-cat-empty__mark" aria-hidden="true">

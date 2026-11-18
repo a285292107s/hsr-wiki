@@ -461,4 +461,61 @@ test.describe('布局验收：货币战争主题', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+
+  test('/currency/trait：左索引右详情联动，页签与数据同源', async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/currency/trait');
+
+    const db = readJson<{
+      season?: { id: number | null };
+      traits: { id: number; name: string; cat: string; season_id: number; layers: unknown[] }[];
+    }>('public/data/cn/currency/traits.json');
+    const seasonId = db.season?.id ?? null;
+    const pool = seasonId == null ? db.traits : db.traits.filter((trait) => trait.season_id === seasonId);
+    const faction = pool.filter((trait) => trait.cat === 'faction');
+    const combat = pool.filter((trait) => trait.cat === 'combat');
+
+    await expect(page.locator('.nk-cat-split__tab')).toHaveCount(3);
+    await expect(page.locator('.nk-cat-split__tab.is-active')).toHaveText(/阵营/);
+    await expect(page.locator('.nk-cw-trait-card')).toHaveCount(faction.length);
+    await expect(page.locator('.nk-cwtp__name')).toContainText(faction[0]!.name);
+    await expect(page.locator('.nk-cwtp__tier')).toHaveCount(faction[0]!.layers.length);
+    await expect(page.locator('.nk-cw-trait-card.is-selected')).toHaveCount(1);
+
+    await page.locator('.nk-cat-split__tab').filter({ hasText: '流派' }).click();
+    await expect(page).toHaveURL(/cat=combat/);
+    await expect(page.locator('.nk-cat-split__tab.is-active')).toHaveText(/流派/);
+    await expect(page.locator('.nk-cw-trait-card')).toHaveCount(combat.length);
+
+    const second = page.locator('.nk-cw-trait-card').nth(1);
+    await expect(second).toHaveAttribute('href', `/currency/trait/${combat[1]!.id}`);
+    await second.click();
+    await expect(page.locator('.nk-cwtp__name')).toContainText(combat[1]!.name);
+    await expect(second).toHaveClass(/is-selected/);
+
+    await page.locator('.nk-cwtp__name a').click();
+    await expect(page).toHaveURL(new RegExp(`/currency/trait/${combat[1]!.id}$`));
+    await expect(page.locator('.nk-ctrait-hero__name')).toHaveText(combat[1]!.name);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
+
+  test('/currency/trait 手机断点：索引直达详情页', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/currency/trait');
+    await expect(page.locator('.nk-cat-split__main')).toBeHidden();
+
+    const first = page.locator('.nk-cw-trait-card').first();
+    const href = await first.getAttribute('href');
+    expect(href).toMatch(/^\/currency\/trait\/\d+$/);
+    await first.click();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+    await expect(page.locator('.nk-ctrait-hero__name')).toBeVisible();
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
 });

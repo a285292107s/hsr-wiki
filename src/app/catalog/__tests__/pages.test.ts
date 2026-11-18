@@ -176,6 +176,22 @@ describe('data-driven filter contract (real data)', () => {
     }
   }, 30000);
 
+  it('currency-trait split：详情面板按数据渲染分级与队员', async () => {
+    const cfg = CATALOG_PAGES['currency-trait'];
+    const items = await cfg.fetchData!({ version: '', cwSeason: 2 });
+    const combat = items.filter((item) => item.cat === 'combat');
+    expect(combat.length).toBeGreaterThan(0);
+    const item = combat[0]!;
+    const layers = item.layers as unknown[];
+    const members = item.members as unknown[];
+    const html = cfg.split!.renderDetail(item);
+    expect(html).toContain('nk-cwtp');
+    expect(html).toContain(item.name as string);
+    expect((html.match(/class="nk-cwtp__tier"/g) ?? []).length).toBe(layers.length);
+    expect((html.match(/class="nk-cwtp__member"/g) ?? []).length).toBe(members.length);
+    expect(html).toContain('nk-cwtp__effect');
+  }, 30000);
+
   it('endgame 赛季排序：单边排期参与排序，当期赛季不沉底（ADR 0038 回归）', async () => {
     const cfg = CATALOG_PAGES.endgame;
     if (!cfg.fetchData) return;
