@@ -197,7 +197,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.nk-cwsc-figure__total { font-size: var(--nk-fs-6); font-weight: 600; color: var(--text3); }
 .nk-cwsc-figure__link:hover .nk-cwsc-figure__num { color: var(--metric-val); }
 .nk-cwsc-figure__link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
@@ -370,7 +369,6 @@
 
 .nk-cwsc-role__trait[data-cat='faction']::before { background: var(--cw-faction); }
 .nk-cwsc-role__trait[data-cat='combat']::before { background: var(--cw-combat); }
-.nk-cwsc-role__trait[data-new] { color: var(--metric-val); }
 .nk-cwsc-role__trait[data-hl] { color: var(--text-bright); }
 
 .nk-cwsc-role:hover { background: color-mix(in srgb, var(--card) 72%, var(--primary) 28%); }

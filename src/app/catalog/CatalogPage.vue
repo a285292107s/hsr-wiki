@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../stores/app';
 import { useDelayedSkeleton } from '../composables/use-delayed-skeleton';
 import { useLoadGeneration } from '../composables/use-load-generation';
+import { getSavedCwSeason } from '../../lib/cw-season';
 import { useScrollRestore } from '../composables/use-scroll-restore';
 import CatalogToolbar from './CatalogToolbar.vue';
 import { useVirtualGrid, vReveal } from './use-virtual-grid';
@@ -115,11 +116,11 @@ async function load(): Promise<void> {
   void app.initManifest();
   try {
     if (!props.config.fetchData) throw new Error('配置缺少 fetchData');
-    items.value = await props.config.fetchData({ version: app.version });
+    items.value = await props.config.fetchData({ version: app.version, cwSeason: getSavedCwSeason() });
     if (!loadGen.isCurrent(gen)) return;
     phase.value = 'ready';
     scrollerRef.value?.scrollTo({ top: 0 });
-    props.config.prefetch?.({ version: app.version });
+    props.config.prefetch?.({ version: app.version, cwSeason: getSavedCwSeason() });
   } catch (e) {
     if (cancelled.value || !loadGen.isCurrent(gen)) return;
     errorMsg.value = userErrorDetail(e);
@@ -130,7 +131,7 @@ async function load(): Promise<void> {
 async function softSwitchTab(): Promise<void> {
   const gen = loadGen.begin();
   try {
-    const data = await props.config.fetchData!({ version: app.version });
+    const data = await props.config.fetchData!({ version: app.version, cwSeason: getSavedCwSeason() });
     if (!loadGen.isCurrent(gen) || cancelled.value) return;
     items.value = data;
     phase.value = 'ready';

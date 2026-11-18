@@ -28,6 +28,7 @@ export interface CatalogItem {
 
 export interface CatalogContext {
   version: string;
+  cwSeason?: number | null;
 }
 
 export interface CatalogTab {

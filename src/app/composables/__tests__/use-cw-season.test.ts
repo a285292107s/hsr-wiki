@@ -15,39 +15,39 @@ const traitOf = (id: string, over: Record<string, unknown> = {}): CatalogItem =>
   id, name: `羁绊${id}`, is_season_new: true, cat: 'faction', ...over,
 });
 
-describe('buildCwSeason：赛季入册口径', () => {
-  it('只收 is_season_new === true，顺序与入参一致', () => {
+describe('buildCwSeason：赛季入册口径（本季全量，不再按 is_season_new 过滤）', () => {
+  it('收全部入参条目，顺序与入参一致', () => {
     const season = buildCwSeason([
       roleOf('1001'),
-      roleOf('1002', { is_season_new: false }),
+      roleOf('1002'),
       roleOf('1003'),
       { id: '1004', name: '旧角色' } as CatalogItem,
     ], [
       traitOf('3001'),
-      traitOf('3002', { is_season_new: false }),
+      traitOf('3002'),
       { id: '3003', name: '旧羁绊' } as CatalogItem,
     ], LEDGER);
 
-    expect(season.roles.map((role) => role.name)).toEqual(['角色1001', '角色1003']);
-    expect(season.traits.map((trait) => trait.id)).toEqual(['3001']);
+    expect(season.roles.map((role) => role.name)).toEqual(['角色1001', '角色1002', '角色1003', '旧角色']);
+    expect(season.traits.map((trait) => trait.id)).toEqual(['3001', '3002', '3003']);
   });
 
-  it('字段缺失 / 非布尔真值都不算新增，且不退化成全量', () => {
+  it('is_season_new 取值不影响收录（该过滤已退役）', () => {
     const season = buildCwSeason([
       { id: '1', name: '甲', is_season_new: 'true' } as unknown as CatalogItem,
       { id: '2', name: '乙', is_season_new: 1 } as unknown as CatalogItem,
     ], [
-      { id: '10', name: '丁', is_season_new: 'true' } as unknown as CatalogItem,
+      { id: '10', name: '丁' } as CatalogItem,
     ], LEDGER);
 
-    expect(season.roles).toEqual([]);
-    expect(season.traits).toEqual([]);
+    expect(season.roles.map((r) => r.avatarId)).toEqual(['1', '2']);
+    expect(season.traits.map((t) => t.id)).toEqual(['10']);
   });
 
-  it('totals 是全量档案数，不是新增数', () => {
+  it('totals 是全量档案数', () => {
     const season = buildCwSeason([
       roleOf('1'),
-      roleOf('2', { is_season_new: false }),
+      roleOf('2'),
     ], [
       traitOf('10'),
       { id: '11', name: '旧羁绊' } as CatalogItem,
@@ -150,7 +150,7 @@ describe('buildCwSeason：羁绊分类与四件套', () => {
     expect(season.traits[0]!.qualityKeys).toEqual(['catalog.quality.silver', 'catalog.quality.gold']);
   });
 
-  it('carriers 从全量角色取（含非新增），并标注 isNew', () => {
+  it('carriers 从全量角色取（isNew 已退役，恒为 false）', () => {
     const season = buildCwSeason([
       { id: '1001', name: '旧角色', rarity: 3, traits: [{ id: 3001, name: '领航员' }] } as CatalogItem,
       { id: '1002', name: '新角色', is_season_new: true, rarity: 5, traits: [{ id: 3001, name: '领航员' }] },
@@ -160,11 +160,11 @@ describe('buildCwSeason：羁绊分类与四件套', () => {
 
     expect(season.traits[0]!.carriers).toEqual([
       { id: '1001', name: '旧角色', isNew: false, cost: 3 },
-      { id: '1002', name: '新角色', isNew: true, cost: 5 },
+      { id: '1002', name: '新角色', isNew: false, cost: 5 },
     ]);
   });
 
-  it('角色羁绊 chip 的 isNew 只看该 id 是否属于本赛季新增羁绊', () => {
+  it('角色羁绊 chip 的 isNew 恒为 false（该标记已退役）', () => {
     const [role] = buildCwSeason([
       roleOf('1', { traits: [{ id: 3001, name: '领航员', cat: 'faction' }, { id: 2010, name: '旧羁绊', cat: 'combat' }] }),
     ], [
@@ -173,7 +173,7 @@ describe('buildCwSeason：羁绊分类与四件套', () => {
     ], LEDGER).roles;
 
     expect(role!.traits.map((chip) => [chip.id, chip.isNew, chip.cat])).toEqual([
-      ['3001', true, 'faction'],
+      ['3001', false, 'faction'],
       ['2010', false, 'combat'],
     ]);
     expect(role!.traits[0]!.icon.endsWith('/3001.webp')).toBe(true);

@@ -91,9 +91,9 @@ export const currencyEquipmentPage: CatalogPageConfig = {
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
-  async fetchData() {
+  async fetchData(ctx) {
     const { items, season } = await loadLocalCurrencyEquipment();
-    const currentSeason = season?.id ?? null;
+    const currentSeason = ctx?.cwSeason ?? season?.id ?? null;
     const scoped = currentSeason == null
       ? items
       : items.filter((it) => (it.season_ids ?? []).includes(currentSeason));

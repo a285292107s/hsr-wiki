@@ -24,9 +24,9 @@ export const currencyPortalPage: CatalogPageConfig = {
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
-  async fetchData() {
+  async fetchData(ctx) {
     const { portals, season } = await loadLocalCurrencyPortals();
-    const currentSeason = season?.id ?? null;
+    const currentSeason = ctx?.cwSeason ?? season?.id ?? null;
     return portals
       .filter((p) => p.in_book)
       .filter((p) => currentSeason == null || p.season_id === currentSeason)

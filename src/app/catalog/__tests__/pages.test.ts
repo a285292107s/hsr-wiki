@@ -286,3 +286,43 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   });
 });
 
+describe('货币战争 · 赛季切换（方案B：按 ctx.cwSeason 过滤）', () => {
+  const idsOf = (items: ReadonlyArray<Record<string, unknown>>) => new Set(items.map((i) => String(i.id)));
+  const singleSeasonPages = ['currency-role', 'currency-trait', 'currency-portal', 'currency-augment'] as const;
+
+  it('单季条目列表随 cwSeason 切换：两季不相交，跟随当前季 = 赛季 2', async () => {
+    for (const key of singleSeasonPages) {
+      const cfg = CATALOG_PAGES[key];
+      expect(cfg?.fetchData, `${key} 缺少 fetchData`).toBeTruthy();
+      const [s1, s2, follow] = await Promise.all([
+        cfg.fetchData!({ version: '', cwSeason: 1 }),
+        cfg.fetchData!({ version: '', cwSeason: 2 }),
+        cfg.fetchData!({ version: '' }),
+      ]);
+      const a = idsOf(s1);
+      const b = idsOf(s2);
+      expect(a.size, `${key} 赛季1 非空`).toBeGreaterThan(0);
+      expect(b.size, `${key} 赛季2 非空`).toBeGreaterThan(0);
+      expect([...a].some((id) => b.has(id)), `${key} 两季条目不应相交`).toBe(false);
+      expect(idsOf(follow), `${key} 跟随当前季应等于赛季2`).toEqual(b);
+    }
+  }, 30000);
+
+  it('装备（可多季共有）按归属过滤：S1=166 / S2=174 / 交集=71（两季共有）', async () => {
+    const cfg = CATALOG_PAGES['currency-equipment'];
+    const s1 = idsOf(await cfg.fetchData!({ version: '', cwSeason: 1 }));
+    const s2 = idsOf(await cfg.fetchData!({ version: '', cwSeason: 2 }));
+    const follow = idsOf(await cfg.fetchData!({ version: '' }));
+    expect(s1.size).toBe(166);
+    expect(s2.size).toBe(174);
+    expect([...s1].filter((id) => s2.has(id)).length, '两季共有装备').toBe(71);
+    expect(follow).toEqual(s2);
+  }, 30000);
+
+  it('角色/羁绊数量与数据分布一致（S1=75/33，S2=62/34）', async () => {
+    expect((await CATALOG_PAGES['currency-role'].fetchData!({ version: '', cwSeason: 1 })).length).toBe(75);
+    expect((await CATALOG_PAGES['currency-role'].fetchData!({ version: '', cwSeason: 2 })).length).toBe(62);
+    expect((await CATALOG_PAGES['currency-trait'].fetchData!({ version: '', cwSeason: 1 })).length).toBe(33);
+    expect((await CATALOG_PAGES['currency-trait'].fetchData!({ version: '', cwSeason: 2 })).length).toBe(34);
+  }, 30000);
+});

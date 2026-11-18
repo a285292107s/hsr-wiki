@@ -241,6 +241,10 @@ function cwRoleDetailName(entry, raw) {
   return clean(isTrailblazerId(entry.id) ? pickGender(raw, SNAPSHOT_GENDER) : raw) || cwRoleName(entry);
 }
 
+function cwSeasonLabel(seasonIds) {
+  const list = Array.isArray(seasonIds) ? seasonIds : (seasonIds == null ? [] : [seasonIds]);
+  return list.length ? uiT('settings.seasonOptN', '第 {n} 赛季', { n: list.join(' / ') }) : '';
+}
 function fmtParam(value, tag, pct) {
   if (value == null || Number.isNaN(Number(value))) return null;
   let n = Number(value);
@@ -604,10 +608,6 @@ function pickRelease(list, label) {
   const target = String(label || '').trim();
   if (!target) return [];
   return list.filter((item) => String(item.release_version ?? '').trim() === target);
-}
-
-function pickSeasonNew(list) {
-  return list.filter((item) => item.is_season_new === true);
 }
 
 function makePage(family, o) {
@@ -1328,10 +1328,15 @@ function endgamePages(ctx) {
 
 
 function currencyHubPages(ctx) {
-  const roles = readJson('currency/role.json').roles || [];
-  const traits = readJson('currency/traits.json').traits || [];
-  const newRoles = pickSeasonNew(roles);
-  const newTraits = pickSeasonNew(traits);
+  const roleData = readJson('currency/role.json');
+  const traitData = readJson('currency/traits.json');
+  const seasonId = roleData.season?.id ?? null;
+  const roles = roleData.roles || [];
+  const traits = traitData.traits || [];
+  const listRoles = seasonId == null ? roles : roles.filter((r) => (r.season_ids || []).includes(seasonId));
+  const listTraits = seasonId == null ? traits : traits.filter((t) => t.season_id === seasonId);
+  const newRoles = listRoles;
+  const newTraits = listTraits;
   const sections = [];
   const ldEntries = [];
   if (newRoles.length) {
@@ -1344,14 +1349,14 @@ function currencyHubPages(ctx) {
     sections.push({ title: `${ui('nav.cwTrait', '羁绊图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', ui('nav.cwTrait', '羁绊图鉴')) });
     ldEntries.push(...items);
   }
-  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季新增角色图鉴与羁绊图鉴条目。', { site: gameName() });
+  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季角色与羁绊图鉴条目。', { site: gameName() });
   const title = `${CATALOG_TITLE['/currency/role']().split(' · ')[0]} - ${titleTail()}`;
   const body = catalogBody(ctx, {
     crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), null]]),
     h1: ui('catalog.currencyWar', '货币战争'),
     summary: esc(summaryPlain),
     items: [],
-    sections: sections.length ? sections : [{ title: ui('cwHub.releaseTitle', '本赛季新增'), html: '<p>本赛季暂无新增条目。</p>' }],
+    sections: sections.length ? sections : [{ title: ui('cwHub.releaseTitle', '本季全量'), html: '<p>本赛季暂无条目。</p>' }],
   });
   return [makePage('currency-hub', {
     route: '/currency',
@@ -1395,12 +1400,14 @@ function currencyRolePages(ctx) {
   roles.forEach((entry, idx) => {
     const d = readJson(`currency/role/${entry.id}.json`);
     const name = cwRoleDetailName(entry, d.name);
+    const seasonLabel = cwSeasonLabel(d.season_ids);
+    const titleName = seasonLabel ? `${name} · ${seasonLabel}` : name;
     const route = `/currency/role/${entry.id}`;
     const starKeys = Object.keys(d.stars || {}).sort((a, b) => Number(a) - Number(b));
     const description = cut(factMeta(
       [`${d.rarity}费`, d.front_back_type ? (cwFbLabel(d.front_back_type)) : '', chargeText(d)],
       CATALOG_TITLE['/currency/role'](),
-      name,
+      titleName,
     ), 150);
     const traitHtml = (d.traits || []).map((tr) => {
       const layerText = (tr.layers || [])
@@ -1467,7 +1474,7 @@ function currencyRolePages(ctx) {
     pages.push(makePage('currency-role-detail', {
       route,
       file: `currency/role/${entry.id}.html`,
-      title: `${name} - ${titleTail()}`,
+      title: `${titleName} - ${titleTail()}`,
       description,
       ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/role'](), '/currency/role'], [name, route]], ctx),
@@ -1586,6 +1593,8 @@ function currencyTraitPages(ctx) {
 
   traits.forEach((entry, idx) => {
     const name = clean(entry.name) || `#${entry.id}`;
+    const seasonLabel = cwSeasonLabel(entry.season_id);
+    const titleName = seasonLabel ? `${name} · ${seasonLabel}` : name;
     const route = `/currency/trait/${entry.id}`;
     const members = roles.filter((r) => (r.trait_list || []).includes(Number(entry.id)));
     const sourceSummary = plain(entry.simple_desc, entry.base_params) || plain(entry.desc, entry.base_params);
@@ -1633,7 +1642,7 @@ function currencyTraitPages(ctx) {
     pages.push(makePage('currency-trait-detail', {
       route,
       file: `currency/trait/${entry.id}.html`,
-      title: `${name} - ${titleTail()}`,
+      title: `${titleName} - ${titleTail()}`,
       description,
       ld: ldDataPage(route, name, description,
         [[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), '/currency'], [CATALOG_TITLE['/currency/trait'](), '/currency/trait'], [name, route]], ctx),

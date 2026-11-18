@@ -67,9 +67,9 @@ export const currencyRolePage: CatalogPageConfig = {
     await import('../../../../src/styles/currency-role-gear.css');
     await import('../../../../src/styles/currency-role-skills.css');
   }],
-  async fetchData() {
+  async fetchData(ctx) {
     const { roles, season } = await loadLocalCurrencyRoles();
-    const currentSeason = season?.id ?? null;
+    const currentSeason = ctx?.cwSeason ?? season?.id ?? null;
     const scoped = currentSeason == null ? roles : roles.filter((r) => r.season_ids.includes(currentSeason));
     const gender = getSavedTrailblazerGender();
     return scoped.map((r) => {
@@ -91,7 +91,6 @@ export const currencyRolePage: CatalogPageConfig = {
         trait_combat: traits.filter((t) => t.cat === 'combat').map((t) => t.id),
         trait_special: traits.filter((t) => t.cat === 'special').map((t) => t.id),
         has_equipment: r.equipment_id != null,
-        is_season_new: r.is_season_new === true,
       };
     });
   },

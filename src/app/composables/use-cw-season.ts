@@ -159,25 +159,24 @@ export function buildCwSeason(
   seasonId: number | null = null,
   meta: { version?: string; syncedAt?: string } = {},
 ): CwSeason {
-  const newTraits = traitItems.filter((item) => item.is_season_new === true);
-  const newTraitIds = new Set(newTraits.map((item) => String(item.id)));
+  const traitIds = new Set(traitItems.map((item) => String(item.id)));
   const carriersByTrait = new Map<string, CwTraitCard['carriers']>();
   for (const item of roleItems) {
     for (const ref of roleTraits(item)) {
       const id = String(ref.id);
-      if (!newTraitIds.has(id)) continue;
+      if (!traitIds.has(id)) continue;
       const bucket = carriersByTrait.get(id) ?? [];
       bucket.push({
         id: String(item.id),
         name: String(item.name ?? ''),
-        isNew: item.is_season_new === true,
+        isNew: false,
         cost: Number(item.rarity) || 0,
       });
       carriersByTrait.set(id, bucket);
     }
   }
 
-  const traits = newTraits.map((item, index): CwTraitCard => {
+  const traits = traitItems.map((item, index): CwTraitCard => {
     const id = String(item.id);
     const cat = (item.cat as CwTraitCat) ?? 'special';
     const layers = Array.isArray(item.layers) ? (item.layers as Array<{ quality?: string | null }>) : [];
@@ -218,12 +217,7 @@ export function buildCwSeason(
     { invite: 0, stock: 0, badge: 0, complete: 0, partial: 0 },
   );
 
-  const newRoles = roleItems.filter((item) => item.is_season_new === true);
-  const roles = groupRoles(newRoles);
-  const newTraitChips = new Map(traits.map((trait) => [trait.id, trait]));
-  for (const role of roles) {
-    role.traits = role.traits.map((chip) => ({ ...chip, isNew: newTraitChips.has(chip.id) }));
-  }
+  const roles = groupRoles(roleItems);
 
   const costCounts = new Map<number, number>();
   for (const role of roles) {
@@ -234,7 +228,7 @@ export function buildCwSeason(
     .map(([cost, count]) => ({ cost, key: cwCostKey(String(cost)) ?? '', count }));
 
   const posCounts = new Map<string, number>();
-  for (const item of newRoles) {
+  for (const item of roleItems) {
     const raw = String(item.front_back_type ?? '');
     const position = POSITION_ORDER.includes(raw) ? raw : 'Both';
     posCounts.set(position, (posCounts.get(position) ?? 0) + 1);

@@ -61,7 +61,7 @@ node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超�
 - **首页＝版本入册页**：`/` 与 `/currency` **全断点渲染导航条**；`/` 为报头 + 版本钢印与同步日期 + 本期入册清单（整行链接）+ 站内即时搜索 + 角色对页 / 光锥行 / 遗器双联 + 页脚藏书量，跨模式只走侧栏「交换」（[ADR 0063](docs/adr/0063-首页改为版本入册页-清单在前与分区分构图.md)，取代 0019 的首页形态）。
   - **禁止按 ADR 0018 旧形态回改**（板块索引、无侧栏、「首页 8 行入口首屏可见」断言均已作废）；**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**。
   - 现行断言在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。
-- **两页条目判据互斥，禁止混用**：常规首页＝**版本增量**（`release_version` 恰等于 `version.json` 的 `version_label`）；货币战争＝**赛季代际差集**（`is_season_new`，仅角色 + 羁绊，文案不显示赛季号）。
+- **货币战争按「当前赛季索引」而非「版本增量」**：五个图鉴页按连接表归属字段（`season_ids` / `season_id`）筛当前季（或用户所选季），**不再用「赛季代际差集」判「新增」**——该口径（`is_season_new`）已于 2026-11-18 退役（货币战争按赛季而非小版本划分、官方无小版本粒度，差集会把多个小版本捆成假批次）。常规首页仍用**版本增量**（`release_version` == `version_label`），两套口径互斥。
   - 前端只读字段、判据在 converter——字段见 [转换器字段映射.md](docs/data/转换器字段映射.md)，决策见 [ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md) / [ADR 0020](docs/adr/0020-货币战争枢纽页改为本赛季新增页.md)。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——探索走 `query.py`，字段结构走 `DATA_CATALOG.md` 总索引（按需读 `.parts/` 分片，禁整读），转换走 `convert.py`。
 - **AI 检索可见性＝构建期预渲染快照**：服务端 HTML 决定可见性（实测爬虫零 JS 执行）；`pnpm build` 末步生成 `dist/prerender/**.html`，`vercel.json` 在 catch-all 之前用明确 rewrite 投递，JS 用户与爬虫拿到同一份 HTML（非 cloaking）。

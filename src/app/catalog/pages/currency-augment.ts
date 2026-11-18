@@ -33,9 +33,9 @@ export const currencyAugmentPage: CatalogPageConfig = {
   gridClass: 'nk-cat-grid nk-cw-grid nk-cw-grid--wide',
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
-  async fetchData() {
+  async fetchData(ctx) {
     const { augments, season } = await loadLocalCurrencyAugments();
-    const currentSeason = season?.id ?? null;
+    const currentSeason = ctx?.cwSeason ?? season?.id ?? null;
     const scoped = currentSeason == null ? augments : augments.filter((a) => a.season_id === currentSeason);
     return scoped.map((a) => ({
       id: String(a.id),

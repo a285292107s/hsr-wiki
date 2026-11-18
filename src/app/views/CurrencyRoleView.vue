@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { pathLabel } from '../../lib/enum-labels';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl, gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc, gridFightPropIconUrl, lightconeIconUrl } from '../../lib/format';
 import { resolveCdnUri } from '../../services/cdn';
-import { heroFocusStyleVars } from '../../services/currency-hero-focus';
+import { heroFocusStyleVars, syncHeroFocusFromServer } from '../../services/currency-hero-focus';
 import { pageTitle } from '../seo';
 import { cwChargeKey, cwCostKey } from '../../lib/enum-labels';
 import { propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp, resolveRecommend, buildRecommendRows, groupTraits, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine } from '../../lib/currency-role';
@@ -64,6 +64,9 @@ const heroBgStyle = computed(() => ({
   backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId.value)})`,
   ...heroFocusStyleVars(String(displayAvatarId.value)),
 }));
+
+onMounted(() => { void syncHeroFocusFromServer(); });
+
 const roleLines = computed(() => {
   const stars = data.value?.stars;
   if (!stars) return [];
@@ -135,7 +138,12 @@ const servantAttrs = computed(() => buildServantAttrs(star.value?.servant, charD
 
 watch(
   data,
-  (d) => { if (d) document.title = pageTitle(d.name); },
+  (d) => {
+    if (d) {
+      const seasonLabel = d.season_ids && d.season_ids.length ? t('settings.seasonOptN', { n: d.season_ids.join(' / ') }) : '';
+      document.title = pageTitle(seasonLabel ? `${d.name} · ${seasonLabel}` : d.name);
+    }
+  },
   { immediate: true },
 );
 

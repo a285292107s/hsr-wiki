@@ -46,9 +46,9 @@ export const currencyTraitPage: CatalogPageConfig = {
   gridClass: 'nk-cat-grid nk-cw-trait-grid',
   skeleton: { variant: 'row' },
   styles: [loadCwCatalogCss],
-  async fetchData() {
+  async fetchData(ctx) {
     const { traits, season } = await loadLocalCurrencyTraits();
-    const currentSeason = season?.id ?? null;
+    const currentSeason = ctx?.cwSeason ?? season?.id ?? null;
     const scoped = currentSeason == null ? traits : traits.filter((t) => t.season_id === currentSeason);
     return scoped.map((t) => ({
       id: String(t.id),
@@ -64,7 +64,6 @@ export const currencyTraitPage: CatalogPageConfig = {
       season_id: t.season_id,
       layers: t.layers,
       remarks: t.remarks,
-      is_season_new: t.is_season_new === true,
       package: t.package,
     }));
   },

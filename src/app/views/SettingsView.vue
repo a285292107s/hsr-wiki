@@ -8,6 +8,8 @@ import {
   type TrailblazerGender,
 } from '../../lib/trailblazer';
 import { LOCALES, localizedPath } from '../../lib/i18n/locales';
+import { getSavedCwSeason, setSavedCwSeason } from '../../lib/cw-season';
+import { loadLocalCurrencyRoles } from '../../services/api';
 import { activeLocale } from '../../lib/i18n/active';
 
 const route = useRoute();
@@ -59,6 +61,22 @@ const currentGender = ref<TrailblazerGender>(getSavedTrailblazerGender());
 function chooseGender(gender: TrailblazerGender): void {
   setTrailblazerGender(gender);
   currentGender.value = gender;
+}
+
+const currentSeason = ref<number | null>(getSavedCwSeason());
+const seasonOptions = ref<number[]>([]);
+void loadLocalCurrencyRoles()
+  .then(({ roles, season }) => {
+    const ids = new Set<number>();
+    if (season?.id != null) ids.add(season.id);
+    for (const r of roles) for (const s of r.season_ids || []) ids.add(s);
+    seasonOptions.value = [...ids].sort((a, b) => a - b);
+  })
+  .catch(() => {});
+
+function chooseSeason(s: number | null): void {
+  setSavedCwSeason(s);
+  currentSeason.value = s;
 }
 
 const activeProfile = computed(() => {
@@ -170,6 +188,36 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
         </button>
       </div>
       <p class="nk-settings__hint">{{ t('settings.languageHint') }}</p>
+    </section>
+
+    <section class="nk-settings__section" aria-labelledby="season-title">
+      <h2 id="season-title" class="nk-title">
+        <span class="nk-title__idx">04</span>
+        {{ t('settings.seasonTitle') }}
+      </h2>
+      <div class="nk-lang" role="listbox" :aria-label="t('settings.seasonListbox')">
+        <button
+          type="button"
+          class="nk-lang__opt"
+          :class="{ 'nk-lang__opt--on': currentSeason === null }"
+          :aria-pressed="currentSeason === null"
+          @click="chooseSeason(null)"
+        >
+          <span class="nk-lang__native">{{ t('settings.seasonFollow') }}</span>
+        </button>
+        <button
+          v-for="s in seasonOptions"
+          :key="s"
+          type="button"
+          class="nk-lang__opt"
+          :class="{ 'nk-lang__opt--on': currentSeason === s }"
+          :aria-pressed="currentSeason === s"
+          @click="chooseSeason(s)"
+        >
+          <span class="nk-lang__native">{{ t('settings.seasonOptN', { n: s }) }}</span>
+        </button>
+      </div>
+      <p class="nk-settings__hint">{{ t('settings.seasonHint') }}</p>
     </section>
   </div>
 </template>

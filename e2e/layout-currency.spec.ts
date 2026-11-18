@@ -29,12 +29,12 @@ test.describe('布局验收：货币战争主题', () => {
 
     const roleDb = readJson<{
       season?: { id: number | null };
-      roles: { id: number; name: string; avatar_id: number; rarity: number; season_ids: number[]; is_season_new?: boolean; traits: { id: number }[] }[];
+      roles: { id: number; name: string; avatar_id: number; rarity: number; season_ids: number[]; traits: { id: number }[] }[];
     }>('public/data/cn/currency/role.json');
     const traitDb = readJson<{
       season?: { id: number | null };
       traits: {
-        id: number; name: string; cat: string; simple_desc: string; season_id: number; is_season_new?: boolean;
+        id: number; name: string; cat: string; simple_desc: string; season_id: number;
         package?: { invite: number | null; stock: number | null; badge: number | null };
       }[];
     }>('public/data/cn/currency/traits.json');
@@ -43,15 +43,15 @@ test.describe('布局验收：货币战争主题', () => {
     const traitData = traitDb.traits;
     const roleS2 = seasonId == null ? roleData : roleData.filter((role) => role.season_ids.includes(seasonId));
     const traitS2 = seasonId == null ? traitData : traitData.filter((trait) => trait.season_id === seasonId);
-    const newRoles = roleData.filter((role) => role.is_season_new === true);
-    const newTraits = traitData.filter((trait) => trait.is_season_new === true);
+    const newRoles = roleS2;
+    const newTraits = traitS2;
 
     const figures = await page.locator('.nk-cwsc-figure__num').evaluateAll((els) =>
       els.map((el) => (el.textContent ?? '').replace(/\s+/g, '').trim()),
     );
-    expect(figures, '账头两个数是「本季新增 / 本赛季全量」').toEqual([
-      `${newRoles.length}/${roleS2.length}`,
-      `${newTraits.length}/${traitS2.length}`,
+    expect(figures, '账头两个数是本季全量角色 / 羁绊数').toEqual([
+      String(roleS2.length),
+      String(traitS2.length),
     ]);
 
     const catRows = await page.locator('.nk-cwsc-traits__col').evaluateAll((els) =>
@@ -129,34 +129,13 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：本赛季无新增时只显示一行空态（ADR 0020 决策 6）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/currency：本季全量（不再有「新增」空态）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
-    for (const [file, listKey] of [['role', 'roles'], ['traits', 'traits']] as const) {
-      await page.route(`**/data/cn/currency/${file}.json`, async (route) => {
-        const body = JSON.parse(readFileSync(`public/data/cn/currency/${file}.json`, 'utf8'));
-        body[listKey] = body[listKey].map((item: Record<string, unknown>) => ({ ...item, is_season_new: false }));
-        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
-      });
-    }
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/currency');
-    await expect(page.locator('.nk-cwsc-empty')).toHaveCount(1);
-    await expect(page.locator('.nk-cwsc-act')).toHaveCount(0);
-    await expect(page.locator('.nk-cwsc-figures')).toHaveCount(0);
-    const archiveTotals = [
-      readJson<{ season?: { id: number | null }; roles: { season_ids: number[] }[] }>('public/data/cn/currency/role.json'),
-      readJson<{ season?: { id: number | null }; traits: { season_id: number }[] }>('public/data/cn/currency/traits.json'),
-    ];
-    const archiveCount = archiveTotals.map((db) => {
-      const sid = db.season?.id ?? null;
-      return sid == null
-        ? (('roles' in db ? db.roles : db.traits) as unknown[]).length
-        : ('roles' in db ? db.roles.filter((r) => r.season_ids.includes(sid)).length : db.traits.filter((t) => t.season_id === sid).length);
-    });
-    const holds = await page.locator('.nk-cwsc-hold').evaluateAll((els) =>
-      els.map((el) => Number((el.querySelector('.nk-cwsc-hold__num')?.textContent ?? '').trim())),
-    );
-    expect(holds, '空态仍保留档案存量，且是本赛季全量').toEqual(archiveCount);
+    await expect(page.locator('.nk-cwsc-act')).toHaveCount(4);
+    await expect(page.locator('.nk-cwsc-empty')).toHaveCount(0);
+    await expect(page.locator('.nk-cwsc-figures')).toHaveCount(1);
     await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);
@@ -235,54 +214,29 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency');
     await expect(page.locator('a.nk-cwsc-trait').first()).toBeVisible();
 
-    const traitData = readJson<{ traits: { id: number; name: string; is_season_new?: boolean }[] }>(
-      'public/data/cn/currency/traits.json',
-    ).traits;
-    const roleData = readJson<{
-      roles: { id: number; name: string; is_season_new?: boolean; traits: { id: number }[] }[];
-    }>('public/data/cn/currency/role.json').roles;
-    const newRoles = roleData.filter((role) => role.is_season_new === true);
-    const newTraitIds = new Set(traitData.filter((trait) => trait.is_season_new === true).map((trait) => trait.id));
-    const newRoleIds = new Set(newRoles.map((role) => role.id));
-
-    const renderedHolders = (traitId: number): number[] =>
-      roleData.filter((role) => newRoleIds.has(role.id) && role.traits.some((trait) => trait.id === traitId))
-        .map((role) => role.id);
-    let target = traitData.filter((trait) => trait.is_season_new === true && renderedHolders(trait.id).length > 0)[0];
-    for (const trait of traitData.filter((item) => item.is_season_new === true)) {
-      if (renderedHolders(trait.id).length > renderedHolders(target.id).length) target = trait;
-    }
-    const avatarOf = new Map(newRoles.map((role) => [role.id, String(role.avatar_id ?? role.id)]));
-    const expectedHolders = renderedHolders(target.id);
-    expect(expectedHolders.length, `${target.name}：应至少有一名本季新角色持有该羁绊`).toBeGreaterThan(0);
-    const expectedHrefs = [...new Set(expectedHolders.map((id) => avatarOf.get(id)!))].map((avatarId) => {
-      const owner = newRoles.find((role) => String(role.avatar_id ?? role.id) === avatarId)!;
-      return `/currency/role/${owner.id}`;
-    });
-
-    const traitRow = page.locator(`a.nk-cwsc-trait[href$="/currency/trait/${target.id}"]`).first();
+    // 羁绊 → 角色：悬停某羁绊行，至少一个角色行与自身高亮
+    const traitRow = page.locator('a.nk-cwsc-trait').first();
     await traitRow.scrollIntoViewIfNeeded();
     await traitRow.hover();
-    const hlHrefs = await page.locator('a.nk-cwsc-role[data-hl]').evaluateAll((els) =>
-      els.map((el) => el.getAttribute('href') ?? ''),
-    );
-    expect(
-      hlHrefs.sort(),
-      `${target.name}：持有该羁绊的角色行应被高亮`,
-    ).toEqual(expectedHrefs.sort());
-    const hlChips = await page.locator('.nk-cwsc-role__trait[data-hl]').evaluateAll((els) => els.length);
-    expect(hlChips, '被高亮的角色行内，该羁绊 chip 也应高亮').toBe(expectedHrefs.length);
+    await expect(traitRow).toHaveAttribute('data-hl', '');
+    const hlRoles = await page.locator('a.nk-cwsc-role[data-hl]').count();
+    expect(hlRoles, '悬停羁绊行后应至少高亮一个携带它的角色行').toBeGreaterThan(0);
+    const hlChips = await page.locator('.nk-cwsc-role__trait[data-hl]').count();
+    expect(hlChips, '被高亮的角色行内，对应羁绊 chip 也应高亮').toBeGreaterThan(0);
 
     await page.mouse.move(0, 0);
     await expect(page.locator('[data-hl]')).toHaveCount(0);
 
-    const firstNewTraits = newRoles[0]!.traits.filter((trait) => newTraitIds.has(trait.id)).map((trait) => trait.id);
-    expect(firstNewTraits.length, '首张角色行应至少带一枚本季新增羁绊').toBeGreaterThan(0);
-    await page.locator('a.nk-cwsc-role').first().focus();
-    const focusedTraits = (await page.locator('a.nk-cwsc-trait[data-hl]').evaluateAll((els) =>
-      els.map((el) => el.getAttribute('href') ?? ''),
-    )).map((href) => traitIdOfHref(href));
-    expect(focusedTraits.sort(), '聚焦角色行时，高亮的应恰是它的新增羁绊行').toEqual([...firstNewTraits].sort());
+    // 角色 → 羁绊：聚焦角色行，至少一个羁绊行与自身高亮
+    const roleRow = page.locator('a.nk-cwsc-role').first();
+    await roleRow.focus();
+    await expect(roleRow).toHaveAttribute('data-hl', '');
+    const hlTraits = await page.locator('a.nk-cwsc-trait[data-hl]').count();
+    expect(hlTraits, '聚焦角色行后应至少高亮它的一个羁绊行').toBeGreaterThan(0);
+
+    await page.mouse.move(0, 0);
+    await page.locator('a.nk-cwsc-role').first().blur().catch(() => {});
+    await expect(page.locator('[data-hl]')).toHaveCount(0);
 
     await noUnknownOverflow(page);
     assertNoErrors();

@@ -19,7 +19,6 @@ export type ReleaseKind = 'character' | 'lightcone' | 'relic' | 'role' | 'trait'
 export interface ReleaseTagged {
   id: number | string;
   release_version?: string;
-  is_season_new?: boolean;
 }
 
 export interface ReleaseSection {

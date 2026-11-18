@@ -52,7 +52,11 @@ watch(
   () => void run(),
   { immediate: true },
 );
-watch(data, (d) => { if (d) document.title = pageTitle(d.name); }, { immediate: true });
+watch(data, (d) => {
+  if (!d) return;
+  const seasonLabel = d.season_id != null ? t('settings.seasonOptN', { n: d.season_id }) : '';
+  document.title = pageTitle(seasonLabel ? `${d.name} · ${seasonLabel}` : d.name);
+}, { immediate: true });
 </script>
 
 <template>

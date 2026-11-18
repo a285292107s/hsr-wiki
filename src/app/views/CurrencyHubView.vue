@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -26,30 +26,33 @@ const coverRole = computed<CwRoleCard | null>(() => {
   return best;
 });
 
-const highlightTraitIds = ref<string[]>([]);
-const highlightRoleIds = ref<string[]>([]);
+const hoveredRole = shallowRef<CwRoleCard | null>(null);
+const hoveredTraitId = ref<string | null>(null);
 
 function roleNeedsHighlight(role: CwRoleCard): boolean {
-  return highlightRoleIds.value.length > 0 && role.variants.some((variant) => highlightRoleIds.value.includes(variant.id));
+  if (hoveredRole.value === role) return true;
+  if (hoveredTraitId.value === null) return false;
+  return role.traits.some((chip) => chip.id === hoveredTraitId.value);
 }
 
+function traitNeedsHighlight(trait: CwTraitCard): boolean {
+  if (hoveredTraitId.value === trait.id) return true;
+  if (hoveredRole.value === null) return false;
+  return hoveredRole.value.traits.some((chip) => chip.id === trait.id);
+}
 function highlightRoleTraits(role: CwRoleCard): void {
-  highlightRoleIds.value = [];
-  highlightTraitIds.value = role.traits.filter((chip) => chip.isNew).map((chip) => chip.id);
+  hoveredRole.value = role;
+  hoveredTraitId.value = null;
 }
 
 function highlightTraitCarriers(trait: CwTraitCard): void {
-  highlightTraitIds.value = [trait.id];
-  highlightRoleIds.value = trait.carriers.map((carrier) => carrier.id);
+  hoveredRole.value = null;
+  hoveredTraitId.value = trait.id;
 }
 
 function clearHighlight(): void {
-  highlightTraitIds.value = [];
-  highlightRoleIds.value = [];
-}
-
-function traitChipTitle(chip: { name: string; isNew: boolean }): string {
-  return chip.isNew ? `${chip.name} · ${t('cwHub.releaseTitle')}` : chip.name;
+  hoveredRole.value = null;
+  hoveredTraitId.value = null;
 }
 
 function costLabel(role: CwRoleCard): string {
@@ -151,13 +154,13 @@ onMounted(() => { void load(); });
                   <li class="nk-cwsc-figure">
                     <RouterLink class="nk-cwsc-figure__link" :to="`/currency/role`">
                       <span class="nk-cwsc-figure__label">{{ t('cwHub.rolesLabel') }}</span>
-                      <span class="nk-cwsc-figure__num">{{ intakeRoles }}<span class="nk-cwsc-figure__total">/{{ season.totals.roles }}</span></span>
+                      <span class="nk-cwsc-figure__num">{{ intakeRoles }}</span>
                     </RouterLink>
                   </li>
                   <li class="nk-cwsc-figure">
                     <RouterLink class="nk-cwsc-figure__link" :to="`/currency/trait`">
                       <span class="nk-cwsc-figure__label">{{ t('cwHub.traitsLabel') }}</span>
-                      <span class="nk-cwsc-figure__num">{{ intakeTraits }}<span class="nk-cwsc-figure__total">/{{ season.totals.traits }}</span></span>
+                      <span class="nk-cwsc-figure__num">{{ intakeTraits }}</span>
                     </RouterLink>
                   </li>
                 </ul>
@@ -197,7 +200,7 @@ onMounted(() => { void load(); });
                       class="nk-cwsc-trait"
                       :to="trait.href"
                       :data-cat="trait.cat"
-                      :data-hl="highlightTraitIds.includes(trait.id) ? '' : undefined"
+                      :data-hl="traitNeedsHighlight(trait) ? '' : undefined"
                       :title="`${trait.name}：${trait.desc}`"
                       @mouseenter="highlightTraitCarriers(trait)"
                       @mouseleave="clearHighlight"
@@ -264,9 +267,8 @@ onMounted(() => { void load(); });
                         :key="chip.id"
                         class="nk-cwsc-role__trait"
                         :data-cat="chip.cat"
-                        :data-new="chip.isNew ? '' : undefined"
-                        :data-hl="highlightTraitIds.includes(chip.id) ? '' : undefined"
-                        :title="traitChipTitle(chip)"
+                        :data-hl="hoveredTraitId === chip.id ? '' : undefined"
+                        :title="chip.name"
                       >{{ chip.name }}</span>
                     </span>
                   </span>
