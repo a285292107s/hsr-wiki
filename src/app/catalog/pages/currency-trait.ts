@@ -136,15 +136,24 @@ function renderMembers(members: TraitMember[]): string {
 }
 
 function renderRules(rules: TraitRule[]): string {
-  return `<div class="nk-cwtp__rules">${rules.map((rule) => {
-    const ruleDesc = fmtDesc(rule.rule_desc, rule.rule_params);
-    const tiers = rule.layers.map((layer) => renderTier(layer)).join('');
-    return `<section class="nk-cwtp__rule" data-rule="${escHtml(rule.id)}">
-        <h4 class="nk-cwtp__rule-name">${escHtml(rule.name)}</h4>
+  const group = 'nk-cwtp-rule';
+  const radios = rules
+    .map((_, i) => `<input class="nk-cwtp__rule-radio" type="radio" name="${group}" id="${group}-${i}"${i === 0 ? ' checked' : ''}>`)
+    .join('');
+  const tabs = rules
+    .map((rule, i) => `<label class="nk-cwtp__rule-tab" for="${group}-${i}">${escHtml(rule.name)}</label>`)
+    .join('');
+  const panels = rules
+    .map((rule) => {
+      const ruleDesc = fmtDesc(rule.rule_desc, rule.rule_params);
+      const tiers = rule.layers.map((layer) => renderTier(layer)).join('');
+      return `<section class="nk-cwtp__rule-panel" data-rule="${escHtml(rule.id)}">
         ${ruleDesc ? `<p class="nk-cwtp__rule-desc">${ruleDesc}</p>` : ''}
         <ol class="nk-cwtp__tiers nk-cwtp__tiers--rule">${tiers}</ol>
       </section>`;
-  }).join('')}</div>`;
+    })
+    .join('');
+  return `<div class="nk-cwtp__rules">${radios}<div class="nk-cwtp__rule-tabs">${tabs}</div>${panels}</div>`;
 }
 
 function renderTraitDetail(item: CatalogItem): string {

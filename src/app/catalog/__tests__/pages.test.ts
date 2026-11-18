@@ -193,8 +193,10 @@ describe('data-driven filter contract (real data)', () => {
 
     const huan = items.find((it) => it.id === '100302')!;
     const huanHtml = cfg.split!.renderDetail(huan);
-    expect((huanHtml.match(/class="nk-cwtp__rule"/g) ?? []).length).toBe(3);
-    expect(huanHtml).toContain('nk-cwtp__rule-name');
+    expect((huanHtml.match(/class="nk-cwtp__rule-panel"/g) ?? []).length).toBe(3);
+    expect((huanHtml.match(/class="nk-cwtp__rule-tab"/g) ?? []).length).toBe(3);
+    expect((huanHtml.match(/type="radio"/g) ?? []).length).toBe(3);
+    expect(huanHtml).toContain('nk-cwtp__rule-panel');
 
     const qian = items.find((it) => it.id === '100602')!;
     const qianHtml = cfg.split!.renderDetail(qian);

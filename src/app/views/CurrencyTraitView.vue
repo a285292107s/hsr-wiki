@@ -37,7 +37,6 @@ const actLabel = computed(() =>
   data.value?.activation_type === 'GreaterEqualThan' && !data.value?.special ? t('catalog.activationType.ge') : '');
 
 
-const special = computed(() => data.value?.special || null);
 function activationLabel(layer: number): string {
   return special.value && special.value.kind === 'astropolis'
     ? t('ctrait.levelActivation', { n: layer })
@@ -89,6 +88,15 @@ watch(data, (d) => {
   const seasonLabel = d.season_id != null ? t('settings.seasonOptN', { n: d.season_id }) : '';
   document.title = pageTitle(seasonLabel ? `${d.name} · ${seasonLabel}` : d.name);
 }, { immediate: true });
+
+const special = computed(() => data.value?.special || null);
+const ruleIndex = ref(0);
+const activeRule = computed(() => {
+  const s = special.value;
+  if (!s || s.kind !== 'rules' || !s.rules || !s.rules.length) return null;
+  return s.rules[Math.min(ruleIndex.value, s.rules.length - 1)] ?? null;
+});
+watch(special, () => { ruleIndex.value = 0; });
 </script>
 
 <template>
@@ -183,12 +191,23 @@ watch(data, (d) => {
       <section v-if="special && special.kind === 'rules'" class="nk-ctrait-section">
         <h2 class="nk-ctrait-section__title">{{ t('ctrait.sec.rules') }}</h2>
         <div class="nk-ctrait-rules">
-          <section v-for="rule in special.rules" :key="rule.id" class="nk-ctrait-rule">
-            <h3 class="nk-ctrait-rule__name">{{ rule.name }}</h3>
-            <div class="nk-ctrait-rule__desc" v-html="fmtDesc(rule.rule_desc, rule.rule_params)"></div>
+          <div class="nk-ctrait-rule-tabs" role="tablist">
+            <button
+              v-for="(rule, i) in special.rules"
+              :key="rule.id"
+              type="button"
+              role="tab"
+              class="nk-ctrait-rule-tab"
+              :class="{ 'is-active': ruleIndex === i }"
+              :aria-selected="ruleIndex === i"
+              @click="ruleIndex = i"
+            >{{ rule.name }}</button>
+          </div>
+          <section v-if="activeRule" :key="activeRule.id" class="nk-ctrait-rule" role="tabpanel">
+            <div class="nk-ctrait-rule__desc" v-html="fmtDesc(activeRule.rule_desc, activeRule.rule_params)"></div>
             <div class="nk-ctrait-layers">
               <article
-                v-for="ly in rule.layers"
+                v-for="ly in activeRule.layers"
                 :key="ly.layer"
                 class="nk-ctrait-layer"
                 :class="`nk-ctrait-layer--${ly.quality ? (QUALITY_CSS[ly.quality] || '') : 'base'}`"
