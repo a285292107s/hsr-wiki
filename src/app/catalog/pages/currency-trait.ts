@@ -63,23 +63,14 @@ function plainDesc(raw: unknown): string {
   return String(raw || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function thresholdsOf(item: CatalogItem): number[] {
-  return ((item.layers as TraitLayer[]) || []).map((layer) => layer.layer);
-}
-
 function renderTraitCard(item: CatalogItem, index = 0): string {
   const icon = gridFightTraitIconUrl(item.icon as string);
-  const thresholds = thresholdsOf(item).join(' / ');
   const fullDesc = plainDesc(item.simple_desc);
 
   return `<a class="nk-cw-trait-card" href="${escHtml(activeHref(`/currency/trait/${item.id}`))}" data-id="${escHtml(item.id)}" title="${escHtml(item.name)}：${escHtml(fullDesc)}" style="--i:${index}">
       <span class="nk-cw-trait-card__icon"><img loading="lazy" data-cdn-src="${escHtml(icon)}" alt=""></span>
       <span class="nk-cw-trait-card__body">
         <span class="nk-cw-trait-card__name">${escHtml(item.name)}</span>
-        ${thresholds ? `<span class="nk-cw-trait-card__meta">${escHtml(thresholds)}</span>` : ''}
-      </span>
-      <span class="nk-cw-trait-card__chev" aria-hidden="true">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
       </span>
     </a>`;
 }
