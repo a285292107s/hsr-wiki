@@ -344,10 +344,8 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
     mazebuff_index = _build_index(mazebuff_raw)
 
     layer_by_trait: dict[int, list[dict]] = {}
-    for entry in layer_raw:
-        tid = entry.get("TraitID")
-        if tid is None:
-            continue
+
+    def _build_layer_node(entry: dict) -> dict:
         desc = resolve_text(entry.get("PropertyDesc", {}))
         params = [_unwrap(p, 0) for p in (entry.get("PropertyParamList") or [])]
         member_props = _flatten_property_mods(entry.get("TraitMemberPropertyList"), prop_names)
@@ -376,9 +374,54 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
         if buff_desc:
             node["buff_desc"] = buff_desc
             node["buff_params"] = buff_params
-        layer_by_trait.setdefault(tid, []).append(node)
-    for tid in layer_by_trait:
-        layer_by_trait[tid].sort(key=lambda x: x["layer"])
+        return node
+
+    for entry in layer_raw:
+        tid = entry.get("TraitID")
+        if tid is None:
+            continue
+        layer_by_trait.setdefault(tid, []).append(_build_layer_node(entry))
+
+    effect_layers_by_effect: dict[int, list[dict]] = {}
+    for entry in layer_raw:
+        tid = entry.get("TraitID")
+        if tid is None:
+            continue
+        effect_layers_by_effect.setdefault(tid, []).append(_build_layer_node(entry))
+
+    def _resolve_layers(entry: dict) -> list[dict]:
+        tid = entry["ID"]
+        name = text_of_key(text_key_of(entry.get("TraitName", {})))
+        own = layer_by_trait.get(tid, [])
+        placeholder = all(
+            not str(node.get("desc") or "").strip() or str(node.get("desc") or "") == name
+            for node in own
+        ) if own else True
+        if not placeholder:
+            return own
+        for effect_id in (entry.get("TraitEffectList") or []):
+            fallback = sorted(effect_layers_by_effect.get(effect_id, []), key=lambda x: x["layer"])
+            usable = [node for node in fallback if str(node.get("desc") or "").strip() and str(node.get("desc") or "") != name]
+            if not usable:
+                continue
+            if own and len(own) == len(fallback):
+                merged: list[dict] = []
+                for base, src in zip(sorted(own, key=lambda x: x["layer"]), fallback):
+                    node = dict(base)
+                    if src.get("desc"):
+                        node["desc"] = src["desc"]
+                        node["params"] = src.get("params", [])
+                    if src.get("member_props"):
+                        node["member_props"] = src["member_props"]
+                    if src.get("all_props"):
+                        node["all_props"] = src["all_props"]
+                    if src.get("buff_desc"):
+                        node["buff_desc"] = src["buff_desc"]
+                        node["buff_params"] = src.get("buff_params", [])
+                    merged.append(node)
+                return merged
+            return [dict(node) for node in fallback]
+        return own
 
     remark_by_trait: dict[int, list[dict]] = {}
     for entry in remark_raw:
@@ -432,7 +475,7 @@ def _convert_traits(out_dir: Path, prop_names: dict[str, str] | None = None, sea
             "base_params": base_params,
             "season_id": season_id,
             "sort_priority": sort_priority,
-            "layers": layer_by_trait.get(tid, []),
+            "layers": _resolve_layers(entry),
             "remarks": remark_by_trait.get(tid, []),
         })
 

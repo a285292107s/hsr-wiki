@@ -61,6 +61,7 @@
 ## 几何与形态判据
 
 - **`<input>` 放进 flex 行必须写 `min-width: 0`**：表单控件的 `min-width: auto` 解析成**固有宽**（Chromium 下 `input[type=range]` 约 129px），flex 收缩下不去 ⇒ 窄视口（320px）上长译文标签把这一行顶出容器，再被页面根的 `overflow-x: hidden` 静默吃掉。`flex: 1` 不解决这件事——`flex-basis: 0%` 只作用于「可收缩」，收缩下限由固有宽决定。判据：横向溢出量不大且只在长译文语言出现时，先量「越界后代的固有宽」而不是调容器宽度。`.nk-skill__slider > input`
+- **菱形图标框会裁掉方形图标且斜边视觉上「变大」**：`rotate(45deg)` 容器 + `rotate(-45deg) scale(1.24)` 反向补偿的「菱形徽章」写法，对 256px 方图会把四角内容切掉（观众看到的是图标被放大后只露出中央）；换成圆角矩形 + `object-fit: contain`（不旋转、不缩放）才能完整展示。若需保留菱形外观，必须用 `clip-path` 而非旋转，且图标本身仍是方形。判据：容器 `transform: none`、`img.object-fit = contain`、`img.naturalWidth === naturalHeight` 时四角不被裁。`currency-trait-browser.css` `.nk-cwtp__sigil`（同坑已修 `currency-catalog.css` 目录卡 `__icon`）。
 - **「元素类型差异」的可见性取决于布局是否把文字盒拉伸**：UA 给 `<button>` 声明 `text-align: center`，单行 / 收缩盒里它是空转，纵向 flex 把子项拉满时才显形。故不能靠读样式表判定，要跨标签比对计算样式 + 做「改掉这个值再量 ink 位移」的差分。
 - **任何 `max-content` / `fit-content` 轨，只要轨内元素的固有宽度由懒加载图决定，就必须写确定值**：图未加载时塌成文字宽、到达后涨到固有宽 ⇒ 同分区两张卡宽度差数倍 + 首屏位移（CLS）。
 - **flex item 的 `min-height: auto` 在 `overflow != visible` 时降为 0**：column flex 容器里唯一带 `overflow: hidden` 的子项会被压塌到几十像素——详情页 Hero 曾因此把页面主标题压到不可见，而既有 Hero 恰好都没写 `overflow: hidden` 所以从未暴露。修法是给该子项 `flex: none`。

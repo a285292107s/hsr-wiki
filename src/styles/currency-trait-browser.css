@@ -100,7 +100,7 @@
 
 .nk-cwtp__head {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
   padding: 26px 26px 22px;
@@ -110,9 +110,8 @@
 
 .nk-cwtp__sigil {
   display: block;
-  width: 66px;
-  height: 66px;
-  transform: rotate(45deg);
+  width: 64px;
+  height: 64px;
   border: 1.5px solid var(--border2);
   border-radius: var(--nk-radius-2);
   overflow: hidden;
@@ -122,9 +121,8 @@
 .nk-cwtp__sigil img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  transform: rotate(-45deg) scale(1.24);
 }
 .nk-cwtp[data-cat="faction"] .nk-cwtp__sigil { border-color: color-mix(in srgb, var(--cw-faction-core) 58%, transparent); }
 .nk-cwtp[data-cat="combat"] .nk-cwtp__sigil { border-color: color-mix(in srgb, var(--cw-combat-core) 58%, transparent); }
