@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl, gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc, gridFightPropIconUrl, lightconeIconUrl } from '../../lib/format';
 import { resolveCdnUri } from '../../services/cdn';
+import { heroFocusStyleVars } from '../../services/currency-hero-focus';
 import { pageTitle } from '../seo';
 import { cwChargeKey, cwCostKey } from '../../lib/enum-labels';
 import { propLabel, propValue, mergeSkillGroups, buildGrowthMatrix, matrixUp, resolveRecommend, buildRecommendRows, groupTraits, buildServantAttrs, buildSkillNameMap, rankMech, rankDesc, stanceLine } from '../../lib/currency-role';
@@ -59,6 +60,10 @@ const displayAvatarId = computed(() => {
   return shouldUseFemaleAvatar(gender, d.female_avatar_id) ? d.female_avatar_id! : (d.avatar_id || d.id);
 });
 
+const heroBgStyle = computed(() => ({
+  backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId.value)})`,
+  ...heroFocusStyleVars(String(displayAvatarId.value)),
+}));
 const roleLines = computed(() => {
   const stars = data.value?.stars;
   if (!stars) return [];
@@ -259,7 +264,7 @@ function hideOnError(e: Event) {
 
     <template v-else-if="data">
       <header class="nk-crole-hero" :data-rarity="data.rarity">
-        <div class="nk-crole-hero__bg" aria-hidden="true" :style="{ backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId)})` }"></div>
+        <div class="nk-crole-hero__bg" aria-hidden="true" :style="heroBgStyle"></div>
         <div class="nk-crole-hero__scrim" aria-hidden="true"></div>
         <div class="nk-crole-hero__content">
           <div class="nk-crole-hero__info">

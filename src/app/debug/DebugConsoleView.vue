@@ -4,22 +4,27 @@ import SpineKvSection from './SpineKvSection.vue';
 import SpineAuditSection from './SpineAuditSection.vue';
 import DeadLinksSection from './DeadLinksSection.vue';
 import SystemMapSection from './SystemMapSection.vue';
+import HeroFocusLabSection from './HeroFocusLabSection.vue';
 import { getQueryParam, setQueryParam, subscribeQueryChange } from './lib/query-state';
 
-type TabId = 'kv' | 'audit' | 'deadlinks' | 'map';
+type TabId = 'kv' | 'audit' | 'deadlinks' | 'map' | 'herofocus';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'kv', label: 'KV 场景验收' },
   { id: 'audit', label: '清单审核' },
   { id: 'deadlinks', label: '死链审核' },
   { id: 'map', label: '系统地图' },
+  { id: 'herofocus', label: '背景取景' },
 ];
 
-const tab = ref<TabId>(
-  getQueryParam('tab') === 'audit' ? 'audit'
-    : getQueryParam('tab') === 'deadlinks' ? 'deadlinks'
-      : getQueryParam('tab') === 'map' ? 'map' : 'kv',
-);
+function parseTab(v: string | null): TabId {
+  return v === 'audit' ? 'audit'
+    : v === 'deadlinks' ? 'deadlinks'
+      : v === 'map' ? 'map'
+        : v === 'herofocus' ? 'herofocus' : 'kv';
+}
+
+const tab = ref<TabId>(parseTab(getQueryParam('tab')));
 
 function selectTab(id: TabId): void {
   if (tab.value === id) return;
@@ -28,9 +33,7 @@ function selectTab(id: TabId): void {
 }
 
 const unsubscribe = subscribeQueryChange(() => {
-  const t: TabId = getQueryParam('tab') === 'audit' ? 'audit'
-    : getQueryParam('tab') === 'deadlinks' ? 'deadlinks'
-      : getQueryParam('tab') === 'map' ? 'map' : 'kv';
+  const t = parseTab(getQueryParam('tab'));
   if (t !== tab.value) tab.value = t;
 });
 onBeforeUnmount(unsubscribe);
@@ -42,7 +45,7 @@ onBeforeUnmount(unsubscribe);
       <p class="nk-spine-debug__kicker">SPINE LAB // 研究线</p>
       <h1>Spine 调试台</h1>
       <p class="nk-spine-debug__desc">
-        研究线调试台：KV 场景一键验收 · 清单三级诊断 · 死链可达性审计 · 系统地图。
+        研究线调试台：KV 场景一键验收 · 清单三级诊断 · 死链可达性审计 · 系统地图 · 角色页背景取景。
       </p>
       <div class="nk-spine-debug__tabs" role="tablist" aria-label="调试功能">
         <button
@@ -69,6 +72,9 @@ onBeforeUnmount(unsubscribe);
     </div>
     <div v-show="tab === 'map'">
       <SystemMapSection :active="tab === 'map'" />
+    </div>
+    <div v-show="tab === 'herofocus'">
+      <HeroFocusLabSection />
     </div>
   </div>
 </template>

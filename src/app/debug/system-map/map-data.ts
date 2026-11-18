@@ -141,7 +141,7 @@ export const NODES: MapNode[] = [
   { id: 'comp', name: '组合式函数', en: 'COMPOSABLES', layer: 'comp', gx: 3, gy: 4,
     files: ['src/app/composables/use-load-generation.ts', 'src/app/composables/use-delayed-skeleton.ts', 'src/app/composables/use-scroll-restore.ts'], desc: '加载代竞态保护 / 延迟骨架屏 / 滚动恢复 / 视差' },
   { id: 'lab', name: '研究线', en: 'SPINE LAB', layer: 'lab', gx: 4, gy: 4,
-    files: ['src/app/debug/DebugConsoleView.vue', 'src/app/debug/index.ts', 'src/app/debug/dead-links.ts'], desc: '主站 dev-only 路由 /debug：KV 场景验收 / 清单审核 / 死链审核 / 系统地图（生产构建摇树）' },
+    files: ['src/app/debug/DebugConsoleView.vue', 'src/app/debug/index.ts', 'src/app/debug/dead-links.ts', 'src/app/debug/HeroFocusLabSection.vue'], desc: '主站 dev-only 路由 /debug：KV 场景验收 / 清单审核 / 死链审核 / 系统地图 / 角色页背景取景（生产构建摇树）' },
   { id: 'converter', name: '数据转换工厂', en: 'CONVERTER', layer: 'converter', gx: 0, gy: 5,
     files: ['tools/converter/convert.py', 'tools/converter/converters/characters.py', 'tools/converter/query.py', 'tools/converter/languages.json'], desc: 'Python 工具：官方解包 ExcelOutput → public/data/cn + public/data/i18n（增量跳过未变更）' },
   { id: 'data', name: '本地数据仓库', en: 'DATA/CN', layer: 'data', gx: 1, gy: 5,

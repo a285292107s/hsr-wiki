@@ -38,7 +38,7 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     await page.goto('/debug');
     await expect(page.locator('.nk-spine-debug__head h1')).toHaveText('Spine 调试台');
     const tabs = page.locator('.nk-spine-debug__tab');
-    await expect(tabs).toHaveCount(4);
+    await expect(tabs).toHaveCount(5);
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
     assertNoErrors();
   });

@@ -24,7 +24,7 @@ src/
 | `services/` | `lib/`、`services/types` | Vue、`app/`、`spine/`（动画播放由 app 编排） | 数据加载 / CDN 解析 / 缓存 / 错误边界，纯函数 + 单例 Promise |
 | `lib/` | 自身 | `app/`、`services/`、`spine/`、Vue | 纯函数：常量映射、格式化、转义、主题通道、错误类型 |
 | `app/`（views / catalog / stores / components / composables） | `lib/`、`services/`、`spine/`（仅动画消费） | 反向被下层引用（禁止） | 页面编排、目录引擎、状态管理、组合式逻辑 |
-| `app/debug/`（研究线） | `lib/`、`services/`、`spine/` | `app/` 业务模块（SidebarNav / 各目录视图）、`stores/` | dev-only `/debug` 调试台四 Tab |
+| `app/debug/`（研究线） | `lib/`、`services/`、`spine/` | `app/` 业务模块（SidebarNav / 各目录视图）、`stores/` | dev-only `/debug` 调试台多 Tab |
 | `styles/` | —（CSS 令牌单向依赖：原始层 → 别名层 → 语义层 → 领域层） | 消费层直引原始层、领域层引用别名层 | `tokens.css` + `catalog.css` 全局两层；页面 CSS 随路由 import |
 
 派生规则：**下层永远不知道上层的存在**；新增跨层需求时先在本表找允许路径，没有就在对应层内实现，禁止为走捷径反向 import。
@@ -52,11 +52,11 @@ view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
 
 ## 研究线（Spine Lab 调试台，主站 dev-only 路由）
 
-研究线调试台已并入主站，为 **dev-only 路由 `/debug`**（视图与引擎在 `src/app/debug/`：KV 场景验收 / 清单审核 / 死链审核 / 系统地图 四 Tab）：
+研究线调试台已并入主站，为 **dev-only 路由 `/debug`**（视图与引擎在 `src/app/debug/`：KV 场景验收 / 清单审核 / 死链审核 / 系统地图 / 背景取景 五 Tab）：
 
 - 路由与入口**构建级排除**：`import.meta.env.DEV` 在 `src/app/router/index.ts` 内联（addRoute 分支），生产构建摇树——prod 无 `/debug` 路由、零研究线代码打包、深链落 404
 - 共享只读依赖：`src/spine/` 引擎层 + `src/services/` 数据层 + `src/lib/` 常量；调试台**禁止反向引用** `src/app/` 业务模块（SidebarNav / 各目录视图等）
-- dev 专用中间件：`vite.config.ts` 的 data-file-index 插件提供 `/data/cn/data-file-index.json`（死链审核浏览器端用；浏览器无目录遍历 API，生产不需要）
+- dev 专用中间件：`vite.config.ts` 的 data-file-index 插件提供 `/data/cn/data-file-index.json`（死链审核浏览器端用；浏览器无目录遍历 API，生产不需要）；`hero-focus-lab` 插件提供 `/__lab/hero-focus` GET/POST（读写 `src/data/currency-hero-focus.json`，供「背景取景」Tab 保存角色页 hero 背景锚点；仅 dev，生产 `src/data` 随视图打包读取）
 - 调试台测试并入主 `pnpm test`（`src/app/debug/**/__tests__`）
 - 研究文档与脚本资产位置见 [commands.md](commands.md)
 
