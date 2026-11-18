@@ -6,15 +6,15 @@ import { gateImagesIn } from './img-gate';
 
 export const CDN_STALL_TIMEOUT_MS = 10_000;
 
-function isCdnImage(src: string): boolean {
-  return /^https?:\/\//.test(src);
+function isManagedImage(src: string): boolean {
+  return /^https?:\/\//.test(src) || src.startsWith(`${LOCAL_ICONS_BASE}/`);
 }
 
 function markDown(img: HTMLImageElement, noPlaceholder = false): void {
   if (img.dataset.cdnDown) return;
   img.dataset.cdnDown = '1';
   const src = img.getAttribute('src') || '';
-  if (noPlaceholder || img.hasAttribute('data-cdn-placeholder') || img.hasAttribute('data-cdn-noph') || !isCdnImage(src)) {
+  if (noPlaceholder || img.hasAttribute('data-cdn-placeholder') || img.hasAttribute('data-cdn-noph') || !isManagedImage(src)) {
     img.addEventListener('load', () => clearDegrade(img), { once: true });
     return;
   }
@@ -80,7 +80,7 @@ function handleFailure(img: HTMLImageElement): void {
     markDown(img);
     return;
   }
-  if (!isCdnImage(src)) return;
+  if (!isManagedImage(src)) return;
 
   if (isCdnDown()) {
     markDown(img, true);

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { IMAGE_GATE_ATTR, IMAGE_GATE_MAX_INFLIGHT, gateImagesIn, installImageGate } from '../cdn';
+import { IMAGE_GATE_ATTR, IMAGE_GATE_MAX_INFLIGHT, LOCAL_ICONS_BASE, gateImagesIn, installImageGate } from '../cdn';
 
 const JSD = 'https://cdn.jsdelivr.net/gh/a285292107s/hsr-wiki@main/public/data/assets/icons/element/quantum.webp';
 const RAW = 'https://raw.githubusercontent.com/a285292107s/hsr-wiki/main/public/data/assets/icons/element/ice.webp';
@@ -112,5 +112,15 @@ describe('img-gate 并发闸门', () => {
     gateImagesIn(img);
     await flush();
     expect(realSrc(img)).toBe(JSD);
+  });
+
+  it('dev 本地基址（同源相对路径）同样纳入闸门，data-cdn-src 仍被接管', async () => {
+    const url = `${LOCAL_ICONS_BASE}/element/quantum.webp`;
+    const img = mkImg({ [IMAGE_GATE_ATTR]: url });
+    gateImagesIn(img);
+    expect(isBlank(img)).toBe(true);
+    expect(img.getAttribute(IMAGE_GATE_ATTR)).toBe(url);
+    await flush();
+    expect(realSrc(img)).toBe(url);
   });
 });

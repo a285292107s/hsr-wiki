@@ -1,4 +1,5 @@
 import { CDN } from '../../lib/constants';
+import { LOCAL_ICONS_BASE } from './base';
 
 export const IMAGE_GATE_MAX_INFLIGHT = 6;
 export const IMAGE_GATE_ROOT_MARGIN = '300px';
@@ -15,7 +16,12 @@ interface GateEntry {
 
 function isGatedImageUrl(url: string): boolean {
   if (!url || url.startsWith('data:') || url.startsWith('blob:')) return false;
-  return url.startsWith(CDN) || url.includes('cdn.jsdelivr.net') || url.includes('raw.githubusercontent.com');
+  return (
+    url.startsWith(CDN) ||
+    url.startsWith(`${LOCAL_ICONS_BASE}/`) ||
+    url.includes('cdn.jsdelivr.net') ||
+    url.includes('raw.githubusercontent.com')
+  );
 }
 
 const srcDesc = typeof HTMLImageElement !== 'undefined'

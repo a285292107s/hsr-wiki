@@ -5,6 +5,8 @@ import {
   JS_DELIVR_BASE,
   JS_DELIVR_UI3D_BASE,
   LOCAL_ICONS_BASE,
+  LOCAL_ICONS_CDN_BASE,
+  LOCAL_ICONS_DEV_BASE,
   LOCAL_ICONS_FALLBACK_BASE,
   NANOKA_HUD,
   cdnFallbackFromPrimary,
@@ -25,6 +27,16 @@ beforeAll(() => {
 
 const BASE = `${CDN}${NANOKA_HUD}`;
 const RAW = LOCAL_ICONS_FALLBACK_BASE;
+
+describe('LOCAL_ICONS_BASE 按环境分流', () => {
+  it('dev 走同源静态路径（dev server 直发 public/），build 走 jsdelivr 镜像', () => {
+    expect(LOCAL_ICONS_DEV_BASE).toBe(`${import.meta.env.BASE_URL}data/assets/icons`);
+    expect(LOCAL_ICONS_CDN_BASE).toBe(
+      'https://cdn.jsdelivr.net/gh/a285292107s/hsr-wiki@main/public/data/assets/icons',
+    );
+    expect(LOCAL_ICONS_BASE).toBe(import.meta.env.DEV ? '/data/assets/icons' : LOCAL_ICONS_CDN_BASE);
+  });
+});
 
 describe('nanokaUrl / cdnUri / cdnRawUrl', () => {
   it('nanokaUrl 按分类子路径拼接 CDN 基址', () => {
