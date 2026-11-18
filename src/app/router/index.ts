@@ -97,7 +97,7 @@ const routes: RouteRecordRaw[] = [
     path: '/currency',
     name: 'currency-hub',
     component: () => import('../views/CurrencyHubView.vue'),
-    meta: { depth: 0, cw: true, titleKey: 'catalog.currencyWar' },
+    meta: { depth: 0, cw: true, titleKey: 'cwHub.mastheadTitle' },
   },
   {
     path: '/currency/role',

@@ -414,6 +414,143 @@
 
 .nk-cwsc-empty { padding: 26px 0 8px; font-size: var(--nk-fs-5); letter-spacing: 0.06em; color: var(--text2); }
 
+.nk-cwsc-timeline { padding-top: clamp(20px, 2.4vw, 30px); }
+
+.nk-cwsc-seasons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nk-cwsc-season {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-2);
+  background: var(--card);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--nk-dur-hover) var(--nk-ease-out), background-color var(--nk-dur-hover) var(--nk-ease-out);
+}
+
+.nk-cwsc-season:hover { border-color: var(--line-2); background: color-mix(in srgb, var(--card) 80%, var(--primary) 20%); }
+.nk-cwsc-season:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nk-cwsc-season[data-active] { border-color: var(--primary); background: color-mix(in srgb, var(--card) 72%, var(--primary) 28%); }
+
+.nk-cwsc-season__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.nk-cwsc-season__no {
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-3);
+  letter-spacing: 0.14em;
+  color: var(--text3);
+}
+
+.nk-cwsc-season__badge {
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  border-radius: 999px;
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-2);
+  letter-spacing: 0.08em;
+  color: var(--primary);
+}
+
+.nk-cwsc-season__name {
+  font-size: var(--nk-fs-title-3);
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--text-bright);
+  overflow-wrap: break-word;
+}
+
+.nk-cwsc-season[data-active] .nk-cwsc-season__no { color: var(--text2); }
+
+.nk-cwsc-season__desc {
+  font-size: var(--nk-fs-3);
+  line-height: 1.7;
+  color: var(--text2);
+  overflow-wrap: break-word;
+}
+
+.nk-cwsc-season__scale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-1);
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-2);
+  color: var(--text3);
+}
+
+.nk-cwsc-season__stat { display: inline-flex; align-items: baseline; gap: 5px; }
+.nk-cwsc-season__stat b {
+  font-size: var(--nk-fs-7);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+.nk-cwsc-season__sub { margin-left: auto; }
+
+.nk-cwsc-theme { padding-top: clamp(24px, 2.8vw, 38px); }
+
+.nk-cwsc-theme__head { display: flex; align-items: baseline; gap: 10px; }
+.nk-cwsc-theme__head .nk-cwsc-act__no { color: var(--cw-special-core); }
+
+.nk-cwsc-theme__title {
+  font-size: var(--nk-fs-title-2);
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--text-bright);
+}
+
+.nk-cwsc-themes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nk-cwsc-theme-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-1);
+  border-radius: var(--nk-radius-2);
+  background: color-mix(in srgb, var(--card) 88%, var(--primary) 12%);
+}
+
+.nk-cwsc-theme-card__name { font-size: var(--nk-fs-5); font-weight: 800; color: var(--text-bright); }
+
+.nk-cwsc-theme-card__count {
+  font-family: var(--font-hud);
+  font-size: var(--nk-fs-3);
+  color: var(--metric-val);
+  font-variant-numeric: tabular-nums;
+}
+
+.nk-cwsc-theme-card__names {
+  font-size: var(--nk-fs-3);
+  line-height: 1.6;
+  color: var(--text2);
+  overflow-wrap: break-word;
+}
+
+.nk-cwsc-theme__none { margin: 12px 0 0; font-size: var(--nk-fs-4); line-height: 1.8; color: var(--text3); }
+
+.nk-cwsc[data-busy] { opacity: 0.6; transition: opacity var(--nk-dur-hover) var(--nk-ease-out); }
+
 .nk-cwsc-notice {
   display: flex;
   align-items: center;
@@ -465,11 +602,14 @@
 @keyframes nk-cwsc-in { from { opacity: 0; transform: translateY(22px); } }
 
 @media (min-width: 768px) {
+  .nk-cwsc-seasons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nk-cwsc-themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .nk-cwsc-roster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1024px) {
   .nk-cwsc-premiere { grid-template-columns: minmax(0, 1fr) 364px; }
+  .nk-cwsc-themes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .nk-cwsc-premiere__art img { aspect-ratio: 364 / 404; }
   .nk-cwsc-traits { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .nk-cwsc-roster { grid-template-columns: repeat(3, minmax(0, 1fr)); }

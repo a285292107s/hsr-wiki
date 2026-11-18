@@ -7,7 +7,19 @@ import { useCwSeason, type CwRoleCard, type CwTraitCard } from '../composables/u
 import { iconImgAttrs } from '../../lib/icons';
 import '../../styles/currency-hub.css';
 
-const { season, loaded, failedCount, intakeFailed, load } = useCwSeason();
+const { season, seasons, seasonScale, currentSeasonId, selectedSeasonId, loaded, switching, failedCount, intakeFailed, selectSeason, load } = useCwSeason();
+
+const selectedSeason = computed(() => seasons.value.find((item) => item.id === selectedSeasonId.value) ?? null);
+
+const THEME_LABEL: Record<string, string> = {
+  encounter: 'cwHub.themeEncounter',
+  spotlight: 'cwHub.themeSpotlight',
+  talent: 'cwHub.themeTalent',
+};
+function themeLabel(key: string): string {
+  const labelKey = THEME_LABEL[key];
+  return labelKey ? t(labelKey) : key;
+}
 
 const allFailed = computed(() => intakeFailed.value >= 2);
 const partialFailed = computed(() => failedCount.value > 0 && !allFailed.value);
@@ -76,10 +88,10 @@ onMounted(() => { void load(); });
 
 <template>
   <div id="nk-cwhub-app">
-    <main class="nk-cwsc">
+    <main class="nk-cwsc" :data-busy="switching ? '' : undefined">
       <header class="nk-hub-masthead">
-        <h1 class="nk-hub-masthead__title">{{ t('catalog.currencyWar') }}</h1>
-        <p class="nk-hub-masthead__tagline">{{ t('cwHub.tagline') }}</p>
+        <h1 class="nk-hub-masthead__title">{{ t('cwHub.mastheadTitle') }}</h1>
+        <p class="nk-hub-masthead__tagline">{{ t('cwHub.mastheadLead') }}</p>
       </header>
 
       <div v-if="loaded && season" class="nk-cwsc-imprint">
@@ -87,6 +99,48 @@ onMounted(() => { void load(); });
         <span v-if="season.version" class="nk-cwsc-imprint__item">{{ t('cwHub.versionMark', { version: season.version }) }}</span>
         <span v-if="season.syncedAt" class="nk-cwsc-imprint__item">{{ t('home.releaseDate', { date: season.syncedAt }) }}</span>
       </div>
+
+      <section v-if="loaded && !allFailed && seasons.length" class="nk-cwsc-timeline" :aria-label="t('cwHub.timelineTitle')">
+        <ol class="nk-cwsc-seasons">
+          <li v-for="entry in seasons" :key="entry.id">
+            <button
+              type="button"
+              class="nk-cwsc-season"
+              :data-active="entry.id === selectedSeasonId ? '' : undefined"
+              :data-current="entry.id === currentSeasonId ? '' : undefined"
+              :aria-pressed="entry.id === selectedSeasonId"
+              @click="selectSeason(entry.id)"
+            >
+              <span class="nk-cwsc-season__top">
+                <span class="nk-cwsc-season__no">{{ t('cwHub.seasonMark', { n: entry.id }) }}</span>
+                <span v-if="entry.id === currentSeasonId" class="nk-cwsc-season__badge">{{ t('cwHub.currentBadge') }}</span>
+              </span>
+              <span class="nk-cwsc-season__name">{{ entry.name }}</span>
+              <span class="nk-cwsc-season__desc">{{ entry.desc }}</span>
+              <span class="nk-cwsc-season__scale">
+                <span class="nk-cwsc-season__stat"><b>{{ seasonScale[entry.id]?.roles ?? 0 }}</b>{{ t('cwHub.rolesLabel') }}</span>
+                <span class="nk-cwsc-season__stat"><b>{{ seasonScale[entry.id]?.traits ?? 0 }}</b>{{ t('cwHub.traitsLabel') }}</span>
+                <span class="nk-cwsc-season__sub">{{ t('cwHub.subSeasons', { n: entry.sub_season_ids.length }) }}</span>
+              </span>
+            </button>
+          </li>
+        </ol>
+      </section>
+
+      <section v-if="loaded && !allFailed && selectedSeason" class="nk-cwsc-theme" :aria-label="t('cwHub.themeTitle')">
+        <div class="nk-cwsc-theme__head">
+          <span class="nk-cwsc-act__no" aria-hidden="true">◆</span>
+          <h2 class="nk-cwsc-theme__title">{{ t('cwHub.themeTitle') }}</h2>
+        </div>
+        <ul v-if="selectedSeason.themes.length" class="nk-cwsc-themes">
+          <li v-for="theme in selectedSeason.themes" :key="theme.key" class="nk-cwsc-theme-card" :data-theme="theme.key">
+            <span class="nk-cwsc-theme-card__name">{{ themeLabel(theme.key) }}</span>
+            <span class="nk-cwsc-theme-card__count">{{ t('cwHub.themeCount', { n: theme.count }) }}</span>
+            <span v-if="theme.names.length" class="nk-cwsc-theme-card__names">{{ theme.names.join(' · ') }}</span>
+          </li>
+        </ul>
+        <p v-else class="nk-cwsc-theme__none">{{ t('cwHub.themeNone') }}</p>
+      </section>
 
       <div v-if="!loaded" class="nk-cwsc-sk" role="status" aria-live="polite" :aria-label="t('cwHub.loadingAria')">
         <div class="nk-cwsc-sk__head" aria-hidden="true">

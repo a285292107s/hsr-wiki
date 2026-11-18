@@ -4,8 +4,13 @@ import {
   loadLocalCurrencyAugments,
   loadLocalCurrencyEquipment,
   loadLocalCurrencyPortals,
+  loadLocalCurrencySeasons,
+  loadLocalCurrencyRoles,
+  loadLocalCurrencyTraits,
   loadLocalVersion,
 } from '../../services/api';
+import { getSavedCwSeason, setSavedCwSeason } from '../../lib/cw-season';
+import type { CurrencySeasonEntry } from '../../services/types';
 import { avatarDrawCardUrl, avatarShopIconUrl, gridFightTraitIconById } from '../../lib/icons';
 import { cwChargeKey, cwCostKey, cwPositionKey, cwTraitCatKey, cwTraitQualityKey } from '../../lib/enum-labels';
 import { activeHref } from '../../lib/i18n/active';
@@ -258,10 +263,16 @@ const CW_SEASON_SOURCES = 5;
 
 export interface CwSeasonShowcase {
   season: ShallowRef<CwSeason | null>;
+  seasons: ShallowRef<CurrencySeasonEntry[]>;
+  seasonScale: ShallowRef<Record<number, { roles: number; traits: number }>>;
+  currentSeasonId: Ref<number | null>;
+  selectedSeasonId: Ref<number | null>;
   loaded: Ref<boolean>;
+  switching: Ref<boolean>;
   failedCount: Ref<number>;
   intakeFailed: Ref<number>;
   sourceCount: number;
+  selectSeason(id: number): Promise<void>;
   load(): Promise<void>;
 }
 
@@ -277,11 +288,15 @@ async function loadCatalogItems(
   }
 }
 
+interface DomainCount {
+  season: number;
+  total: number;
+}
+
 interface DomainSnapshot {
-  seasonId: number | null;
-  portals: { season: number; total: number } | null;
-  augments: { season: number; total: number } | null;
-  equipment: { season: number; total: number } | null;
+  portals: DomainCount | null;
+  augments: DomainCount | null;
+  equipment: DomainCount | null;
   failed: number;
 }
 
@@ -293,29 +308,24 @@ async function safeLoad<T>(load: () => Promise<T>): Promise<T | null> {
   }
 }
 
-async function loadDomainSnapshot(): Promise<DomainSnapshot> {
+async function loadDomainSnapshot(seasonId: number | null): Promise<DomainSnapshot> {
   const [portals, augments, equipment] = await Promise.all([
     safeLoad(async () => {
       const list = await loadLocalCurrencyPortals();
-      const seasonId = list.season?.id ?? null;
       return {
-        seasonId,
         season: list.portals.filter((item) => seasonId != null && item.season_id === seasonId).length,
         total: list.portals.length,
       };
     }),
     safeLoad(async () => {
       const list = await loadLocalCurrencyAugments();
-      const seasonId = list.season?.id ?? null;
       return {
-        seasonId,
         season: list.augments.filter((item) => seasonId != null && item.season_id === seasonId).length,
         total: list.augments.length,
       };
     }),
     safeLoad(async () => {
       const list = await loadLocalCurrencyEquipment();
-      const seasonId = list.season?.id ?? null;
       return {
         season: list.items.filter((item) => seasonId != null && (item.season_ids ?? []).includes(seasonId)).length,
         total: list.items.length,
@@ -323,10 +333,9 @@ async function loadDomainSnapshot(): Promise<DomainSnapshot> {
     }),
   ]);
   return {
-    seasonId: portals?.seasonId ?? augments?.seasonId ?? null,
-    portals: portals ? { season: portals.season, total: portals.total } : null,
-    augments: augments ? { season: augments.season, total: augments.total } : null,
-    equipment,
+    portals: portals ?? null,
+    augments: augments ?? null,
+    equipment: equipment ?? null,
     failed: [portals, augments, equipment].filter((item) => item === null).length,
   };
 }
@@ -366,30 +375,67 @@ function toLedger(snapshot: DomainSnapshot): CwDomainStat[] {
 export function useCwSeason(): CwSeasonShowcase {
   const app = useAppStore();
   const season = shallowRef<CwSeason | null>(null);
+  const seasons = shallowRef<CurrencySeasonEntry[]>([]);
   const loaded = ref(false);
+  const switching = ref(false);
   const failedCount = ref(0);
   const intakeFailed = ref(0);
+  const currentSeasonId = ref<number | null>(null);
+  const selectedSeasonId = ref<number | null>(null);
+  const seasonScale = shallowRef<Record<number, { roles: number; traits: number }>>({});
 
-  async function load(): Promise<void> {
-    loaded.value = false;
-    failedCount.value = 0;
-    intakeFailed.value = 0;
-    await app.initVersion();
-    const ctx: CatalogContext = { version: app.version };
+  async function build(targetId: number | null): Promise<void> {
+    const ctx: CatalogContext = { version: app.version, cwSeason: targetId ?? undefined };
     const [roleItems, traitItems, domains, version] = await Promise.all([
       loadCatalogItems(() => import('../catalog/pages/currency-role').then((m) => m.currencyRolePage), ctx),
       loadCatalogItems(() => import('../catalog/pages/currency-trait').then((m) => m.currencyTraitPage), ctx),
-      loadDomainSnapshot(),
+      loadDomainSnapshot(targetId),
       safeLoad(() => loadLocalVersion()),
     ]);
     intakeFailed.value = (roleItems === null ? 1 : 0) + (traitItems === null ? 1 : 0);
     failedCount.value = intakeFailed.value + domains.failed;
-    season.value = buildCwSeason(roleItems ?? [], traitItems ?? [], toLedger(domains), domains.seasonId, {
+    season.value = buildCwSeason(roleItems ?? [], traitItems ?? [], toLedger(domains), targetId, {
       version: version?.version_label ?? '',
       syncedAt: version?.synced_at ?? '',
     });
+  }
+
+  async function load(): Promise<void> {
+    loaded.value = false;
+    await app.initVersion();
+    const data = await safeLoad(() => loadLocalCurrencySeasons());
+    const entries = data?.seasons ?? [];
+    seasons.value = entries;
+    const [roleList, traitList] = await Promise.all([
+      safeLoad(() => loadLocalCurrencyRoles()),
+      safeLoad(() => loadLocalCurrencyTraits()),
+    ]);
+    const roles = roleList?.roles ?? [];
+    const traits = traitList?.traits ?? [];
+    seasonScale.value = Object.fromEntries(entries.map((entry) => [
+      entry.id,
+      {
+        roles: roles.filter((role) => (role.season_ids ?? []).includes(entry.id)).length,
+        traits: traits.filter((trait) => trait.season_id === entry.id).length,
+      },
+    ]));
+    currentSeasonId.value = data?.current_season ?? entries[entries.length - 1]?.id ?? null;
+    const ids = new Set(entries.map((entry) => entry.id));
+    const saved = getSavedCwSeason();
+    const target = saved != null && ids.has(saved) ? saved : currentSeasonId.value;
+    selectedSeasonId.value = target;
+    await build(target);
     loaded.value = true;
   }
 
-  return { season, loaded, failedCount, intakeFailed, sourceCount: CW_SEASON_SOURCES, load };
+  async function selectSeason(id: number): Promise<void> {
+    if (id === selectedSeasonId.value) return;
+    switching.value = true;
+    selectedSeasonId.value = id;
+    setSavedCwSeason(id);
+    await build(id);
+    switching.value = false;
+  }
+
+  return { season, seasons, seasonScale, currentSeasonId, selectedSeasonId, loaded, switching, failedCount, intakeFailed, sourceCount: CW_SEASON_SOURCES, selectSeason, load };
 }

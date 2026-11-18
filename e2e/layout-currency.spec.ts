@@ -19,14 +19,27 @@ test.describe('布局验收：货币战争主题', () => {
     await page.goto('/currency');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'cw');
     await expect(page.locator('main.nk-cwsc')).toBeVisible();
-    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
-    await expect(page.locator('.nk-cwsc-act')).toHaveCount(4);
+    await expect(page.locator('.nk-hub-masthead__title')).toHaveText('赛季枢纽');
 
+    const seasonsDb = readJson<{ current_season: number | null; seasons: { id: number; name: string; themes: { key: string; count: number; names: string[] }[] }[] }>('public/data/cn/currency/seasons.json');
+    const seasonButtons = page.locator('button.nk-cwsc-season');
+    await expect(seasonButtons).toHaveCount(seasonsDb.seasons.length);
+    const currentIdx = seasonsDb.seasons.findIndex((s) => s.id === seasonsDb.current_season);
+    await expect(seasonButtons.nth(currentIdx)).toHaveAttribute('data-active', '');
+    await expect(seasonButtons.nth(currentIdx)).toHaveAttribute('data-current', '');
+
+    const currentSeason = seasonsDb.seasons[currentIdx]!;
+    const themeCards = page.locator('.nk-cwsc-theme-card');
+    await expect(themeCards).toHaveCount(currentSeason.themes.length);
+    const themeKeys = await themeCards.evaluateAll((els) => els.map((el) => el.getAttribute('data-theme')));
+    expect(themeKeys, '主题卡与 seasons.json 同源').toEqual(currentSeason.themes.map((t) => t.key));
+    await expect(themeCards.first().locator('.nk-cwsc-theme-card__names')).toContainText(currentSeason.themes[0]!.names[0]!);
+
+    await expect(page.locator('.nk-cwsc-act')).toHaveCount(4);
     const acts = await page.locator('.nk-cwsc-act').evaluateAll((els) =>
       els.map((el) => el.getAttribute('data-act')),
     );
-    expect(acts, '长卷固定四幕：启幕 → 板块 → 名册 → 账房').toEqual(['premiere', 'traits', 'roles', 'ledger']);
-
+    expect(acts, '选中赛季速览四幕：启幕 → 板块 → 名册 → 账房').toEqual(['premiere', 'traits', 'roles', 'ledger']);
     const roleDb = readJson<{
       season?: { id: number | null };
       roles: { id: number; name: string; avatar_id: number; rarity: number; season_ids: number[]; traits: { id: number }[] }[];
@@ -102,11 +115,25 @@ test.describe('布局验收：货币战争主题', () => {
     );
     expect(ledger, '账房三本账：环境 / 策略 / 装备').toEqual(['/currency/buff', '/currency/augment', '/currency/item']);
 
+    if (seasonsDb.seasons.length > 1) {
+      const otherIdx = seasonsDb.seasons.findIndex((s) => s.id !== seasonsDb.current_season);
+      const otherSeason = seasonsDb.seasons[otherIdx]!;
+      await page.locator('button.nk-cwsc-season').nth(otherIdx).click();
+      await expect(page.locator('button.nk-cwsc-season').nth(otherIdx)).toHaveAttribute('data-active', '');
+      await expect(page.locator('.nk-cwsc-theme-card')).toHaveCount(otherSeason.themes.length);
+      if (otherSeason.themes.length) await expect(page.locator('.nk-cwsc-theme')).toContainText(otherSeason.themes[0]!.names[0]!);
+      else await expect(page.locator('.nk-cwsc-theme__none')).toBeVisible();
+      const rolesAfter = await page.locator('a.nk-cwsc-role').count();
+      const expectedGroups = new Set(roleDb.roles.filter((r) => (r.season_ids || []).includes(otherSeason.id)).map((r) => String(r.avatar_id ?? r.id))).size;
+      expect(rolesAfter, '切季后名册应重建为该季角色').toBe(expectedGroups);
+      await page.locator('button.nk-cwsc-season').nth(seasonsDb.seasons.findIndex((s) => s.id === seasonsDb.current_season)).click();
+    }
+
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('/currency：1920×1080 首屏内闭合第一幕（报头 + 幻月舞台 + 账头）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/currency：1920×1080 首屏内呈现赛季时间线', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto('/currency');
@@ -116,12 +143,18 @@ test.describe('布局验收：货币战争主题', () => {
     );
     expect(mastheadH, '报头不得高过 120px').toBeLessThanOrEqual(120);
 
+    const timeline = page.locator('.nk-cwsc-timeline');
+    await expect(timeline).toBeVisible();
+    const seasonButtons = page.locator('button.nk-cwsc-season');
+    expect(await seasonButtons.count(), '至少一个赛季卡').toBeGreaterThan(0);
+    const firstBottom = await seasonButtons.first().evaluate((el) => Math.round(el.getBoundingClientRect().bottom));
+    expect(firstBottom, '首个赛季卡应落在首屏内').toBeLessThanOrEqual(1080);
+
     const premiere = page.locator('.nk-cwsc-act[data-act="premiere"]');
+    await premiere.scrollIntoViewIfNeeded();
     await expect(premiere.locator('.nk-cwsc-act__title')).toBeVisible();
     const facts = premiere.locator('.nk-cwsc-figure');
     await expect(facts).toHaveCount(2);
-    const bottom = await facts.last().evaluate((el) => Math.round(el.getBoundingClientRect().bottom));
-    expect(bottom, '第一幕的账头应落在首屏内').toBeLessThanOrEqual(1080);
     const art = premiere.locator('.nk-cwsc-premiere__art img');
     await expect(art).toBeVisible();
     expect(await art.evaluate((el) => el.getAttribute('data-cdn-src') || el.getAttribute('src'))).toMatch(/avatardrawcard\//);
@@ -129,14 +162,16 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency：本季全量（不再有「新增」空态）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/currency：本季全量时间线与四幕速览都在（无「新增」空态）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/currency');
+    await expect(page.locator('.nk-cwsc-timeline')).toBeVisible();
+    await expect(page.locator('button.nk-cwsc-season').first()).toBeVisible();
     await expect(page.locator('.nk-cwsc-act')).toHaveCount(4);
     await expect(page.locator('.nk-cwsc-empty')).toHaveCount(0);
     await expect(page.locator('.nk-cwsc-figures')).toHaveCount(1);
-    await expect(page.locator('.nk-hub-masthead__title')).toBeVisible();
+    await expect(page.locator('.nk-hub-masthead__title')).toHaveText('赛季枢纽');
     await expect(page.locator('.nk-hub-footer')).toHaveCount(1);
     await noUnknownOverflow(page);
     assertNoErrors();

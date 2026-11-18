@@ -21,7 +21,7 @@ from converters import characters, character_detail
 from converters import light_cones, light_cone_detail, relics, relic_affixes, monsters, endgame, endgame_catalog
 from converters import monster_filter
 from converters import endgame_guide
-from converters import currency, currency_catalog  # noqa: E402
+from converters import currency, currency_catalog, currency_seasons  # noqa: E402
 from converters import achievements
 from converters import monster_detail
 from converters import voracity
@@ -54,6 +54,7 @@ MODULES: dict[str, list] = {
     "monster_filter": [monster_filter.convert],
     "currency": [currency.convert],
     "currency_catalog": [currency_catalog.convert],
+    "currency_seasons": [currency_seasons.convert],
     "achievements": [achievements.convert],
     "version": [version.convert],
 }

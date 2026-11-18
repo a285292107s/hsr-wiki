@@ -163,6 +163,25 @@ export interface CurrencySeasonMeta {
   sub_season_ids: number[];
 }
 
+export interface CurrencySeasonTheme {
+  key: 'encounter' | 'spotlight' | 'talent';
+  count: number;
+  names: string[];
+}
+
+export interface CurrencySeasonEntry {
+  id: number;
+  name: string;
+  desc: string;
+  sub_season_ids: number[];
+  themes: CurrencySeasonTheme[];
+}
+
+export interface CurrencySeasons {
+  current_season: number | null;
+  seasons: CurrencySeasonEntry[];
+}
+
 export interface CurrencyRoleList {
   roles: CurrencyRoleEntry[];
   season?: CurrencySeasonMeta;

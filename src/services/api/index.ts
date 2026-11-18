@@ -26,7 +26,7 @@ export { loadLocalVoracity } from './voracity';
 export {
   loadLocalCurrencyRoles, loadLocalCurrencyRole,
   loadLocalCurrencyEquipment, loadLocalCurrencyPortals, loadLocalCurrencyAugments,
-  loadLocalCurrencyTraits, loadLocalCurrencyPropIcons,
+  loadLocalCurrencyTraits, loadLocalCurrencyPropIcons, loadLocalCurrencySeasons,
 } from './currency';
 export {
   expandSpineUrl, loadSpineOfficialManifest, loadSpineNanokaManifest, loadSpineManifests,

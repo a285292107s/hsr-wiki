@@ -20,7 +20,7 @@ export const NORMAL_HUB_ITEM: NavItem = {
 };
 
 export const CW_HUB_ITEM: NavItem = {
-  key: 'nav.currencyHub', shortKey: 'nav.currencyHubShort', en: 'HUB', path: '/currency', exact: true,
+  key: 'nav.currencyHub', shortKey: 'nav.currencyHubShort', en: 'SEASON', path: '/currency', exact: true,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
 };
 

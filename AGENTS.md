@@ -62,6 +62,7 @@ node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超�
   - **禁止按 ADR 0018 旧形态回改**（板块索引、无侧栏、「首页 8 行入口首屏可见」断言均已作废）；**禁止恢复全屏媒体层 / 立绘轮播 / 枢纽滚轮**。
   - 现行断言在 `e2e/layout-home.spec.ts` 与 `e2e/layout-hub.spec.ts`。
 - **货币战争按「当前赛季索引」而非「版本增量」**：五个图鉴页按连接表归属字段（`season_ids` / `season_id`）筛当前季（或用户所选季），**不再用「赛季代际差集」判「新增」**——该口径（`is_season_new`）已于 2026-11-18 退役（货币战争按赛季而非小版本划分、官方无小版本粒度，差集会把多个小版本捆成假批次）。常规首页仍用**版本增量**（`release_version` == `version_label`），两套口径互斥。
+  - **枢纽页（`/currency`）＝「赛季枢纽」**：以赛季时间线为骨架，展示每季官方名 / 简介 / 主题玩法（奇遇伙伴 / 主角光环 / 赛季天赋）与当期速览；赛季名与主题由 `currency_seasons` 产出 `currency/seasons.json`（[ADR 0067](docs/adr/0067-货币战争枢纽页改为赛季枢纽页.md)）。
   - 前端只读字段、判据在 converter——字段见 [转换器字段映射.md](docs/data/转换器字段映射.md)，决策见 [ADR 0019](docs/adr/0019-枢纽页导航条回归与首页改为版本上新页.md) / [ADR 0020](docs/adr/0020-货币战争枢纽页改为本赛季新增页.md)。
 - **数据边界**：`vendor/TurnBasedGameData` **禁止直接读取或写入**——探索走 `query.py`，字段结构走 `DATA_CATALOG.md` 总索引（按需读 `.parts/` 分片，禁整读），转换走 `convert.py`。
 - **AI 检索可见性＝构建期预渲染快照**：服务端 HTML 决定可见性（实测爬虫零 JS 执行）；`pnpm build` 末步生成 `dist/prerender/**.html`，`vercel.json` 在 catch-all 之前用明确 rewrite 投递，JS 用户与爬虫拿到同一份 HTML（非 cloaking）。

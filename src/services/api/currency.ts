@@ -2,7 +2,7 @@
 import type {
   CurrencyRoleList, CurrencyRoleDetail,
   CurrencyEquipList, CurrencyPortalList, CurrencyAugmentList, CurrencyTraitList,
-  CurrencyPropIconMap,
+  CurrencyPropIconMap, CurrencySeasons,
 } from '../types';
 import { loadLocalJSON, singletonLocalData } from './local';
 import { getSavedTrailblazerGender, isTrailblazerId, pickGenderVariant } from '../../lib/trailblazer';
@@ -23,6 +23,8 @@ export const loadLocalCurrencyEquipment = singletonLocalData<CurrencyEquipList>(
 export const loadLocalCurrencyPortals = singletonLocalData<CurrencyPortalList>('currency/portals.json');
 export const loadLocalCurrencyAugments = singletonLocalData<CurrencyAugmentList>('currency/augments.json');
 export const loadLocalCurrencyTraits = singletonLocalData<CurrencyTraitList>('currency/traits.json');
+
+export const loadLocalCurrencySeasons = singletonLocalData<CurrencySeasons>('currency/seasons.json');
 
 export const loadLocalCurrencyPropIcons = singletonLocalData<CurrencyPropIconMap>('currency/prop_icons.json');
 

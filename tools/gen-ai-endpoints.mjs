@@ -1330,40 +1330,72 @@ function endgamePages(ctx) {
 function currencyHubPages(ctx) {
   const roleData = readJson('currency/role.json');
   const traitData = readJson('currency/traits.json');
-  const seasonId = roleData.season?.id ?? null;
+  const seasonsData = readJson('currency/seasons.json');
+  const seasons = seasonsData.seasons || [];
+  const seasonId = seasonsData.current_season ?? roleData.season?.id ?? null;
+  const current = seasons.find((s) => s.id === seasonId) ?? null;
   const roles = roleData.roles || [];
   const traits = traitData.traits || [];
   const listRoles = seasonId == null ? roles : roles.filter((r) => (r.season_ids || []).includes(seasonId));
   const listTraits = seasonId == null ? traits : traits.filter((t) => t.season_id === seasonId);
-  const newRoles = listRoles;
-  const newTraits = listTraits;
+
+  const themeLabel = (key) => ({
+    encounter: ui('cwHub.themeEncounter', '奇遇伙伴'),
+    spotlight: ui('cwHub.themeSpotlight', '主角光环'),
+    talent: ui('cwHub.themeTalent', '赛季天赋'),
+  }[key] || key);
+  const seasonsList = seasons.map((s) => ({
+    name: s.name || uiT('cwHub.seasonMark', '第 {n} 赛季', { n: s.id }),
+    href: '/currency',
+    meta: s.id === seasonId ? esc(ui('cwHub.currentBadge', '当前赛季')) : '',
+    desc: txtSafe(s.desc || '', null, 160),
+  }));
+
   const sections = [];
   const ldEntries = [];
-  if (newRoles.length) {
-    const items = newRoles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })) }));
+  if (seasonsList.length) {
+    sections.push({ title: ui('cwHub.timelineTitle', '赛季主题'), html: linkList(seasonsList, true) });
+    ldEntries.push(...seasonsList);
+  }
+  if (current) {
+    const themeItems = (current.themes || []).map((theme) => ({
+      name: themeLabel(theme.key),
+      meta: esc(uiT('cwHub.themeCount', '{n} 项', { n: theme.count })),
+      desc: theme.names && theme.names.length ? txtSafe(theme.names.join(' · '), null, 200) : '',
+    }));
+    sections.push({
+      title: `${ui('cwHub.mastheadTitle', '赛季枢纽')} · ${current.name}`,
+      html: current.desc ? `<p>${esc(current.desc)}</p>` : '',
+    });
+    if (themeItems.length) {
+      sections.push({ title: ui('cwHub.themeTitle', '主题玩法'), html: linkList(themeItems, false) });
+    }
+  }
+  if (listRoles.length) {
+    const items = listRoles.map((r) => ({ name: cwRoleName(r), href: `/currency/role/${r.id}`, meta: esc(uiT('snapshot.costLabel', '{n} 费', { n: r.rarity })) }));
     sections.push({ title: `${ui('catalog.character.title', '角色图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/role', ui('catalog.character.title', '角色图鉴')) });
     ldEntries.push(...items);
   }
-  if (newTraits.length) {
-    const items = newTraits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}`, meta: esc(cwCatLabel(t.cat)) }));
+  if (listTraits.length) {
+    const items = listTraits.map((t) => ({ name: t.name, href: `/currency/trait/${t.id}`, meta: esc(cwCatLabel(t.cat)) }));
     sections.push({ title: `${ui('nav.cwTrait', '羁绊图鉴')}（${items.length}）`, html: linkList(items, true) + snapMore('/currency/trait', ui('nav.cwTrait', '羁绊图鉴')) });
     ldEntries.push(...items);
   }
-  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争模式枢纽：本赛季角色与羁绊图鉴条目。', { site: gameName() });
-  const title = `${CATALOG_TITLE['/currency/role']().split(' · ')[0]} - ${titleTail()}`;
+  const summaryPlain = uiT('snapshot.sum.cwHub', '{site}货币战争赛季枢纽：历届赛季主题与当期角色、羁绊图鉴条目。', { site: gameName() });
+  const title = `${ui('cwHub.mastheadTitle', '赛季枢纽')} - ${titleTail()}`;
   const body = catalogBody(ctx, {
     crumbs: crumbHtml([[ui('nav.home', '首页'), '/'], [ui('catalog.currencyWar', '货币战争'), null]]),
-    h1: ui('catalog.currencyWar', '货币战争'),
+    h1: ui('cwHub.mastheadTitle', '赛季枢纽'),
     summary: esc(summaryPlain),
     items: [],
-    sections: sections.length ? sections : [{ title: ui('cwHub.releaseTitle', '本季全量'), html: '<p>本赛季暂无条目。</p>' }],
+    sections: sections.length ? sections : [{ title: ui('cwHub.noSeason', '暂无赛季数据'), html: '<p></p>' }],
   });
   return [makePage('currency-hub', {
     route: '/currency',
     file: 'currency.html',
     title,
     description: cut(summaryPlain, 150),
-    ld: ldCollection('/currency', ui('catalog.currencyWar', '货币战争'), cut(summaryPlain, 150), ldEntries),
+    ld: ldCollection('/currency', ui('cwHub.mastheadTitle', '赛季枢纽'), cut(summaryPlain, 150), ldEntries),
     body,
   })];
 }
