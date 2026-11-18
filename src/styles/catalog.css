@@ -100,6 +100,10 @@
   .nk-cat-split__list::-webkit-scrollbar { width: 5px; }
   .nk-cat-split__list::-webkit-scrollbar-thumb { background: var(--nk-scrollbar-thumb); border-radius: var(--nk-radius-1); }
 }
+.nk-cat--headless .nk-cat-split { padding-top: 14px; }
+@media (min-width: 1024px) {
+  .nk-cat--headless .nk-cat-split__rail { top: 14px; max-height: calc(100vh - 28px); }
+}
 .nk-virtual-grid { display: block; position: relative; }
 .nk-virtual-cell .nk-item-card,
 .nk-virtual-cell .nk-idx-card,

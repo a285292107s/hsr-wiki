@@ -64,6 +64,7 @@ export interface CatalogPageConfig {
   gridClass?: string;
   skeleton?: CatalogSkeleton;
   split?: CatalogSplitLayout;
+  headless?: boolean;
   virtualMinColW?: number;
   virtualImgRatio?: number;
   virtualInfoH?: number;

@@ -176,7 +176,7 @@ export const currencyTraitPage: CatalogPageConfig = {
   id: 'currency-trait',
   titleKey: 'catalog.titleWithMode',
   titleArgs: { mode: 'catalog.currencyWar', name: 'nav.cwTrait' },
-  subtitle: 'TRAITS',
+  headless: true,
   searchKey: 'catalog.cwTrait.search',
   gridClass: 'nk-cw-trait-grid',
   skeleton: { variant: 'row' },

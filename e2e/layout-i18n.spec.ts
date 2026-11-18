@@ -125,8 +125,8 @@ test.describe('布局验收：多语言', () => {
     await expect(page).toHaveTitle(new RegExp(en['catalog.character.title']!));
 
     await page.goto('/en/currency/trait');
-    await expect(page.locator('.nk-cat-title'))
-      .toContainText(`${en['catalog.currencyWar']} · ${en['nav.cwTrait']}`);
+    await expect(page).toHaveTitle(new RegExp(`${en['catalog.currencyWar']} · ${en['nav.cwTrait']}`));
+    await expect(page.locator('.nk-cat-split__rail')).toHaveAttribute('aria-label', en['nav.cwTrait']!);
 
     await page.goto('/en/endgame');
     await expect(page.locator('.nk-eg-lrow').first()).toBeVisible();

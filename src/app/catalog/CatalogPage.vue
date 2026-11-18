@@ -272,7 +272,8 @@ function scrollSplitTop(): void {
   const delta = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
   if (scroller.scrollTop <= delta + 8) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  scroller.scrollTo({ top: scroller.scrollTop + delta - 64, behavior: reduce ? 'auto' : 'smooth' });
+  const offset = props.config.headless ? 24 : 64;
+  scroller.scrollTo({ top: scroller.scrollTop + delta - offset, behavior: reduce ? 'auto' : 'smooth' });
 }
 
 function resetSplitScroll(): void {
@@ -358,10 +359,12 @@ onBeforeUnmount(() => {
   <div
     id="nk-catalog-app"
     ref="scrollerRef"
+    :class="{ 'nk-cat--headless': config.headless }"
     :aria-busy="phase === 'loading'"
     @click="onContentClick"
     @error.capture="onCardImgError"
   >
+    <h1 v-if="config.headless" class="nk-sr-only">{{ pageTitle }}</h1>
     <div v-if="phase === 'error'" class="nk-error-state">
       <div class="nk-error-state__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -376,6 +379,7 @@ onBeforeUnmount(() => {
 
     <template v-else>
       <CatalogToolbar
+        v-if="!config.headless"
         :title="pageTitle"
         :subtitle="config.subtitle"
         :placeholder="t(config.searchKey)"
