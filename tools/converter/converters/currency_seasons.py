@@ -112,9 +112,9 @@ def attribute_spotlight(spotlight_rows: list[dict], role_season: dict[int, int |
     return counts
 
 
-def attribute_talent(talent_rows: list[dict]) -> dict[int, int]:
+def attribute_talent(rows: list[dict]) -> dict[int, int]:
     counts: dict[int, int] = {}
-    for row in talent_rows:
+    for row in rows:
         season_id = _season_value(row.get("SeasonID"))
         if season_id is None:
             continue
@@ -122,13 +122,44 @@ def attribute_talent(talent_rows: list[dict]) -> dict[int, int]:
     return counts
 
 
+def attribute_camps(camp_rows: list[dict], camp_season_rows: list[dict]) -> dict[int, dict]:
+    name_by_id = {row.get("ID"): resolve_text(row.get("CampName", {})) for row in camp_rows}
+    ids_by_season: dict[int, set[int]] = {}
+    for row in camp_season_rows:
+        season_id = _season_value(row.get("SeasonID"))
+        camp_id = row.get("CampID")
+        if season_id is None or camp_id is None:
+            continue
+        ids_by_season.setdefault(season_id, set()).add(camp_id)
+    result: dict[int, dict] = {}
+    for season_id, ids in ids_by_season.items():
+        names: list[str] = []
+        seen: set[str] = set()
+        for camp_id in sorted(ids):
+            name = name_by_id.get(camp_id)
+            if name and name not in seen:
+                seen.add(name)
+                names.append(name)
+        result[season_id] = {"count": len(ids), "names": names}
+    return result
+
+
 def build_theme_rows(
     season_id: int,
     chimera_by_season: dict[int, list[dict]],
     spotlight_counts: dict[int, int],
     talent_counts: dict[int, int],
+    camp_by_season: dict[int, dict] | None = None,
+    division_counts: dict[int, int] | None = None,
 ) -> list[dict]:
     themes: list[dict] = []
+    camp = (camp_by_season or {}).get(season_id)
+    if camp and camp.get("count"):
+        themes.append({"key": "camp", "count": camp["count"], "names": camp.get("names", [])})
+    if talent_counts.get(season_id):
+        themes.append({"key": "talent", "count": talent_counts[season_id], "names": []})
+    if (division_counts or {}).get(season_id):
+        themes.append({"key": "division", "count": division_counts[season_id], "names": []})
     chimera = chimera_by_season.get(season_id, [])
     if chimera:
         names = [resolve_text(row.get("NameDesc", {})) for row in chimera]
@@ -136,8 +167,6 @@ def build_theme_rows(
         themes.append({"key": "encounter", "count": len(chimera), "names": names})
     if spotlight_counts.get(season_id):
         themes.append({"key": "spotlight", "count": spotlight_counts[season_id], "names": []})
-    if talent_counts.get(season_id):
-        themes.append({"key": "talent", "count": talent_counts[season_id], "names": []})
     return themes
 
 
@@ -147,6 +176,8 @@ def build_seasons(
     chimera_by_season: dict[int, list[dict]],
     spotlight_counts: dict[int, int],
     talent_counts: dict[int, int],
+    camp_by_season: dict[int, dict] | None = None,
+    division_counts: dict[int, int] | None = None,
 ) -> dict:
     sub_by_season: dict[int, list[int]] = {}
     for row in module_rows or []:
@@ -166,7 +197,9 @@ def build_seasons(
             "name": meta.get("name", ""),
             "desc": meta.get("desc", ""),
             "sub_season_ids": sorted(set(sub_by_season[season_id])),
-            "themes": build_theme_rows(season_id, chimera_by_season, spotlight_counts, talent_counts),
+            "themes": build_theme_rows(
+                season_id, chimera_by_season, spotlight_counts, talent_counts, camp_by_season, division_counts
+            ),
         })
 
     return {"current_season": current_season(module_rows), "seasons": seasons}
@@ -193,8 +226,12 @@ def convert() -> None:
     chimera_by_season = attribute_chimera(_load_excel("GridFightChimeraInfo.json"), role_season)
     spotlight_counts = attribute_spotlight(_load_excel("GridFightSpotLight.json"), role_season)
     talent_counts = attribute_talent(_load_optional("GridFightSeasonTalent.json"))
+    camp_by_season = attribute_camps(_load_optional("GridFightCamp.json"), _load_optional("GridFightCampSeason.json"))
+    division_counts = attribute_talent(_load_optional("GridFightDivisionLevelShow.json"))
 
-    payload = build_seasons(module_rows, panel_by_season, chimera_by_season, spotlight_counts, talent_counts)
+    payload = build_seasons(
+        module_rows, panel_by_season, chimera_by_season, spotlight_counts, talent_counts, camp_by_season, division_counts
+    )
 
     missing = [s["id"] for s in payload["seasons"] if not s["name"]]
     if missing:

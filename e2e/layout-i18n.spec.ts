@@ -418,10 +418,10 @@ test.describe('布局验收：多语言', () => {
     const cn = msgs('cn');
 
     await page.goto('/en/currency');
-    await expect(page.locator('.nk-hub-masthead__tagline')).toHaveText(en['cwHub.tagline']!);
-    await expect(page.locator('.nk-hub-masthead__title')).toHaveText(en['catalog.currencyWar']!);
+    await expect(page.locator('.nk-hub-masthead__title')).toHaveText(en['cwHub.mastheadTitle']!);
+    await expect(page.locator('.nk-hub-masthead__tagline')).toHaveText(en['cwHub.mastheadLead']!);
     const cw = await page.locator('#nk-home-app, .nk-cw-hub, body').first().innerText();
-    expect(cw, '枢纽页不得残留中文标语').not.toContain(cn['cwHub.tagline']!);
+    expect(cw, '枢纽页不得残留中文标语').not.toContain(cn['cwHub.mastheadLead']!);
 
     await page.goto('/en/endgame/maze');
     await expect(page.locator('.nk-title').first()).toBeVisible();

@@ -1340,10 +1340,17 @@ function currencyHubPages(ctx) {
   const listTraits = seasonId == null ? traits : traits.filter((t) => t.season_id === seasonId);
 
   const themeLabel = (key) => ({
+    camp: ui('cwHub.themeCamp', '对手阵营'),
+    talent: ui('cwHub.themeTalent', '赛季天赋'),
+    division: ui('cwHub.themeDivision', '职级段位'),
     encounter: ui('cwHub.themeEncounter', '奇遇伙伴'),
     spotlight: ui('cwHub.themeSpotlight', '主角光环'),
-    talent: ui('cwHub.themeTalent', '赛季天赋'),
   }[key] || key);
+  const themeCount = (key, n) => {
+    if (key === 'camp') return uiT('cwHub.themeCampUnit', '{n} 家', { n });
+    if (key === 'division') return uiT('cwHub.themeDivisionUnit', '{n} 段', { n });
+    return uiT('cwHub.themeCount', '{n} 项', { n });
+  };
   const seasonsList = seasons.map((s) => ({
     name: s.name || uiT('cwHub.seasonMark', '第 {n} 赛季', { n: s.id }),
     href: '/currency',
@@ -1360,7 +1367,7 @@ function currencyHubPages(ctx) {
   if (current) {
     const themeItems = (current.themes || []).map((theme) => ({
       name: themeLabel(theme.key),
-      meta: esc(uiT('cwHub.themeCount', '{n} 项', { n: theme.count })),
+      meta: esc(themeCount(theme.key, theme.count)),
       desc: theme.names && theme.names.length ? txtSafe(theme.names.join(' · '), null, 200) : '',
     }));
     sections.push({

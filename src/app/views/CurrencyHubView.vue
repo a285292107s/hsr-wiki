@@ -12,13 +12,23 @@ const { season, seasons, seasonScale, currentSeasonId, selectedSeasonId, loaded,
 const selectedSeason = computed(() => seasons.value.find((item) => item.id === selectedSeasonId.value) ?? null);
 
 const THEME_LABEL: Record<string, string> = {
+  camp: 'cwHub.themeCamp',
+  talent: 'cwHub.themeTalent',
+  division: 'cwHub.themeDivision',
   encounter: 'cwHub.themeEncounter',
   spotlight: 'cwHub.themeSpotlight',
-  talent: 'cwHub.themeTalent',
+};
+const THEME_UNIT: Record<string, string> = {
+  camp: 'cwHub.themeCampUnit',
+  division: 'cwHub.themeDivisionUnit',
 };
 function themeLabel(key: string): string {
   const labelKey = THEME_LABEL[key];
   return labelKey ? t(labelKey) : key;
+}
+function themeCountLabel(key: string, count: number): string {
+  const unitKey = THEME_UNIT[key];
+  return unitKey ? t(unitKey, { n: count }) : t('cwHub.themeCount', { n: count });
 }
 
 const allFailed = computed(() => intakeFailed.value >= 2);
@@ -135,7 +145,7 @@ onMounted(() => { void load(); });
         <ul v-if="selectedSeason.themes.length" class="nk-cwsc-themes">
           <li v-for="theme in selectedSeason.themes" :key="theme.key" class="nk-cwsc-theme-card" :data-theme="theme.key">
             <span class="nk-cwsc-theme-card__name">{{ themeLabel(theme.key) }}</span>
-            <span class="nk-cwsc-theme-card__count">{{ t('cwHub.themeCount', { n: theme.count }) }}</span>
+            <span class="nk-cwsc-theme-card__count">{{ themeCountLabel(theme.key, theme.count) }}</span>
             <span v-if="theme.names.length" class="nk-cwsc-theme-card__names">{{ theme.names.join(' · ') }}</span>
           </li>
         </ul>

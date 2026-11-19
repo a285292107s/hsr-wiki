@@ -163,8 +163,10 @@ export interface CurrencySeasonMeta {
   sub_season_ids: number[];
 }
 
+export type CurrencySeasonThemeKey = 'camp' | 'talent' | 'division' | 'encounter' | 'spotlight';
+
 export interface CurrencySeasonTheme {
-  key: 'encounter' | 'spotlight' | 'talent';
+  key: CurrencySeasonThemeKey;
   count: number;
   names: string[];
 }

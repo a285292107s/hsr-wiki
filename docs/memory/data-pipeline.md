@@ -136,4 +136,5 @@
 
 - **联合模式保留旧值时必须配套「末尾清洗」**：`skill_animations.json` 的旧 `title`（wiki 中文小标题）会随「既有优先」一直留着，脚本末尾按不变量（`title` 只能是非令牌则删除）统一清洗后，结构层残留中文从 16 处降到 2 处（仅剩已登记的属性回退）。
 - **`convert.py --only currency` 会重写 `public/data/i18n/*/currency.json`，但只收角色侧令牌**：`currency/` 语言包同时服务 `currency.py`（角色）、`currency_catalog.py`（装备 / 环境 / 策略 / 羁绊）与 `currency_seasons.py`（赛季名 / 简介），单独跑任一子集都会把其余模块的键从包里抹掉（如仅 `currency_catalog` 会丢 `seasons.json` 的 11 个键）⇒ 必须三模块同跑 `--only currency,currency_catalog,currency_seasons`；`check-i18n-packs.mjs` 会红，别等构建才发现。
+- **S1/S2 的「主题玩法」不同构，别拿 S2 数据冒充 S1**：`GridFightChimeraInfo`（奇遇）/`GridFightSpotLight`（主角光环）是**仅 S2 有**的表（S1 冻结档也没有）；S1（零和博弈）的真实玩法是「对手阵营 / 赛季天赋 / 职级段位」。旧实现把三主题写死为「奇遇/光环/天赋」，导致 S1 主题板块空白。修法：`currency_seasons.py` 按通用—专属顺序产出 `camp → talent → division → encounter → spotlight`（缺项跳过），数据取 live dump 现有表——`GridFightCamp`+`GridFightCampSeason`（逐季阵营，S2 比 S1 多 3 家）、`GridFightSeasonTalent`、`GridFightDivisionLevelShow`。注意 `GridFightSeasonTalent` 逐季**覆盖**（冻结档是 S1=SeasonID1、live 是 S2，ID/标题同集），所以不必读冻结档。
 

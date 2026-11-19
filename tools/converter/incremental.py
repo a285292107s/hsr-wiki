@@ -166,7 +166,9 @@ MODULE_SOURCES: dict[str, list[str]] = {
                           "GridFightSeasonModule.json", "ActivityConfig.json",
                           "ActivityPanel.json", "GridFightRoleBasicInfo.json",
                           "GridFightChimeraInfo.json", "GridFightSpotLight.json",
-                          "GridFightSeasonTalent.json"],
+                          "GridFightSeasonTalent.json",
+                          "GridFightCamp.json", "GridFightCampSeason.json",
+                          "GridFightDivisionLevelShow.json"],
     "achievements": ["AchievementData.json", "AchievementSeries.json",
                       "TextJoinConfig.json", "TextJoinItem.json"],
     "voracity": [

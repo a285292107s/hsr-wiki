@@ -9,6 +9,7 @@ from converters.currency_seasons import (  # noqa: E402
     attribute_chimera,
     attribute_spotlight,
     attribute_talent,
+    attribute_camps,
     build_seasons,
     build_theme_rows,
     resolve_season_panels,
@@ -111,16 +112,45 @@ class TestAttributeTalent:
         assert attribute_talent(rows) == {2: 2, 1: 1}
 
 
+class TestAttributeCamps:
+    def test_counts_and_dedupes_names_by_season(self):
+        camps = [
+            {"ID": 1, "CampName": "凛冬经贸联合体"},
+            {"ID": 2, "CampName": "铁盾安保集团"},
+            {"ID": 3, "CampName": "未知"},
+        ]
+        links = [
+            {"CampID": 1, "SeasonID": 1},
+            {"CampID": 1, "SeasonID": 2},
+            {"CampID": 2, "SeasonID": 2},
+            {"CampID": 2, "SeasonID": 2},
+            {"CampID": 3, "SeasonID": 2},
+        ]
+        result = attribute_camps(camps, links)
+        assert result[1] == {"count": 1, "names": ["凛冬经贸联合体"]}
+        assert result[2]["count"] == 3
+        assert result[2]["names"] == ["凛冬经贸联合体", "铁盾安保集团", "未知"]
+
+    def test_empty(self):
+        assert attribute_camps([], []) == {}
+
+
 class TestBuildThemeRows:
-    def test_orders_encounter_spotlight_talent_and_skips_absent(self):
+    def test_orders_camp_talent_division_encounter_spotlight(self):
         chimera = {2: [{"NameDesc": "蜜果羹"}, {"NameDesc": "胶糖卷"}]}
-        themes = build_theme_rows(2, chimera, {2: 57}, {2: 40})
-        assert [theme["key"] for theme in themes] == ["encounter", "spotlight", "talent"]
-        assert themes[0] == {"key": "encounter", "count": 2, "names": ["蜜果羹", "胶糖卷"]}
-        assert themes[1] == {"key": "spotlight", "count": 57, "names": []}
+        camp = {2: {"count": 28, "names": ["凛冬经贸联合体"]}}
+        themes = build_theme_rows(2, chimera, {2: 57}, {2: 40}, camp, {2: 10})
+        assert [theme["key"] for theme in themes] == ["camp", "talent", "division", "encounter", "spotlight"]
+        assert themes[0] == {"key": "camp", "count": 28, "names": ["凛冬经贸联合体"]}
+        assert themes[3] == {"key": "encounter", "count": 2, "names": ["蜜果羹", "胶糖卷"]}
+        assert themes[4] == {"key": "spotlight", "count": 57, "names": []}
+
+    def test_legacy_four_args_still_work(self):
+        themes = build_theme_rows(2, {}, {}, {2: 40})
+        assert [theme["key"] for theme in themes] == ["talent"]
 
     def test_season_without_themes(self):
-        assert build_theme_rows(1, {}, {}, {}) == []
+        assert build_theme_rows(1, {}, {}, {}, {}, {}) == []
 
 
 class TestBuildSeasons:
@@ -136,11 +166,12 @@ class TestBuildSeasons:
         modules = _modules((2, 1))
         panels = {2: {"name": "货币战争•入画奇航", "desc": "简介"}}
         chimera = {2: [{"NameDesc": "蜜果羹"}]}
-        payload = build_seasons(modules, panels, chimera, {2: 57}, {2: 40})
+        camp = {2: {"count": 28, "names": ["凛冬经贸联合体"]}}
+        payload = build_seasons(modules, panels, chimera, {2: 57}, {2: 40}, camp, {2: 10})
         season = payload["seasons"][0]
         assert season["name"] == "货币战争•入画奇航"
         assert season["desc"] == "简介"
-        assert [theme["key"] for theme in season["themes"]] == ["encounter", "spotlight", "talent"]
+        assert [theme["key"] for theme in season["themes"]] == ["camp", "talent", "division", "encounter", "spotlight"]
 
     def test_empty_modules(self):
         assert build_seasons([], {}, {}, {}, {}) == {"current_season": None, "seasons": []}
