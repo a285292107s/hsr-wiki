@@ -462,7 +462,7 @@ test.describe('布局验收：货币战争主题', () => {
     assertNoErrors();
   });
 
-  test('/currency/trait：左索引右详情联动，页签与数据同源', async ({ page }) => {
+  test('/currency/trait：左索引右详情联动，页签与数据同源', { tag: '@viewport-pinned' }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/currency/trait');
