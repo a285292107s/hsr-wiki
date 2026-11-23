@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildCwSeason, type CwDomainStat } from '../use-cw-season';
+import { buildCwSeason, normalizeSeasonEntries, type CwDomainStat } from '../use-cw-season';
 import type { CatalogItem } from '../../catalog/types';
+import type { CurrencySeasonEntry } from '../../../services/types';
 
 const LEDGER: CwDomainStat[] = [
   { key: 'portals', navKey: 'nav.cwPortal', href: '/currency/buff', season: 36, total: 120 },
@@ -211,5 +212,37 @@ describe('buildCwSeason：账房与元数据', () => {
     buildCwSeason(roles, traits, LEDGER);
 
     expect(JSON.stringify({ roles, traits })).toBe(snapshot);
+  });
+});
+
+describe('normalizeSeasonEntries：赛季条目文本去噪', () => {
+  const seasonOf = (over: Partial<CurrencySeasonEntry> = {}): CurrencySeasonEntry => ({
+    id: 1,
+    name: '货币战争•零和博弈',
+    desc: '赛季简介',
+    sub_season_ids: [],
+    themes: [],
+    ...over,
+  });
+
+  it('字面 \\n 与不换行空格归一为普通空格', () => {
+    const [entry] = normalizeSeasonEntries([
+      seasonOf({ name: 'Guerres des monnaies\u00A0:\\nVoyage vers la toile', desc: '  首行\\n次行  ' }),
+    ]);
+
+    expect(entry!.name).toBe('Guerres des monnaies : Voyage vers la toile');
+    expect(entry!.desc).toBe('首行 次行');
+  });
+
+  it('其余字段保持原样，且不修改入参', () => {
+    const raw = [seasonOf({ id: 2, sub_season_ids: [1, 2] })];
+    const snapshot = JSON.stringify(raw);
+
+    const [entry] = normalizeSeasonEntries(raw);
+
+    expect(entry!.id).toBe(2);
+    expect(entry!.sub_season_ids).toEqual([1, 2]);
+    expect(entry).not.toBe(raw[0]);
+    expect(JSON.stringify(raw)).toBe(snapshot);
   });
 });

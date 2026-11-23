@@ -105,8 +105,16 @@ function traitPackageOf(item: CatalogItem): CwTraitPackage {
   return { invite: pkg.invite != null, stock: pkg.stock != null, badge: pkg.badge != null };
 }
 
-function normalizeDesc(value: unknown): string {
+function normalizeText(value: unknown): string {
   return String(value ?? '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+export function normalizeSeasonEntries(entries: readonly CurrencySeasonEntry[]): CurrencySeasonEntry[] {
+  return entries.map((entry) => ({
+    ...entry,
+    name: normalizeText(entry.name),
+    desc: normalizeText(entry.desc),
+  }));
 }
 
 function groupRoles(roleItems: readonly CatalogItem[]): CwRoleCard[] {
@@ -197,7 +205,7 @@ export function buildCwSeason(
       catKey: cwTraitCatKey(cat) ?? 'catalog.traitCat.special',
       layers: layers.length,
       qualityKeys,
-      desc: normalizeDesc(item.simple_desc),
+      desc: normalizeText(item.simple_desc),
       carriers: carriersByTrait.get(id) ?? [],
       pkg: traitPackageOf(item),
     };
@@ -405,7 +413,7 @@ export function useCwSeason(): CwSeasonShowcase {
     await app.initVersion();
     const data = await safeLoad(() => loadLocalCurrencySeasons());
     const entries = data?.seasons ?? [];
-    seasons.value = entries;
+    seasons.value = normalizeSeasonEntries(entries);
     const [roleList, traitList] = await Promise.all([
       safeLoad(() => loadLocalCurrencyRoles()),
       safeLoad(() => loadLocalCurrencyTraits()),

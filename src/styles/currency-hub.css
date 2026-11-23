@@ -439,6 +439,8 @@
   transition: border-color var(--nk-dur-hover) var(--nk-ease-out), background-color var(--nk-dur-hover) var(--nk-ease-out);
 }
 
+.nk-cwsc-season > * { min-width: 0; }
+
 .nk-cwsc-season:hover { border-color: var(--line-2); background: color-mix(in srgb, var(--card) 80%, var(--primary) 20%); }
 .nk-cwsc-season:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .nk-cwsc-season[data-active] { border-color: var(--primary); background: color-mix(in srgb, var(--card) 72%, var(--primary) 28%); }
