@@ -28,7 +28,6 @@ test.describe('布局验收：多语言长文案 · 桌面档（1280）· cn / d
         for (const x of d.spillX) failures.push(`${route.name} 横向外溢 ${x}`);
         for (const x of d.hardClipY) failures.push(`${route.name} 纵向硬裁切 ${x}`);
         for (const x of d.navClipped) failures.push(`${route.name} 导航被截断 ${x}`);
-        for (const x of d.clippedNoFallback) failures.push(`${route.name} 截断无复原文本 ${x}`);
       }
       expect(failures, `${code}：长文案布局破损`).toEqual([]);
       assertNoErrors();

@@ -16,7 +16,7 @@
     "test:e2e:prod": "node tools/e2e-prod.mjs",
     "test:e2e:prod:layout": "node tools/e2e-prod.mjs e2e/layout-",
     "test:e2e:affected": "node tools/e2e-affected.mjs --run",
-    "test:e2e:update": "playwright test --update-snapshots=all"
+    "test:e2e:full": "node tools/e2e-full.mjs"
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",

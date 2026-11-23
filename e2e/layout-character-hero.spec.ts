@@ -11,7 +11,7 @@ import {
 } from './layout.shared';
 
 test.describe('布局验收：角色详情页', () => {
-  test('/character/1001：hero、概览面板、无溢出', { tag: '@cross-engine' }, async ({ page }) => {
+  test('/character/1001：hero、概览面板、无溢出', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1001');
     await expect(page.locator('.nk-hero--char')).toBeVisible();
@@ -21,7 +21,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：hero 素材对位分档（窄桌面档右对齐 / ≥1440 回到居中）', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001：hero 素材对位分档（窄桌面档右对齐 / ≥1440 回到居中）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const read = () =>
       page.evaluate(() => {
@@ -46,7 +46,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 桌面：hero 文字可读性只落在字形（媒体无底板 / 无整片遮罩）', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001 桌面：hero 文字可读性只落在字形（媒体无底板 / 无整片遮罩）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1001');
@@ -122,7 +122,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：hero 卷宗封面结构（阵营归抬头行 / 拉丁注音 = name_en / 名称族内距最紧）', { tag: '@cross-engine' }, async ({ page }) => {
+  test('/character/1001：hero 卷宗封面结构（阵营归抬头行 / 拉丁注音 = name_en / 名称族内距最紧）', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     const d = readJson<{ name_en: string }>('public/data/cn/characters/1001.json');
     expect(d.name_en, '1001 应有拉丁转写（否则本用例失去区分力）').not.toBe('');

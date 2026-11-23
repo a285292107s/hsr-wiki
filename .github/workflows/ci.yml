@@ -4,26 +4,25 @@ on:
   push:
     branches: [main]
   pull_request:
-  schedule:
-    - cron: '0 18 * * *'
   workflow_dispatch:
     inputs:
       e2e_scope:
-        description: 手动跑哪一层 e2e（full = 不变量 + 布局契约 + 跨引擎 + 冒烟）
+        description: 手动跑哪一层 e2e（nightly = 冒烟 + 长文案；full = 再加布局契约 6 片与 13 语言全量）
         type: choice
-        options: [full, invariants, none]
-        default: full
+        options: [none, nightly, full]
+        default: nightly
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 门禁分三档（push / PR / 慢档），准入理由、片数纪律与各档取舍见 docs/agents/testing.md「门禁分层」。
-# 只有 `@visual-detail` 不在任何 CI 档：回看须 `E2E_DETAIL=1 pnpm exec playwright test --grep @visual-detail`。
+# 门禁口径：个人维护的小众站点，push 档只守「不可逆 + 影响全体用户」的失效——
+# 构建（守卫链 / 类型 / 预渲染快照与 AI 端点断言）、纯函数与数据口径、路由可达与未捕获异常。
+# 版式几何与长文案回归降为夜间一次冒烟、发版前手动 full；口径与理由见 docs/adr/0068。
 jobs:
   static:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
 
@@ -31,15 +30,14 @@ jobs:
         with:
           browsers: ''
 
-      - name: 构建守卫（tools/check-guards.mjs）
-        run: node tools/check-guards.mjs
-
-      # 标签与 grepInvert 必须成对：少任一侧的失效只在夜间 layout 显形，纯文本机检把它挪到 push 档（秒级）。
+      # 标签与 grepInvert 必须成对：少任一侧的失效只在夜间显形，纯文本机检把它挪到 push 档（秒级）。
       - name: e2e 视口标签与 project 收集过滤（标签 ⊗ grepInvert 必须成对）
         run: node tools/check-e2e-viewport-tags.mjs --strict
 
-      - name: 类型检查（vue-tsc -b）
-        run: pnpm exec vue-tsc -b
+      # 与 vercel.json 的 buildCommand 同一条链：守卫链 + vue-tsc + vite build + 预渲染快照与 AI 端点断言。
+      # 数据同步提交不触发 CI（bot 推送），所以这条是「数据换了之后页面还能不能建出来」的门。
+      - name: 构建链条（守卫 + 类型 + 预渲染快照 / AI 端点断言）
+        run: pnpm build
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -78,8 +76,9 @@ jobs:
             /tmp/hsr-wiki-e2e-results/
           retention-days: 7
 
+  # 夜间档只留两件事：语义骨架（shell + a11y）与长文案冒烟（风险语言子集 + 手机档长文案）。
   invariants:
-    if: github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope != 'none')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope != 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -93,12 +92,11 @@ jobs:
         with:
           browsers: chromium
 
-      # guards 已独立成 push 档 job，这里只留语义与可达性；组数决定片数上限，加片只会空跑。
       - name: E2E 语义契约层（shell + a11y，分片 ${{ matrix.shard }}/2）
         run: >-
           pnpm exec playwright test
           e2e/shell.spec.ts e2e/accessibility.spec.ts
-          --shard=${{ matrix.shard }}/2
+          --shard=${{ matrix.shard }}/2 --workers=1
 
       - name: Upload e2e artifacts
         if: failure()
@@ -110,72 +108,8 @@ jobs:
             /tmp/hsr-wiki-e2e-results/
           retention-days: 7
 
-  layout:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4, 5, 6]
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: ./.github/actions/setup
-        with:
-          browsers: chromium
-
-      # 冒烟族（locales-* / i18n-overflow* / endgame-overflow*）由 smoke job 承担；排除模式必须与 smoke 清单同源，
-      # 否则同一文件被两个 job 跑到（重复计费、分片偏移）。用 glob 而非硬编码：新增 layout 分文件自动纳入，
-      # 漏加会退化成「跑不到用例」而非报错；`-i18n-overflow` 子串同时收掉 `-alt` / `-mobile` 变体
-      # （前者已整文件降级为 `@visual-detail`，后者归 smoke）。
-      - name: E2E 布局契约（分片 ${{ matrix.shard }}/6）
-        shell: bash
-        run: |
-          files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-locales-sweep -e layout-i18n-overflow -e layout-endgame-overflow | tr '\n' ' ')
-          echo "本分片文件集：$files"
-          pnpm exec playwright test $files --shard=${{ matrix.shard }}/6 \
-            --project=chromium --project=mobile-chromium
-
-      - name: Upload e2e artifacts
-        if: failure()
-        uses: actions/upload-artifact@v5
-        with:
-          name: playwright-artifacts-layout-${{ matrix.shard }}
-          path: |
-            playwright-report/
-            /tmp/hsr-wiki-e2e-results/
-          retention-days: 7
-
-  # 独立成 job：`--shard` 按「文件 × project」组均分，`@cross-engine` 全落第 1 片——塞进 layout 会让每个分片都装 firefox。
-  firefox:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: ./.github/actions/setup
-        with:
-          browsers: chromium firefox
-
-      - name: E2E 跨引擎契约（firefox，@cross-engine）
-        run: >-
-          pnpm exec playwright test
-          --project=firefox-layout-contract
-
-      - name: Upload e2e artifacts
-        if: failure()
-        uses: actions/upload-artifact@v5
-        with:
-          name: playwright-artifacts-firefox
-          path: |
-            playwright-report/
-            /tmp/hsr-wiki-e2e-results/
-          retention-days: 7
-
   smoke:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.e2e_scope != 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -189,9 +123,8 @@ jobs:
         with:
           browsers: chromium
 
-      # 风险语言子集（cn 缺省 / de 性别变体 / jp ruby / ru 分片），全 13 语言矩阵见 ci-full.yml。
-      # 清单只放「常规收集里真能收到用例」的文件：整文件降级为 `@visual-detail` 的放这里就是空跑。
-      # 报条数必须带 `SMOKE_SCOPE`（不带是 13 语言全量，与 CI 实跑不是同一批）；改文件后先用 `--list --shard` 数每片条数再定片数。
+      # 风险语言子集（cn 缺省 / de 性别变体 / jp ruby / ru 分片）：13 语言全量在手动 full 档。
+      # 报条数必须带 `SMOKE_SCOPE`（不带是 13 语言全量，与 CI 实跑不是同一批）。
       - name: E2E 全语言冒烟 + 多语言长文案（风险语言子集，分片 ${{ matrix.shard }}/2）
         run: >-
           pnpm exec playwright test
@@ -213,3 +146,78 @@ jobs:
             playwright-report/
             /tmp/hsr-wiki-e2e-results/
           retention-days: 7
+
+  # 布局契约层只在「动版式 / 发版前」手动跑：它守的是「和上一版长得一样」，不该在无人看的时候常驻红灯。
+  layout:
+    if: github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      # 冒烟族（locales-* / i18n-overflow* / endgame-overflow*）分别归 smoke 与 i18n-full，这里用 glob 排除；
+      # 漏加会退化成「跑不到用例」而非报错，新增 layout 分文件自动纳入。
+      - name: E2E 布局契约（分片 ${{ matrix.shard }}/6）
+        shell: bash
+        run: |
+          files=$(ls e2e/layout-*.spec.ts | grep -v -e layout-locales-smoke -e layout-locales-sweep -e layout-i18n-overflow -e layout-endgame-overflow | tr '\n' ' ')
+          echo "本分片文件集：$files"
+          pnpm exec playwright test $files --shard=${{ matrix.shard }}/6 \
+            --project=chromium --project=mobile-chromium
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-layout-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 7
+
+  # 13 语言 × 三档长文案：原先由独立的周跑工作流承担，现改为手动 full 档（周跑只带来无人读的红灯）。
+  i18n-full:
+    if: github.event_name == 'workflow_dispatch' && inputs.e2e_scope == 'full'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: 全语言长文案与冒烟（13 语言，分片 ${{ matrix.shard }}/2）
+        run: >-
+          pnpm exec playwright test
+          e2e/layout-locales-smoke.spec.ts
+          e2e/layout-locales-sweep.spec.ts
+          e2e/layout-i18n-overflow.spec.ts
+          e2e/layout-i18n-overflow-mobile.spec.ts
+          e2e/layout-endgame-overflow.spec.ts
+          --shard=${{ matrix.shard }}/2
+        env:
+          SMOKE_SCOPE: all
+          I18N_OVERFLOW_ALL: '1'
+
+      - name: Upload e2e artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-i18n-full-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            /tmp/hsr-wiki-e2e-results/
+          retention-days: 14

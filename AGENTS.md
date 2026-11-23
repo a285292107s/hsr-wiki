@@ -23,7 +23,7 @@ HSR Wiki — 部署于 Vercel 的《崩坏：星穹铁道》数据展示型 Wiki
 | 术语 / 命名 / 禁用词 / 玩家侧文案措辞 | [CONTEXT.md](CONTEXT.md) | [data-semantics.md](docs/memory/data-semantics.md)（命名裁决） |
 | Spine 机制 / 官网抓取 / 技能预览动画抓取 / 黑块成因 | [docs/spine/](docs/spine/) | [spine.md](docs/memory/spine.md) |
 | AI 检索可见性 / 预渲染快照 / robots.txt / sitemap | [ai-discoverability.md](docs/agents/ai-discoverability.md) | [ai-visibility.md](docs/memory/ai-visibility.md) |
-| 写改测试 / e2e 分层 / 像素基线 | [testing.md](docs/agents/testing.md) | [testing.md](docs/memory/testing.md) |
+| 写改测试 / e2e 分层 / 门禁档位 | [testing.md](docs/agents/testing.md) | [testing.md](docs/memory/testing.md) |
 | 命令 / 端口 / dev 缓存陈旧 / 临时工作区 / 部署与门禁 | [commands.md](docs/agents/commands.md) | [build-deploy.md](docs/memory/build-deploy.md) |
 | UI 样式 / 色彩令牌 / 主题与强调色 / 断点 / 反 AI 味 | [ui-design.md](docs/agents/ui-design.md) | [ui-tokens.md](docs/memory/ui-tokens.md) |
 | UI 质量验收标准（获奖级达标判据 / 分层门禁 / 终止条件） | [UI质量验收标准.md](docs/audit/UI质量验收标准.md) | [testing.md](docs/memory/testing.md) |
@@ -42,13 +42,13 @@ pnpm test:e2e:affected  # 只跑按 git diff 推导出的受影响用例（「�
 pnpm test:e2e:prod      # 同一批断言跑 build 产物（整层快数倍；判据与边界见 testing.md）
 pnpm test:e2e:guards    # 不变量层：guards + shell + a11y
 pnpm test:e2e:layout    # 布局契约层：全部 layout-*
-pnpm test:e2e:ci        # 上面两层合集（本地一次跑完 CI 慢档的全部 e2e）
+pnpm test:e2e:ci        # 上面两层合集（本机一次跑完 guards + shell + a11y + layout；CI 只跑其中子集）
 node tools/doc-audit.mjs        # 文档结构化审核（改文档后跑）
 node tools/check-doc-links.mjs  # 文档链接校验（断链或误删引用即非零退出；仅手动，未进 CI）
 node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超长 / H2 重复 / 每节契约行 / 索引表一致；默认 report-only，--strict 才失败）
 ```
 
-全量命令手册（守卫逐条、e2e 分层与像素基线、研究线 `/debug`、converter、漂移检查器、部署与门禁、dev 缓存自愈）见 [commands.md](docs/agents/commands.md)。
+全量命令手册（守卫逐条、e2e 分层、研究线 `/debug`、converter、漂移检查器、部署与门禁、dev 缓存自愈）见 [commands.md](docs/agents/commands.md)。
 
 ## 架构（每次改动前必知）
 
@@ -94,7 +94,7 @@ node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超�
 
 **memory 写法（防流水账）**：memory 只留**判据与坑位**；过程叙事与验证数字（实现落点 / 用例数与耗时 / 降级记录 / 交付清单 / 时序编号）一律进 commit message。三条准入判据见 [memory/README.md](docs/memory/README.md)。
 
-**重构期模式**：UI 重构迭代期内展示层反复变动，验收基准从「取值正确」降为「不变量与契约不破」——只跑不变量层与受影响用例，不为可逆改动开 ADR / 同步子文件 / 逐轮刷新像素基线；收敛后一次性重建基线，并补登记本轮真实发生的契约变化。
+**重构期模式**：UI 重构迭代期内展示层反复变动，验收基准从「取值正确」降为「不变量与契约不破」——只跑不变量层与受影响用例，不为可逆改动开 ADR / 同步子文件；收敛后一次性补登记本轮真实发生的契约变化。
 
 ## 注释与文档
 
@@ -145,13 +145,13 @@ node tools/check-field-map.mjs  # 转换器字段映射结构守卫（单行超�
 |---|---|---|---|
 | T0 | 数据层 / 纯函数 / API | `pnpm test` + `pnpm build` 即止 | — |
 | T1a | 纯 CSS 数值微调（尺寸/间距/颜色，无选择器结构变化） | 守卫 + 静态审查（字面量/计算确认）；**视觉交用户 RunPreview 确认，不启动 headless 取证** | ≤5 min |
-| T1b | CSS 布局/结构变化（选择器、flex/grid、断点区间） | 守卫 + `pnpm test:e2e`（toHaveCSS / 溢出检测 / 像素基线，仅取有疑问的断点）；审美项交用户 RunPreview 确认 | ≤10 min |
+| T1b | CSS 布局/结构变化（选择器、flex/grid、断点区间） | 守卫 + `pnpm test:e2e:affected`（toHaveCSS / 溢出检测，仅取有疑问的断点）；审美项交用户 RunPreview 确认 | ≤10 min |
 | T2 | 模板结构 / v-if / v-for / 数据流 | 守卫 + `pnpm test:e2e`（toHaveText / toHaveCount / a11y 扫描）；较大改动按需 | ≤15 min |
 | T3 | Spine / Canvas / 动画 / 异步编排 | 守卫 + 取证金字塔 L1-L4 按需；先探测 `visibilityState` 与 rAF（后台标签页挂起陷阱） | ≤30 min |
 
 - **降级必须记录**：超预算降级 / 跳过某级验证 / 豁免项一律写进交付记录（原级别 + 原因），**禁止静默降级**——未记录视为漏测。细则与其余执行纪律见 [verification.md](docs/agents/verification.md)「执行纪律」。
 - **e2e 优先跑 build 产物**：需要跑成批 e2e 时用 `pnpm test:e2e:prod`（同批断言实测快 4 倍，判据与边界见 [testing.md](docs/agents/testing.md)），dev 档留给单条调试；两者断言语义相同，`@dev-only` 用例只在 dev 档收集。
-- **验证耗时控制**：`visual.spec` 全量禁止，只跑改动实际影响的用例（`pnpm test:e2e:affected` 或 `--grep <关键词>`）；同一会话内全量 e2e 最多一次。
+- **验证耗时控制**：不跑与改动无关的用例（`pnpm test:e2e:affected` 或 `--grep <关键词>`）；同一会话内全量 e2e 最多一次。
 
 ## 本文件维护（防回流）
 

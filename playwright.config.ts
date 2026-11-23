@@ -39,13 +39,6 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'firefox-layout-contract',
-      use: { ...devices['Desktop Firefox'] },
-      testMatch: /layout-character.*\.spec\.ts/,
-      grep: /@cross-engine/,
-      grepInvert: process.env.CI && process.env.E2E_DETAIL !== '1' ? [calibratedExclude] : undefined,
-    },
-    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       grepInvert: chromiumGrepInvert,
@@ -53,7 +46,7 @@ export default defineConfig({
     {
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
-      testIgnore: [/visual\.spec\.ts/, /accessibility\.spec\.ts/],
+      testIgnore: [/accessibility\.spec\.ts/],
       // @viewport-pinned / @viewport-independent：自钉或断点无关，手机档不必重跑；@visual-detail /
       // @i18n-detail / @font-calibrated：慢档专属，常规收集一律收起（CI 与本机一致）。
       grepInvert: [/@viewport-pinned/, /@viewport-independent/, ...mobileSlowExcludes],

@@ -61,7 +61,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1204：吸顶区块导航在 <1024 档可横滑到位 + 有溢出提示 + 触控 44 且条高不变', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1204：吸顶区块导航在 <1024 档可横滑到位 + 有溢出提示 + 触控 44 且条高不变', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
@@ -138,7 +138,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1204：技能等级滑条在键盘 Tab 下有可见焦点环', { tag: '@cross-engine' }, async ({ page }) => {
+  test('/character/1204：技能等级滑条在键盘 Tab 下有可见焦点环', async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.goto('/character/1204');
     await page.waitForSelector('.nk-stats__stat');
@@ -161,7 +161,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001：极端视口矩阵（320 / 834 / 矮横屏 / 2560）四条不变量', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const vp of [
       { width: 320, height: 568 },
@@ -221,7 +221,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1513：吸顶区块导航跟随当前区块 + 渐隐按滚动位置双向开关', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1513：吸顶区块导航跟随当前区块 + 渐隐按滚动位置双向开关', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/character/1513');

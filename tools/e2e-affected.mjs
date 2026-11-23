@@ -231,10 +231,10 @@ for (const t of index) {
   const hit = t.routes.size ? [...t.routes].some((r) => ris.some((re) => re.test(r))) : false;
   if (direct || hit) matchedTests.push({ ...t, direct });
 }
-const pixelTests = matchedTests.filter((t) => t.file.includes('visual.spec.ts'));
-const runTests = matchedTests.filter((t) => !t.file.includes('visual.spec.ts'));
+const runTests = matchedTests;
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const grepOf = (list) => {
   const frags = new Set();
   for (const t of list) {
@@ -295,11 +295,6 @@ if (runTests.length) {
   console.log('  推导不出（变更未落到任何路由，或该路由没有 goto 索引）→ 不要静默跳过：');
   console.log(`  建议跑 guards 层 + 全量 layout：${CI_CMD}\n`);
   cmd = CI_CMD;
-}
-if (pixelTests.length) {
-  console.log(B(`── 像素基线（按需，未进默认命令；${pixelTests.length} 条） ──`));
-  for (const t of pixelTests) console.log(`  ${t.file}  ${t.title}`);
-  console.log(`  需要时：pnpm exec playwright test ${fileList(pixelTests).join(' ')}\n`);
 }
 if (cmd) {
   console.log(B('── 建议命令 ──'));

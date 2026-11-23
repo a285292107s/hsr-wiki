@@ -26,7 +26,7 @@
 | 层 | 选型 | 版本 | 说明 |
 | --- | --- | --- | --- |
 | 单元 | Vitest + happy-dom | <!--ver:vitest-->4.1.10 / <!--ver:happy-dom-->20.11.1 | `pnpm test`；DOM 环境不做真实布局 |
-| 组件 / e2e | Playwright + `@axe-core/playwright` | <!--ver:@playwright/test-->1.62.1 / <!--ver:@axe-core/playwright-->4.12.1 | 分层与命令见 [testing.md](testing.md)；像素基线纪律见 [commands.md](commands.md) |
+| 组件 / e2e | Playwright + `@axe-core/playwright` | <!--ver:@playwright/test-->1.62.1 / <!--ver:@axe-core/playwright-->4.12.1 | 分层、门禁档位与命令见 [testing.md](testing.md) |
 | 类型检查 | vue-tsc | <!--ver:vue-tsc-->3.2.8 | `pnpm build` 内建 |
 | converter | pytest（合成数据，不依赖真实源数据） | <!--ver:python-->3.12 | `cd tools/converter && python -m pytest tests/` |
 

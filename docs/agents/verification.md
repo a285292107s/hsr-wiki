@@ -21,13 +21,13 @@ AI 侧验证基线 = **代码与规格工作流**（静态审查 / 可断言规�
 | L1 静态结构 | `--dump-dom`、骨架/清单解析（无需渲染） | CDP 兜底命令；`src/app/debug/spine-audit.ts` 的骨架解析与元数据提取 |
 | L2 渲染态断言 | `toHaveCSS` / `toHaveText` / `toHaveCount` | `e2e/layout-*.spec.ts` |
 | L3 横向溢出检测 | 全树扫描右边界超出视口/产生横向滚动条的元素 | `e2e/helpers.ts → findHorizontalOverflow` |
-| L4 像素基线 | `toHaveScreenshot`（本机刷新基线，CI 不跑） | `e2e/visual.spec.ts` |
+| L4 像素对比 | 已退役（`toHaveScreenshot` 无消费方） | — |
 
 ## 执行纪律（超预算即降级）
 
 - **降级必须记录**：任何「超预算降级」「跳过某级验证」「豁免项」必须在交付记录 / 回复中写明（原级别、降级原因）；**禁止静默降级**——未记录视为漏测，并作为「任务交付流程」第 5 条的沉淀信号。
-- **验证耗时控制**：`visual.spec` 全量禁止——只跑改动实际影响的用例（`--grep 首页` 等），与改动无关的 character / endgame / currency 用例直接跳过；同一会话内全量 e2e 最多执行一次；T1a/T1b 纯 CSS 改动用守卫 + 单探针计算样式断言 + `layout.spec` 即可，不跑像素基线。
-- **重构期像素基线冻结**：UI 重构迭代期内**不逐轮刷新像素基线**——展示层反复变动时刷新，等于把基线写成流水账，且每次 `--update-snapshots` 都会掩盖真实回归。迭代期只跑不变量层与受影响用例（`pnpm test:e2e:affected`）；**收敛后一次性 `pnpm test:e2e:update` 重建**，刷新时按受影响用例分开跑（禁 `visual.spec` 全量）。基线文件始终是判定依据，**不得为过测删除用例或放宽断言**。
+- **验证耗时控制**：只跑改动实际影响的用例（`--grep <关键词>` 或 `pnpm test:e2e:affected`），与改动无关的页面直接跳过；同一会话内全量 e2e 最多执行一次；T1a/T1b 纯 CSS 改动用守卫 + 单探针计算样式断言即可，不启动 headless 全扫。
+- **像素基线已退役**：像素对比用例与基线图于 2026-11-23 删除（判定依赖供图与渲染环境），视觉验收交用户 RunPreview + `layout-*.spec.ts` 的可执行断言；禁止重新引入基线而不先开 ADR。
 - **环境问题先排除**：headless 内 CDN / 网络加载失败先判定环境性（`curl` 验证 URL 可达），不当代码缺陷深究（限流窗口特征见 [architecture.md](architecture.md)）。
 - **dev 缓存陈旧先自愈**：dev 下怀疑「改了不生效」时禁止直接重启分析——先 `curl` 对比 dev 响应与磁盘特征串定位，再 `node tools/refresh-vite-cache.mjs` 自愈（症状、用法与根因见 [commands.md](commands.md)）。
 - **条件等待与清理**：用 `page.waitForFunction` / `expect.poll` 精确条件，**禁止固定 sleep 与长轮询**；不等待与断言目标无关的就绪状态（如只查 padding 就不等 spine 渲染）；验证确认后单独 `Remove-Item` 清理临时文件。

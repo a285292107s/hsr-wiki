@@ -30,7 +30,9 @@ pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 
 pnpm preview   # 预览构建产物
 ```
 
-`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文七守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面）/ **社交卡片**（`og:image` 同源 + `twitter:card` + `og:locale` 与 `<html lang>` 一致）/ **JSON-LD `inLanguage` 与 `<html lang>` 同源** / **数据条目页必须是 `WebPage` + `mainEntity`（不用 `Article`）**，并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+`pnpm build` 前置 `tools/check-guards.mjs`（色彩收口 / Spine 清单 / 对比度 / 语言清单 / 语言包覆盖 / UI 词典 / 界面中文 / 图片加载收口八守卫串行）；末步 `tools/gen-ai-endpoints.mjs` + `tools/check-ai-endpoints.mjs`（生成 `dist/prerender/**` 快照与 `dist/sitemap.xml`；逐份断言 title / canonical / 内链 / 中文字符数 / h1 / JSON-LD / 游戏标记 / 未展开参数占位符 `#\d+\[…\]` / **无未解析文本令牌 `$t:…`** / **无原始词典键名**（缺键时 vue-i18n 会把键名本身写进页面）/ **社交卡片**（`og:image` 同源 + `twitter:card` + `og:locale` 与 `<html lang>` 一致）/ **JSON-LD `inLanguage` 与 `<html lang>` 同源** / **数据条目页必须是 `WebPage` + `mainEntity`（不用 `Article`）**，并断言覆盖率。契约见 [ai-discoverability.md](ai-discoverability.md)）。两者可单独运行，但生成器必须在 `vite build` 之后（模板取自 `dist/index.html`）。
+
+图片加载收口守卫生效方式：`node tools/check-image-loading.mjs` 默认 report-only（打印命中不退出），`--strict` 命中即退出 1；`check-guards.mjs` 以 `--strict` 调用，故 `pnpm build` 阶段任何 `<img src>` / 模板串 `data-cdn-src` / 裸 `background-image: url()` / 内联 `@error` 改 src / `new Image()` 都会让构建失败。统一入口 `src/lib/image.ts` + `src/app/components/CdnImage.vue`，豁免清单见守卫脚本内 `EXEMPT`（image 模块自身 / CdnImage / services/cdn 底层回退 / 测试）。
 
 多语言相关三守卫可单独运行（契约见 [ADR 0052](../adr/0052-多语言站点架构-路径前缀与语言包.md)）：
 
@@ -94,12 +96,12 @@ pnpm test:watch                                      # 监听模式
 e2e（Playwright，webServer 自动起 dev server 并复用已有 6188 实例）：
 
 ```bash
-pnpm test:e2e          # 本机层：常规全集（含像素基线；`@visual-detail` / `@i18n-detail` 需 E2E_DETAIL=1 才收集）
+pnpm test:e2e          # 本机层：常规全集（`@visual-detail` / `@i18n-detail` 需 E2E_DETAIL=1 才收集）
 pnpm test:e2e:guards   # CI 快层：不变量 + 外壳契约 + a11y（guards + shell + accessibility，不受 UI 迭代影响，永远可跑）
 pnpm test:e2e:layout   # 布局契约层：全部 layout-*（CI 里按 6 分片跑；本地即全量单进程）
 pnpm test:e2e:ci       # 上面两层合集（本地一次跑完 CI 的 PR + 夜间层；不含 @visual-detail 等慢档标签，收窄登记见 testing.md）
 pnpm test:e2e:affected # 受影响用例层：按 git diff 推导并直接执行（= node tools/e2e-affected.mjs --run）
-pnpm test:e2e:update   # 刷新像素基线（已内置 --update-snapshots=all；重构期只在收敛后跑一次）
+pnpm test:e2e:full     # 手动 full 档：13 语言 × 三档长文案（= tools/e2e-full.mjs，内部注入 SMOKE_SCOPE=all + I18N_OVERFLOW_ALL=1，与 ci.yml 的 i18n-full job 同集）
 
 # build 产物档（推荐用于整层/全量：同 150 条 layout 实测 717.7s → 179.4s，见 testing.md）
 pnpm test:e2e:prod                                      # vite build → vite preview(6189) → playwright（默认 --project=chromium）
@@ -107,7 +109,7 @@ pnpm test:e2e:prod:layout                               # 同上，跑全部 lay
 node tools/e2e-prod.mjs --skip-build e2e/layout-nav.spec.ts --grep "设置入口"   # 复用已构建的 dist，只跑命中用例
 ```
 
-**直接调用 playwright 时必须显式传覆盖模式**：`pnpm exec playwright test --update-snapshots=all`——Playwright 默认 `changed` 模式在更新已有基线时静默 pass 不落盘。只跑改动实际影响的用例（`--grep 首页` 等），`visual.spec` 全量禁止。
+**直接调用 playwright 时必须显式传选择器**：只跑改动实际影响的用例（`--grep 首页` 等）或整个文件，不跑全量。像素基线已于 2026-11-23 删除，`--update-snapshots` 不再有消费方。
 
 `playwright.config.ts` 保持 `fullyParallel: false`（**文件内**串行）——全局并行实测过但不采纳：本地 4 worker 全量墙钟比串行快约两成，代价是 3 次全量里出现 1 次并发竞态 flake（同一用例串行复跑 2/2 与单独复跑 3/3 均绿，属并发下 dev server 争用而非代码缺陷）。**禁止为提速放宽断言、加 `--retries` 或改配置掩盖 flake**。
 
@@ -122,7 +124,7 @@ node tools/e2e-prod.mjs --skip-build e2e/layout-nav.spec.ts --grep "设置入口
 
 ## 漂移与影响面工具（report-only，默认不阻塞）
 
-七个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）是硬门禁，不属本组。
+七个漂移检查器都**默认不阻塞**（退出码 `0`）：只打印漂移清单，**加 `--strict` 才在命中时退出 1**；`e2e-affected.mjs` 只推导并打印可执行命令，`--run` 才真正执行。它们**刻意不接入 `pnpm build` 与 CI**——迭代期漂移必然存在，硬门禁只会逼出「为过闸改文档」的反向浪费。注意区分：`tools/check-doc-links.mjs`（断链 / 误删引用即非零退出）与 `tools/check-image-loading.mjs`（图片加载收口，已进构建守卫链，见上节）是硬门禁，不属本组。
 
 **唯一例外是 `check-e2e-viewport-tags.mjs --strict`（已进 CI `static` job）**：它判的不是漂移而是「标签与 `grepInvert` 是否成对」，缺任一半都让桌面契约被 Pixel 7 重跑；而 push 档不跑 layout，这类错只能在夜间慢档显形（实测连红两个 schedule run）。它是纯文本扫描、秒级，放进 push 反馈环不增加抖动面。
 
@@ -192,10 +194,10 @@ python -m pytest tests/ -v               # converter 单元测试
 - main 分支 protection 仅保留防 force push 与防删除（required status checks / enforce_admins / PR 强制均已移除）——push main 直接通过。
 - CI 分**三档**（判据见 [testing.md](testing.md)「门禁分层」）：
   - **push 档**：`static`（七守卫 + 视口标签机检 + `vue-tsc -b`）、`unit-tests`（`pnpm test`）与 `guards`（`e2e/guards.spec.ts --project=chromium`，唯一进 push 档的 e2e，约 30s 量级）。
-  - **PR 档**：`invariants`（`shell` + `accessibility`，2 分片）。**布局契约不进 PR。**
-  - **慢档**（`schedule` 每日 + 手动 `workflow_dispatch`；**不含 PR**）：`layout`（6 分片 × 每片 2 worker，只装 chromium）、`firefox`（`@cross-engine` 标签 11 条，CI 收起 1 条 `@font-calibrated` 后实收 10 条）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集，2 分片 10/8）。发布前手动触发一次 `e2e_scope=full` 取全量结果。
-  - **`@visual-detail` / `@i18n-detail` 不在任何 CI 档**：脆弱几何断言与逐页词典枚举降级为「不常规跑」，判据与证据一条未删，回看走 `E2E_DETAIL=1 pnpm exec playwright test --grep @visual-detail`（`grepInvert` 无 CLI 覆盖开关，不带该变量时连收集都收不到）。
-- CI **不跑** `pnpm build`（Vercel 构建即发布门，重复跑零增量）；失败由 GitHub 通知。
-- **全量矩阵周跑**：`.github/workflows/ci-full.yml`（周一定时 + 手动触发）跑 13 语言 × 全部路由族（26 条路径）的冒烟与全语言长文案扫描——这是「每次 push 只跑风险语言子集」这处已登记收窄的补偿。
+  - **PR 档**：只跑 push 档三个 job（`static` / `unit-tests` / `guards`）；夜间与 full 档不随 PR。
+  - **夜间档**（`schedule` 每日 18:00 UTC + 手动 `workflow_dispatch`；**不含 PR**，~6 min）：`invariants`（shell + a11y，2 分片 `--workers=1`）、`smoke`（全语言冒烟 + 多语言长文案，风险语言子集，2 分片 10/8）。
+  - **手动 full 档**（`workflow_dispatch e2e_scope=full`）：`layout`（6 分片 × 2 project）+ `i18n-full`（13 语言 × 三档长文案）。只在「动版式」与「发版前」跑。
+- **push 档 `static` 跑的就是 `pnpm build`**（守卫链 + `vue-tsc` + `vite build` + 预渲染快照与 AI 端点断言），与 `vercel.json` 的 `buildCommand` 同一条链：数据同步提交不触发 CI（bot 推送），这条是「数据换了之后页面还能不能建出来」的门。
+- **全语言矩阵改手动**：原周跑工作流（ci-full.yml，已删）只产出无人读的红灯；13 语言的冒烟与三档长文案改由 `ci.yml` 的 `i18n-full` job 在 `e2e_scope=full` 时跑。取舍见 [ADR 0068](../adr/0068-门禁按低维护口径收敛.md)。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。

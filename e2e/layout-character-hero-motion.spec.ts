@@ -87,7 +87,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 平板档：文字与媒体并排且骨架同框', { tag: ['@visual-detail', '@viewport-pinned', '@font-calibrated', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001 平板档：文字与媒体并排且骨架同框', { tag: ['@visual-detail', '@viewport-pinned', '@font-calibrated'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 768, height: 1024 });
     const measure = (rootSel: string) => page.evaluate((sel) => {
@@ -147,7 +147,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001：hero 面板在 1024 与矮横屏下仍落在 hero 内', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001：hero 面板在 1024 与矮横屏下仍落在 hero 内', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     for (const vp of [{ width: 1024, height: 768 }, { width: 1440, height: 460 }]) {
       await page.setViewportSize(vp);
@@ -203,7 +203,7 @@ test.describe('布局验收：角色详情页', () => {
     assertNoErrors();
   });
 
-  test('/character/1001 桌面：hero 媒体滚动视差（推进 / 封顶 / 面板不动 / reduced-motion 关闭）', { tag: ['@visual-detail', '@viewport-pinned', '@cross-engine'] }, async ({ page }) => {
+  test('/character/1001 桌面：hero 媒体滚动视差（推进 / 封顶 / 面板不动 / reduced-motion 关闭）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/character/1001');

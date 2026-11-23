@@ -51,7 +51,6 @@ export interface Defects {
   hardClipX: string[];
   spillX: string[];
   hardClipY: string[];
-  clippedNoFallback: string[];
   navClipped: string[];
 }
 
@@ -62,7 +61,6 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
     const hardClipX: string[] = [];
     const spillX: string[] = [];
     const hardClipY: string[] = [];
-    const clippedNoFallback: string[] = [];
     const navClipped: string[] = [];
 
     const inTransition = (el: Element): boolean => {
@@ -81,6 +79,22 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
         cur = cur.parentElement;
       }
       return false;
+    };
+    const clipOffenders = (host: Element): string => {
+      const hb = host.getBoundingClientRect();
+      const hostRight = hb.left + host.clientLeft + host.clientWidth;
+      const hits: string[] = [];
+      for (const child of host.querySelectorAll('*')) {
+        const ccs = getComputedStyle(child);
+        if (ccs.display === 'none' || ccs.visibility === 'hidden') continue;
+        const cr = child.getBoundingClientRect();
+        if (cr.width < 2 || cr.height < 2) continue;
+        if (inScrollableAncestor(child)) continue;
+        const over = cr.right - hostRight;
+        if (over > 1) hits.push(`${sel(child)} +${Math.round(over)}px`);
+        if (hits.length >= 3) break;
+      }
+      return hits.length ? ` ← 越界源：${hits.join(' / ')}` : '';
     };
     const sel = (el: Element): string => {
       const parts: string[] = [];
@@ -156,22 +170,8 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
 
       if (clipsX && clippedX) {
         const rec = `${sel(el)} +${el.scrollWidth - el.clientWidth}px "${text}"`;
-        if (!isEllipsis && !isClamp) hardClipX.push(rec);
-        const flat = (v: string | null): string => (v || '').replace(/\s+/g, ' ').trim();
-        const flatText = flat(text);
-        let cur: Element | null = el;
-        let hasFallback = false;
-        for (let i = 0; i < 5 && cur && cur !== document.body; i++) {
-          const t = flat(cur.getAttribute('title'));
-          const a = flat(cur.getAttribute('aria-label'));
-          if ((t && t.includes(flatText)) || (a && a.includes(flatText))) {
-            hasFallback = true;
-            break;
-          }
-          cur = cur.parentElement;
-        }
-        if (!hasFallback) clippedNoFallback.push(rec);
-        if (isNav(el)) navClipped.push(rec);
+        if (!isEllipsis && !isClamp) hardClipX.push(rec + clipOffenders(el));
+        if (isNav(el)) navClipped.push(rec + clipOffenders(el));
       } else if (!clipsX && clippedX && cs.whiteSpace === 'nowrap') {
         spillX.push(`${sel(el)} +${el.scrollWidth - el.clientWidth}px "${text}"`);
       }
@@ -188,13 +188,12 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
       hardClipX: [...new Set(hardClipX)].slice(0, 12),
       spillX: [...new Set(spillX)].slice(0, 12),
       hardClipY: [...new Set(hardClipY)].slice(0, 12),
-      clippedNoFallback: [...new Set(clippedNoFallback)].slice(0, 12),
       navClipped: [...new Set(navClipped)].slice(0, 12),
     };
   });
 }
 
-const DEFECT_KEYS = ['hardClipX', 'spillX', 'hardClipY', 'clippedNoFallback', 'navClipped'] as const;
+const DEFECT_KEYS = ['hardClipX', 'spillX', 'hardClipY', 'navClipped'] as const;
 
 const hasDefects = (d: Defects): boolean => d.pageOverflow > 1 || DEFECT_KEYS.some((k) => d[k].length > 0);
 
