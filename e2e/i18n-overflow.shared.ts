@@ -157,12 +157,14 @@ export async function scanDefects(page: import('@playwright/test').Page): Promis
       if (clipsX && clippedX) {
         const rec = `${sel(el)} +${el.scrollWidth - el.clientWidth}px "${text}"`;
         if (!isEllipsis && !isClamp) hardClipX.push(rec);
+        const flat = (v: string | null): string => (v || '').replace(/\s+/g, ' ').trim();
+        const flatText = flat(text);
         let cur: Element | null = el;
         let hasFallback = false;
         for (let i = 0; i < 5 && cur && cur !== document.body; i++) {
-          const t = cur.getAttribute('title');
-          const a = cur.getAttribute('aria-label');
-          if ((t && t.includes(text)) || (a && a.includes(text))) {
+          const t = flat(cur.getAttribute('title'));
+          const a = flat(cur.getAttribute('aria-label'));
+          if ((t && t.includes(flatText)) || (a && a.includes(flatText))) {
             hasFallback = true;
             break;
           }

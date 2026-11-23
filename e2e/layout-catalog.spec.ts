@@ -77,12 +77,14 @@ test.describe('布局验收：目录引擎 · 卡片渲染', () => {
             el.scrollWidth > el.clientWidth + 1 &&
             el.clientWidth > 0;
           if (!clipped) continue;
+          const flat = (v: string | null): string => (v || '').replace(/\s+/g, ' ').trim();
+          const flatText = flat(text);
           let cur: Element | null = el;
           let found = false;
           for (let i = 0; i < 5 && cur && cur !== document.body; i++) {
-            const t = cur.getAttribute('title');
-            const a = cur.getAttribute('aria-label');
-            if ((t && t.includes(text)) || (a && a.includes(text))) { found = true; break; }
+            const t = flat(cur.getAttribute('title'));
+            const a = flat(cur.getAttribute('aria-label'));
+            if ((t && t.includes(flatText)) || (a && a.includes(flatText))) { found = true; break; }
             cur = cur.parentElement;
           }
           if (!found) {
