@@ -26,7 +26,7 @@ pnpm dev       # → http://localhost:6188/
 ## 构建与预览
 
 ```bash
-pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 + 守卫 → dist/ 图标裁剪
+pnpm build     # 构建守卫 → vue-tsc -b → vite build → AI 端点生成 + 守卫
 pnpm preview   # 预览构建产物
 ```
 
@@ -201,3 +201,11 @@ python -m pytest tests/ -v               # converter 单元测试
 - **全语言矩阵改手动**：原周跑工作流（ci-full.yml，已删）只产出无人读的红灯；13 语言的冒烟与三档长文案改由 `ci.yml` 的 `i18n-full` job 在 `e2e_scope=full` 时跑。取舍见 [ADR 0068](../adr/0068-门禁按低维护口径收敛.md)。
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。
+
+### 可部署 dist 下载（不影响 Vercel）
+
+`release-dist.yml`：**打 tag（`v*`）或手动触发**时，在 Actions 里跑完整 `pnpm build`，把 `dist/` 打包为 `dist.tar.gz`（约 285 MB，压缩后）+ `.sha256` 传到 GitHub Release。**不改 main、不动 Vercel 部署链**——Vercel 仍从源码自动构建。
+
+- 产物根目录可直接作任意静态托管根目录（含 `index.html`、`prerender/`、`data/`、`sitemap.xml` 等）；`data/assets/icons` 图标随包（约 250 MB，[ADR 0069](../adr/0069-图片加载改为本地优先.md)）。
+- **该产物不能直接丢给不认识 SPA 重写的托管**：深层路由（如 `/character/1212`）刷新依赖 `vercel.json` 里的 rewrites（快照投递 + catch-all → `prerender/_shell.html`）；包内附 `vercel.json` 仅作参照，非 Vercel 托管需自行实现等价重写，否则深层刷新 404。
+- **它不加速 Vercel 部署**：Vercel Git 集成每次仍从头构建（含 1137 页预渲染）。若真要“免构建部署”，得改 `vercel deploy --prebuilt`，但那只是把构建搬到 Actions + 多两次 ~285 MB 传输，总时长未必降，且多一个失败面——当前小站（日均 ≤10）不值得。
