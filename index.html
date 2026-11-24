@@ -29,11 +29,10 @@
     <!-- 字体：自托管（src/styles/fonts.css + public/fonts/*.woff2）。此前直引 Google Fonts 的
          跨域 `<link rel="stylesheet">` 是**渲染阻塞**，且该域在中国大陆不可达——浏览器要等连接超时
          才继续渲染，FCP/LCP 直接塌掉。字体文件与本站同源，随入口 CSS chunk 走内容哈希缓存。 -->
-    <!-- 图片走项目 GitHub 仓库镜像（主源 cdn.jsdelivr.net/gh，回退 raw.githubusercontent.com）：
-         此前图片由 Vercel 源站（/data/assets/icons）直发，跨境带宽低、立绘体量大，首屏 LCP 图被明显拖慢；
-         改为 jsdelivr 镜像后同为项目 GitHub 地址、速度显著提升。
-         preconnect 省掉首屏 LCP 图的 DNS+TLS；raw 回退仅在 jsdelivr 冷文件 403（仓库超 50MB 限额）时启用，故只 dns-prefetch。 -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <!-- 图片本地优先：主源为同源 /data/assets/icons（随构建产物部署），失败时回退 cdn.jsdelivr.net（同一 GitHub 仓库镜像），
+         再失败回退 raw.githubusercontent.com。主源同源无需跨域，故只在首次回退前按需建立连接：
+         jsdelivr 走 preconnect（LCP 回退常见路），raw 仅在 jsdelivr 冷文件 403（仓库超 50MB 限额）时才用，故只 dns-prefetch。 -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
     <style>html, body { margin: 0; background: #121214; }</style>
   </head>

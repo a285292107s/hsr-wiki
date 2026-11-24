@@ -1,6 +1,6 @@
 import { isCdnDown, subscribeCdnHealth } from './health';
-import { LOCAL_ICONS_BASE } from './base';
-import { localFallbackFromPrimary } from './resolve';
+import { LOCAL_ICONS_BASE, LOCAL_ICONS_DELIVR_BASE, LOCAL_ICONS_FALLBACK_BASE } from './base';
+import { localFallback2FromPrimary, localFallbackFromPrimary } from './resolve';
 import { MISSING_ICON_SRC } from './placeholder';
 import { gateImagesIn } from './img-gate';
 
@@ -69,12 +69,20 @@ function clearStallTimer(img: HTMLImageElement): void {
   }
 }
 
+function isLocalMirrorUrl(src: string): boolean {
+  return src.startsWith(`${LOCAL_ICONS_DELIVR_BASE}/`) || src.startsWith(`${LOCAL_ICONS_FALLBACK_BASE}/`);
+}
+
 function handleFailure(img: HTMLImageElement): void {
   const src = img.getAttribute('src') || '';
   if (src.startsWith(`${LOCAL_ICONS_BASE}/`)) {
-    const remote = localFallbackFromPrimary(src);
-    if (remote) {
-      img.src = remote;
+    const jd = img.getAttribute('data-cdn-fallback') || localFallbackFromPrimary(src);
+    if (jd) {
+      const raw = img.getAttribute('data-cdn-fallback2') || localFallback2FromPrimary(src);
+      img.removeAttribute('data-cdn-fallback');
+      if (raw) img.setAttribute('data-cdn-fallback2', raw);
+      else img.removeAttribute('data-cdn-fallback2');
+      img.src = jd;
       return;
     }
     markDown(img);
@@ -86,8 +94,18 @@ function handleFailure(img: HTMLImageElement): void {
     markDown(img, true);
     return;
   }
+  if (isLocalMirrorUrl(src)) {
+    const fb2 = img.getAttribute('data-cdn-fallback2');
+    if (fb2 && fb2 !== src) {
+      img.removeAttribute('data-cdn-fallback2');
+      img.src = fb2;
+      return;
+    }
+    markDown(img);
+    return;
+  }
   const fb = img.getAttribute('data-cdn-fallback');
-  if (fb) {
+  if (fb && fb !== src) {
     img.removeAttribute('data-cdn-fallback');
     img.src = fb;
     return;

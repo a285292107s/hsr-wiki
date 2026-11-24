@@ -14,6 +14,7 @@ describe('image 模块统一图片加载', () => {
     expect(imgAttrs(localSrc)).toEqual({
       src: localSrc,
       'data-cdn-fallback': expect.any(String),
+      'data-cdn-fallback2': expect.any(String),
     });
   });
 
@@ -24,6 +25,7 @@ describe('image 模块统一图片加载', () => {
     expect(attrs.loading).toBe('lazy');
     expect(attrs.fetchpriority).toBe('high');
     expect(attrs['data-cdn-fallback']).toBeTruthy();
+    expect(attrs['data-cdn-fallback2']).toBeTruthy();
   });
 
   it('imgHtml 用 data-cdn-src 输出模板串图片，转义全部用户可见文本', () => {

@@ -1,17 +1,18 @@
-import { cdnFallbackFromPrimary, cdnImgFallbackAttr, cdnUri, type CdnCategory } from '../services/cdn';
+import { cdnFallbackFromPrimary, cdnImgFallbackAttr, cdnUri, localFallback2FromPrimary, type CdnCategory } from '../services/cdn';
 import { escHtml } from './html';
 
 export interface CdnImgAttrs {
   'data-cdn-src': string;
   'data-cdn-fallback'?: string;
+  'data-cdn-fallback2'?: string;
   alt: string;
   loading?: 'lazy' | 'eager';
   fetchpriority?: 'high';
 }
-
 export interface ImgAttrs {
   src: string;
   'data-cdn-fallback'?: string;
+  'data-cdn-fallback2'?: string;
 }
 
 export interface ImgHtmlOptions {
@@ -28,7 +29,8 @@ export function cdnSrc(category: CdnCategory, file: string): string {
 
 export function imgAttrs(url: string): ImgAttrs {
   const fb = cdnFallbackFromPrimary(url);
-  return { src: url, 'data-cdn-fallback': fb || undefined };
+  const fb2 = localFallback2FromPrimary(url);
+  return { src: url, 'data-cdn-fallback': fb || undefined, 'data-cdn-fallback2': fb2 || undefined };
 }
 
 export function imgAttrsWith(
@@ -57,6 +59,8 @@ export function cdnImgAttrs(url: string, alt: string, opts?: {
   const fb = cdnFallbackFromPrimary(url);
   const attrs: CdnImgAttrs = { 'data-cdn-src': url, alt };
   if (fb) attrs['data-cdn-fallback'] = fb;
+  const fb2 = localFallback2FromPrimary(url);
+  if (fb2) attrs['data-cdn-fallback2'] = fb2;
   if (opts?.loading) attrs.loading = opts.loading;
   if (opts?.fetchpriority) attrs.fetchpriority = opts.fetchpriority;
   return attrs;
