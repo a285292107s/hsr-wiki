@@ -3,8 +3,9 @@ import { shallowRef } from 'vue';
 import { elemLabel } from '../../lib/enum-labels';
 import { translate } from '../i18n';
 import { monsterRankKey } from '../../lib/enum-labels';
-import { escHtml, elementIconUrl, fmtDesc } from '../../lib/format';
-import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
+import { hideImgOnError, imgHtml } from '../../lib/image';
+import { elementIconUrl, fmtDesc } from '../../lib/format';
+import { cdnSrc } from '../../lib/image';
 import { loadLocalItems } from '../../services/api';
 import type {
   LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeRewardItem,
@@ -54,7 +55,7 @@ export function seasonNodeBuff(data: MazeListEntry): MazeBuffInfo | null {
 }
 
 export function buffIconUrl(b: MazeBuffInfo): string {
-  return b.icon ? cdnUri('bufficon', `${b.icon}.webp`) : '';
+  return b.icon ? cdnSrc('bufficon', `${b.icon}.webp`) : '';
 }
 
 export const BUFF_ICON_FALLBACK =
@@ -64,7 +65,7 @@ export function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
+      ? imgHtml(src, { className: 'nk-egd-elem', alt: elemLabel(d), title: elemLabel(d), loading: 'lazy' })
       : '';
   }).join('');
 }
@@ -196,6 +197,4 @@ export function starTierRows(
   return rows;
 }
 
-export function hideOnError(e: Event): void {
-  (e.target as HTMLImageElement).style.display = 'none';
-}
+export const hideOnError = hideImgOnError;

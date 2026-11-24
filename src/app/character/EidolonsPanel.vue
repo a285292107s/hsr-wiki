@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import SectionIndex from './SectionIndex.vue';
 import { extraTerms } from './utils';
 import { eidolonIconUrl, fmtDesc } from '../../lib/format';
+import { imgAttrs } from '../../lib/image';
 import { SECTION_IDX } from './sections';
 import type { CharacterData, SkillExtra } from '../../services/types';
 
@@ -51,7 +52,7 @@ const indexItems = computed(() =>
     class="nk-eidolon"
   >
     <div class="nk-eidolon__head">
-      <img class="nk-eidolon__icon" :src="e.img" :alt="e.name" loading="lazy">
+      <img class="nk-eidolon__icon" v-bind="imgAttrs(e.img)" :alt="e.name" loading="lazy">
       <div class="nk-eidolon__info">
         <div class="nk-eidolon__meta">
           <span class="nk-eidolon__num">E{{ e.num }}</span>

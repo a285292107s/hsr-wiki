@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cdnUri } from '../../services/cdn';
+import { cdnSrc, imgAttrs, markImgError } from '../../lib/image';
 import { pollutionLabel } from './pollution';
 import type { MazeSummonInfo } from '../../services/types';
 
@@ -22,10 +22,10 @@ defineProps<{ items: MazeSummonInfo[] }>();
       >
         <img
           class="nk-egd-summon__icon"
-          :src="m.icon ? cdnUri('monstermiddleicon', `${m.icon}.webp`) : ''"
+          v-bind="imgAttrs(m.icon ? cdnSrc('monstermiddleicon', `${m.icon}.webp`) : '')"
           :alt="m.name"
           loading="lazy"
-          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+          @error="markImgError"
         >
         <span class="nk-egd-summon__name">{{ m.name }}</span>
         <span v-if="m.polluted" class="nk-egd-pollchip" :data-level="m.polluted">{{ pollutionLabel({ level: m.polluted }) }}</span>

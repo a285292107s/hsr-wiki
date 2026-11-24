@@ -7,6 +7,7 @@ import {
   modeDefaultArtUrl, seasonBannerUrl, seasonHeroBgUrl,
 } from '../catalog/pages/endgame';
 import { hideOnError } from './renders';
+import { imgAttrs as bindImgAttrs } from '../../lib/image';
 import type { MazeListEntry } from '../../services/types';
 
 const props = defineProps<{
@@ -42,14 +43,14 @@ const flipHeroBg = computed(() => !!seasonBanner.value);
       v-if="heroBg"
       class="nk-egd-hero__bg"
       :class="{ 'nk-egd-hero__bg--flip': flipHeroBg }"
-      :src="heroBg"
+      v-bind="bindImgAttrs(heroBg)"
       alt=""
       aria-hidden="true"
       loading="lazy"
       @error="hideOnError"
     >
     <div class="nk-egd-hero__plate">
-      <img v-if="seasonArt" class="nk-egd-hero__art" :src="seasonArt" alt="" aria-hidden="true" @error="hideOnError">
+      <img v-if="seasonArt" class="nk-egd-hero__art" v-bind="bindImgAttrs(seasonArt)" alt="" aria-hidden="true" @error="hideOnError">
     </div>
     <div class="nk-egd-hero__panel">
       <div class="nk-egd-hero__camp">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
-import { cdnUri } from '../../services/cdn';
+import { cdnSrc, imgAttrs, markImgError } from '../../lib/image';
 import { elemRow, lastWaveBoss } from './renders';
 import { tabNextIndex } from './tabs';
 import type { MazeStageDetail } from '../../services/types';
@@ -36,7 +36,7 @@ const cards = computed(() => {
       key: it.key,
       label: it.label,
       boss: shared ? '' : (boss?.name || ''),
-      icon: boss?.icon ? cdnUri('monstermiddleicon', `${boss.icon}.webp`) : '',
+      icon: boss?.icon ? cdnSrc('monstermiddleicon', `${boss.icon}.webp`) : '',
       elems: it.stage?.damage?.length ? elemRow(it.stage.damage) : '',
       level: it.level,
       countdown: it.countdown || 0,
@@ -83,10 +83,10 @@ function onKeydown(e: KeyboardEvent, i: number): void {
         <img
           v-if="t.icon"
           class="nk-egd-nodecard__img"
-          :src="t.icon"
+          v-bind="imgAttrs(t.icon)"
           alt=""
           loading="lazy"
-          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+          @error="markImgError"
         >
       </span>
       <span class="nk-egd-nodecard__body">

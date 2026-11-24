@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { loadLocalCurrencyRoles, loadLocalCurrencyRole } from '../../services/api';
 import type { CurrencyRoleEntry, CurrencyRoleDetail } from '../../services/types';
+import { bgStyle, imgAttrs } from '../../lib/image';
 import { avatarDrawCardUrl } from '../../lib/icons';
 import {
   buildHeroFocusCss, clampFocus, DEFAULT_FOCUS, FOCUS_LIMITS, HERO_FOCUS_ENDPOINT, HERO_POS_VAR,
@@ -77,7 +78,7 @@ const savedList = computed(() =>
 const artStyle = computed(() => (
   artFailed.value || !artUrl.value
     ? { background: 'var(--surface)' }
-    : { backgroundImage: `url(${artUrl.value})` }
+    : bgStyle(artUrl.value)
 ));
 
 function applyFocus(f: HeroFocus): void {
@@ -314,7 +315,7 @@ watch(
             <img
               v-if="artUrl && !artFailed"
               class="nk-hfl__probe"
-              :src="artUrl"
+              v-bind="imgAttrs(artUrl)"
               alt=""
               @error="artFailed = true"
             >

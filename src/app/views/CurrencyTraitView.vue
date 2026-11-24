@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { imgAttrs } from '../../lib/image';
 import { fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../lib/format';
 import { pageTitle } from '../seo';
 import { propLabel } from '../../lib/currency-role';
@@ -145,7 +146,7 @@ watch(special, () => { ruleIndex.value = 0; });
         <div class="nk-ctrait-hero__glow"></div>
         <div class="nk-ctrait-hero__content">
           <div class="nk-ctrait-hero__icon">
-            <img :src="traitIconUrl(data.icon)" :alt="data.name" loading="eager" />
+            <img v-bind="imgAttrs(traitIconUrl(data.icon))" :alt="data.name" loading="eager" />
           </div>
           <div class="nk-ctrait-hero__info">
             <div class="nk-ctrait-hero__badges">
@@ -181,7 +182,7 @@ watch(special, () => { ruleIndex.value = 0; });
             :to="`/currency/role/${m.id}`"
             class="nk-ctrait-member"
           >
-            <img class="nk-ctrait-member__avatar" :src="avatarShopIconUrl(m.avatar_id || m.id)" :alt="m.name" loading="lazy" />
+            <img class="nk-ctrait-member__avatar" v-bind="imgAttrs(avatarShopIconUrl(m.avatar_id || m.id))" :alt="m.name" loading="lazy" />
             <span class="nk-ctrait-member__name">{{ m.name }}</span>
             <span v-if="m.rarity" class="nk-ctrait-member__cost">{{ cwCostKey(String(m.rarity)) ? t(cwCostKey(String(m.rarity))!) : m.rarity }}</span>
           </router-link>

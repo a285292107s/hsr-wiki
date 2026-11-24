@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { hideImgOnError, imgAttrs } from '../../lib/image';
 import { userErrorDetail } from '../../lib/errors';
 import { useRoute } from 'vue-router';
 import { ENDGAME_MODES, seasonPosterTabUrl } from '../catalog/pages/endgame';
@@ -290,10 +291,10 @@ onBeforeUnmount(() => {
               <img
                 v-if="prevSeason.posterTab"
                 class="nk-egd-nav__thumb"
-                :src="seasonPosterTabUrl({ poster_tab: prevSeason.posterTab })"
+                v-bind="imgAttrs(seasonPosterTabUrl({ poster_tab: prevSeason.posterTab }))"
                 alt=""
                 loading="lazy"
-                @error="($event.target as HTMLImageElement).style.display='none'"
+                @error="hideImgOnError"
               >
               <span class="nk-egd-nav__body">
                 <span class="nk-egd-nav__dir">{{ t('egd.prevSeason') }}</span>
@@ -313,10 +314,10 @@ onBeforeUnmount(() => {
               <img
                 v-if="nextSeason.posterTab"
                 class="nk-egd-nav__thumb"
-                :src="seasonPosterTabUrl({ poster_tab: nextSeason.posterTab })"
+                v-bind="imgAttrs(seasonPosterTabUrl({ poster_tab: nextSeason.posterTab }))"
                 alt=""
                 loading="lazy"
-                @error="($event.target as HTMLImageElement).style.display='none'"
+                @error="hideImgOnError"
               >
             </router-link>
           </nav>

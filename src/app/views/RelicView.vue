@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRelicStore } from '../stores/relic';
 import { fmtDesc, itemIconUrl } from '../../lib/format';
-import { cdnUri } from '../../services/cdn';
+import { bgStyle, cdnSrc, imgAttrs, swapImgOnError } from '../../lib/image';
 import { SLOT_ICONS, SLOT_INDEX } from '../../lib/constants';
 import { propLabel, relicSlotLabel } from '../../lib/enum-labels';
 import type { LocalRelicPiece, RelicMainAffix, RelicSubAffix } from '../../services/types';
@@ -57,15 +57,13 @@ function focusPiece(id: number | null): void {
 }
 
 function pieceIconUrl(p: LocalRelicPiece): string {
-  return cdnUri('relicfigures', `IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`);
+  return cdnSrc('relicfigures', `IconRelic_${d.value!.id}_${SLOT_INDEX[p.type] ?? 1}.webp`);
 }
 function slotIconUrl(p: LocalRelicPiece): string {
-  return cdnUri('relicfigures', `${SLOT_ICONS[p.type] || 'IconRelicBody'}.webp`);
+  return cdnSrc('relicfigures', `${SLOT_ICONS[p.type] || 'IconRelicBody'}.webp`);
 }
-function onPieceImgError(e: Event, p: LocalRelicPiece): void {
-  const img = e.target as HTMLImageElement;
-  img.onerror = null;
-  img.src = slotIconUrl(p);
+function onPieceImgError(p: LocalRelicPiece): (e: Event) => void {
+  return swapImgOnError(slotIconUrl(p));
 }
 
 function fmtAffix(value: number, property: string, baseValue: number): string {
@@ -255,7 +253,7 @@ onBeforeUnmount(() => {
         <div class="nk-hero__visual">
           <div
             class="nk-hero__bg nk-hero__bg--relic"
-            :style="{ backgroundImage: `url(${figureUrl})` }"
+            :style="bgStyle(figureUrl)"
           ></div>
           <div class="nk-hero__scrim"></div>
         </div>
@@ -284,7 +282,7 @@ onBeforeUnmount(() => {
                 @mouseleave="focusPiece(null)"
               >
                 <span class="nk-relic-piece__fig">
-                  <img :src="pieceIconUrl(p)" alt="" @error="onPieceImgError($event, p)">
+                  <img v-bind="imgAttrs(pieceIconUrl(p))" alt="" @error="onPieceImgError(p)($event)">
                 </span>
                 <span class="nk-relic-piece__text">
                   <span class="nk-relic-hero-piece__slot">{{ relicSlotLabel(p) }}</span>
@@ -328,7 +326,7 @@ onBeforeUnmount(() => {
                       @mouseenter="focusPiece(p.id)"
                       @mouseleave="focusPiece(null)"
                     >
-                      <img class="nk-relic-affix-table__icon" :src="pieceIconUrl(p)" alt="" @error="onPieceImgError($event, p)">
+                      <img class="nk-relic-affix-table__icon" v-bind="imgAttrs(pieceIconUrl(p))" alt="" @error="onPieceImgError(p)($event)">
                       <span class="nk-relic-affix-table__slot-name">{{ relicSlotLabel(p) }}</span>
                     </th>
                   </tr>
@@ -405,7 +403,7 @@ onBeforeUnmount(() => {
               >
                 <div class="nk-relic-story__head">
                   <span class="nk-relic-story__fig">
-                    <img :src="pieceIconUrl(s.piece)" alt="" loading="lazy" @error="onPieceImgError($event, s.piece)">
+                    <img v-bind="imgAttrs(pieceIconUrl(s.piece))" alt="" loading="lazy" @error="onPieceImgError(s.piece)($event)">
                   </span>
                   <div class="nk-relic-story__heading">
                     <div class="nk-relic-story__name">{{ s.name }}</div>

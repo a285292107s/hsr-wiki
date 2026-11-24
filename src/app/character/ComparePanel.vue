@@ -2,7 +2,8 @@
 import { computed } from 'vue';
 import CompareSkillCard from './CompareSkillCard.vue';
 import { buildCompare } from '../../lib/compare';
-import { fmtDesc, iconUrl, iconImgAttrs, eidolonIconUrl } from '../../lib/format';
+import { imgAttrs } from '../../lib/image';
+import { fmtDesc, iconUrl, eidolonIconUrl } from '../../lib/format';
 import { SECTION_IDX } from './sections';
 import type { CharacterData } from '../../services/types';
 import type { CompareResult, RankDiff, TreeDiff } from '../../lib/compare';
@@ -102,7 +103,7 @@ const spNote = computed<string | null>(() => {
         class="nk-cmp-rank"
       >
         <div class="nk-cmp-rank__head">
-          <img class="nk-cmp-rank__icon" :src="c.img" :alt="c.name" loading="lazy">
+          <img class="nk-cmp-rank__icon" v-bind="imgAttrs(c.img)" :alt="c.name" loading="lazy">
           <div class="nk-cmp-rank__meta">
             <span class="nk-cmp-rank__num">E{{ c.num }}</span>
             <span class="nk-cmp-rank__name">
@@ -137,7 +138,7 @@ const spNote = computed<string | null>(() => {
         class="nk-cmp-tree"
       >
         <div class="nk-skill__title-row">
-          <img v-if="c.icon" class="nk-skill__icon" v-bind="iconImgAttrs(c.icon)" alt="">
+          <img v-if="c.icon" class="nk-skill__icon" v-bind="imgAttrs(c.icon)" alt="">
           <div class="nk-skill__title">
             <span class="nk-skill__name">
               <template v-if="c.nameChanged">

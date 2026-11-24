@@ -2,7 +2,7 @@
 import { elemLabel, pathLabel } from '../../../lib/enum-labels';
 import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, avatarShopIconUrl, elementIconUrl, pathIconUrl } from '../../../lib/format';
-import { cdnImgFallbackAttr } from '../../../services/cdn';
+import { imgHtml } from '../../../lib/image';
 import { loadLocalCharacterList } from '../../../services/api';
 import { getSavedTrailblazerGender, isTrailblazerId, trailblazerGenderOfId } from '../../../lib/trailblazer';
 import type { CatalogItem, CatalogPageConfig } from '../types';
@@ -83,7 +83,7 @@ export const characterPage: CatalogPageConfig = {
     const element = String(item.element || '');
     const path = String(item.path || '');
     const avatarItem = String(item.avatar || '');
-    const avatar = `<img data-cdn-src="${escHtml(avatarItem)}"${cdnImgFallbackAttr(avatarItem)} alt="${escHtml(item.name)}" loading="lazy">`;
+    const avatar = imgHtml(avatarItem, { alt: item.name as string, loading: 'lazy' });
     return `<a class="nk-idx-card" href="${escHtml(item.href)}" data-rarity="${escHtml(item.rarity)}" title="${escHtml(item.name)}" style="--i:${i}">
     <span class="nk-idx-card__portrait">
       ${avatar}
@@ -95,11 +95,11 @@ export const characterPage: CatalogPageConfig = {
       <span class="nk-idx-card__stars-row" aria-hidden="true">${stars}</span>
       <span class="nk-idx-card__meta">
         <span class="nk-idx-card__tag">
-          ${item.elemImg ? `<img class="nk-idx-card__icon" data-cdn-src="${escHtml(item.elemImg)}" alt="">` : ''}
+          ${item.elemImg ? imgHtml(String(item.elemImg), { className: 'nk-idx-card__icon' }) : ''}
           <span class="nk-idx-card__tag-text">${escHtml(elemLabel(element))}</span>
         </span>
         <span class="nk-idx-card__tag">
-          ${item.pathImg ? `<img class="nk-idx-card__icon" data-cdn-src="${escHtml(item.pathImg)}" alt="">` : ''}
+          ${item.pathImg ? imgHtml(String(item.pathImg), { className: 'nk-idx-card__icon' }) : ''}
           <span class="nk-idx-card__tag-text">${escHtml(pathLabel(path))}</span>
         </span>
       </span>

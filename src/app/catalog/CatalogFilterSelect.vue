@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue';
+import { imgAttrs } from '../../lib/image';
 import { useI18n } from 'vue-i18n';
 import type { CatalogFilterOption } from './types';
 
@@ -82,7 +83,7 @@ onBeforeUnmount(() => {
       :aria-expanded="open"
       :aria-label="t('catalog.filterAria', { name: label })"
     >
-      <img v-if="hasValue && current?.icon" class="nk-cat-select__icon" :src="current.icon" alt="">
+      <img v-if="hasValue && current?.icon" class="nk-cat-select__icon" v-bind="imgAttrs(current.icon)" alt="">
       <span class="nk-cat-select__label">{{ label }}</span>
       <span v-if="hasValue" class="nk-cat-select__val" v-html="current?.label ?? ''"></span>
       <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -100,7 +101,7 @@ onBeforeUnmount(() => {
           :class="{ 'is-active': opt.val === modelValue }"
           @click="pick(opt.val)"
         >
-          <img v-if="opt.icon" class="nk-cat-select__icon" :src="opt.icon" alt="">
+          <img v-if="opt.icon" class="nk-cat-select__icon" v-bind="imgAttrs(opt.icon)" alt="">
           <span v-html="opt.label"></span>
         </button>
       </template>

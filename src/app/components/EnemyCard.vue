@@ -8,8 +8,8 @@ import { tabNextIndex } from '../endgame/tabs';
 import type { MazeMonsterInfo } from '../../services/types';
 
 import { monsterRankKey } from '../../lib/enum-labels';
+import { cdnSrc, imgAttrs, imgHtml, markImgError } from '../../lib/image';
 import { escHtml, elementIconUrl, fmtBigNumber } from '../../lib/format';
-import { cdnUri, cdnImgFallbackAttr } from '../../services/cdn';
 
 import { translate } from '../i18n';
 
@@ -30,7 +30,7 @@ function elemRow(types: string[]): string {
   return types.map((d) => {
     const src = elementIconUrl(d);
     return src
-      ? `<img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(elemLabel(d))}" title="${escHtml(elemLabel(d))}" loading="lazy">`
+      ? imgHtml(src, { className: 'nk-egd-elem', alt: elemLabel(d), title: elemLabel(d), loading: 'lazy' })
       : '';
   }).join('');
 }
@@ -53,16 +53,16 @@ function resistRowHtml(m: MazeMonsterInfo): string {
     if (!src) return '';
     const label = elemLabel(d);
     const pct = `${Math.round(v * 100)}%`;
-    return `<span class="nk-egd-mon__resitem"><img class="nk-egd-elem" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="${escHtml(label)}" title="${escHtml(label)} ${pct}" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
+    return `<span class="nk-egd-mon__resitem">${imgHtml(src, { className: 'nk-egd-elem', alt: label, title: `${label} ${pct}`, loading: 'lazy' })}<span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
 
 function debuffResistHtml(m: MazeMonsterInfo): string {
   return (m.debuff_resist || []).map((d) => {
-    const src = cdnUri('statusimmune', `${d.icon}.webp`);
+    const src = cdnSrc('statusimmune', `${d.icon}.webp`);
     const pct = `${Math.round(d.value * 100)}%`;
     const label = t('card.effectRes', { v: pct });
-    return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}"><img class="nk-egd-mon__immicon" data-cdn-src="${escHtml(src)}"${cdnImgFallbackAttr(src)} alt="" aria-hidden="true" loading="lazy"><span class="nk-egd-mon__resval">${pct}</span></span>`;
+    return `<span class="nk-egd-mon__resitem" title="${escHtml(label)}">${imgHtml(src, { className: 'nk-egd-mon__immicon', loading: 'lazy' })}<span class="nk-egd-mon__resval">${pct}</span></span>`;
   }).join('');
 }
 
@@ -145,10 +145,10 @@ function onPhaseKeydown(e: KeyboardEvent, i: number): void {
       >
         <img
           class="nk-egd-mon__img"
-          :src="monster.icon ? cdnUri('monstermiddleicon', `${monster.icon}.webp`) : ''"
+          v-bind="imgAttrs(monster.icon ? cdnSrc('monstermiddleicon', `${monster.icon}.webp`) : '')"
           :alt="monster.name"
           loading="lazy"
-          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+          @error="markImgError"
         >
       </router-link>
       <span

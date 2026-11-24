@@ -6,6 +6,8 @@ import { useI18n } from 'vue-i18n';
 import { translate } from '../i18n';
 import { pageTitle } from '../seo';
 import { monsterRankKey } from '../../lib/enum-labels';
+import { imgHtml } from '../../lib/image';
+import CdnImage from '../components/CdnImage.vue';
 import { elementIconUrl, escHtml, fmtDesc, monsterFigureUrl, monsterIconUrl } from '../../lib/format';
 import type { MonsterEliteGroups, MonsterLevelCurve } from '../../lib/monster-stats';
 import {
@@ -190,12 +192,12 @@ async function loadAtlas(): Promise<void> {
 
 function elemTag(elem: string): string {
   const name = elemLabel(elem);
-  return `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(elem))}" alt="" loading="lazy">${escHtml(name)}</span>`;
+  return `<span class="nk-mob-tag">${imgHtml(elementIconUrl(elem), { loading: 'lazy' })}${escHtml(name)}</span>`;
 }
 const weakHtml = computed(() => (d.value?.weak ?? []).map(elemTag).join(''));
 const resistHtml = computed(() =>
   Object.entries(d.value?.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag">${imgHtml(elementIconUrl(k), { loading: 'lazy' })}${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join(''));
 const introHtml = computed(() => {
   if (!d.value) return '';
@@ -210,7 +212,7 @@ function skillMeta(s: MonsterSkillDetail): string {
   if (s.damage_type) {
     const name = elemLabel(s.damage_type);
     parts.push(
-      `<span class="nk-mob-skill__elem"><img data-cdn-src="${escHtml(elementIconUrl(s.damage_type))}" alt="${escHtml(name)}" title="${escHtml(name)}" loading="lazy">${escHtml(name)}</span>`,
+      `<span class="nk-mob-skill__elem">${imgHtml(elementIconUrl(s.damage_type), { alt: name, title: name, loading: 'lazy' })}${escHtml(name)}</span>`,
     );
   }
   if (s.type_desc) {
@@ -284,7 +286,7 @@ const phases = computed(() => {
 function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
   if (kind === 'weak') return (phase.weak ?? []).map(elemTag).join('');
   return Object.entries(phase.resist ?? {})
-    .map(([k, v]) => `<span class="nk-mob-tag"><img data-cdn-src="${escHtml(elementIconUrl(k))}" alt="" loading="lazy">${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
+    .map(([k, v]) => `<span class="nk-mob-tag">${imgHtml(elementIconUrl(k), { loading: 'lazy' })}${escHtml(elemLabel(k))} ${Math.round(v * 100)}%</span>`)
     .join('');
 }
 </script>
@@ -345,7 +347,7 @@ function phaseTags(phase: MonsterPhase, kind: 'weak' | 'resist'): string {
     <template v-else-if="d">
       <div class="nk-mob-hero">
         <div class="nk-mob-hero__figure">
-          <img :src="figureUrl" :alt="d.name" loading="eager">
+          <CdnImage :src="figureUrl" :alt="d.name" loading="eager" />
         </div>
         <div class="nk-mob-hero__info">
           <div class="nk-mob-hero__meta">

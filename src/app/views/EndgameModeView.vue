@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { imgAttrs } from '../../lib/image';
 import { userErrorDetail } from '../../lib/errors';
 import { useRoute, RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -151,7 +152,7 @@ function cardHtml(item: CatalogItem, i: number): string {
           <span>{{ mode ? t(mode.labelKey) : '' }}</span>
         </nav>
         <div class="nk-egm__head">
-          <img v-if="heroArt" class="nk-egm__emblem" :src="heroArt" alt="" width="48" height="48">
+          <img v-if="heroArt" class="nk-egm__emblem" v-bind="imgAttrs(heroArt)" alt="" width="48" height="48">
           <div>
             <h1 class="nk-egm__title">{{ mode ? t(mode.labelKey) : '' }}</h1>
             <p class="nk-egm__en">{{ mode?.en }}</p>

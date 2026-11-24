@@ -52,10 +52,9 @@ function isNearViewport(el: HTMLImageElement): boolean {
   const r = el.getBoundingClientRect();
   const vh = window.innerHeight || document.documentElement.clientHeight;
   const vw = window.innerWidth || document.documentElement.clientWidth;
-  const m = 300;
+  const m = parseInt(IMAGE_GATE_ROOT_MARGIN, 10);
   return r.bottom >= -m && r.top <= vh + m && r.right >= -m && r.left <= vw + m;
 }
-
 let pumpScheduled = false;
 function schedulePump(): void {
   if (pumpScheduled) return;

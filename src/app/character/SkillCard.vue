@@ -2,9 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { elemLabel, skillTypeLabel } from '../../lib/enum-labels';
 import type { CharacterData, Skill, SkillAnimEntry } from '../../services/types';
-import {
-  fmtDesc, fmtToughness, skillIconUrl, iconUrl, iconImgAttrs,
-} from '../../lib/format';
+import { imgAttrs } from '../../lib/image';
+import { fmtDesc, fmtToughness, skillIconUrl, iconUrl } from '../../lib/format';
 
 import { extraTerms } from './utils';
 
@@ -163,7 +162,7 @@ const officialMaxLv = computed(() => props.sk.max_level ?? maxLv.value);
 const typeName = computed(() => props.sk.type_name || skillTypeLabel(props.sk.type ?? '', ''));
 const tagLabel = computed(() => props.sk.tag || '');
 const icon = computed(() => skillIconUrl(props.sk, props.charId, props.charData));
-const iconAttrs = computed(() => iconImgAttrs(icon.value));
+const iconAttrs = computed(() => imgAttrs(icon.value));
 const typeKey = computed(() => props.sk.type || '');
 
 const terms = computed(() => extraTerms(props.sk));
@@ -297,7 +296,7 @@ function onImgLoad(): void { imgDone.value = true; }
                 <div class="nk-skill__link-item-head">
                   <img
                     class="nk-skill__link-item-icon"
-                    v-bind="iconImgAttrs(iconUrl(l.icon))"
+                    v-bind="imgAttrs(iconUrl(l.icon))"
                     :alt="l.name"
                   >
                   <span class="nk-skill__link-item-name">{{ l.name }}</span>
@@ -338,7 +337,7 @@ function onImgLoad(): void { imgDone.value = true; }
                 <img
                   v-if="curAnim"
                   class="nk-skill__anim-img"
-                  :src="curAnim"
+                  v-bind="imgAttrs(curAnim)"
                   :alt="t('skill.animAlt', { name: sk.name })"
                   loading="lazy"
                   @load="onImgLoad"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { cdnUri } from '../../services/cdn';
+import { cdnSrc, imgAttrs } from '../../lib/image';
 import { charStageForLevel, fmtStatValue, levelStatValue, maxLevelStat } from '../../lib/format';
 import { CHAR_STAGE_LEVEL_CAPS, MAX_CHAR_LEVEL } from '../../lib/constants';
 import { SECTION_IDX } from './sections';
@@ -49,19 +49,19 @@ const tiers = computed<StatTier[]>(() => {
     {
       id: 'panel',
       items: [
-        mk(grow(cur.hp_base, cur.hp_add), t('common.stat.hp'), 'hp', cdnUri('trace', 'IconMaxHP.webp'), cur.hp_add),
-        mk(grow(cur.attack_base, cur.attack_add), t('common.stat.atk'), 'atk', cdnUri('trace', 'IconAttack.webp'), cur.attack_add),
-        mk(grow(cur.defence_base, cur.defence_add), t('common.stat.def'), 'def', cdnUri('trace', 'IconDefence.webp'), cur.defence_add),
+        mk(grow(cur.hp_base, cur.hp_add), t('common.stat.hp'), 'hp', cdnSrc('trace', 'IconMaxHP.webp'), cur.hp_add),
+        mk(grow(cur.attack_base, cur.attack_add), t('common.stat.atk'), 'atk', cdnSrc('trace', 'IconAttack.webp'), cur.attack_add),
+        mk(grow(cur.defence_base, cur.defence_add), t('common.stat.def'), 'def', cdnSrc('trace', 'IconDefence.webp'), cur.defence_add),
       ],
     },
     {
       id: 'param',
       items: [
-        mk(maxStat.speed_base, t('catalog.charge.speed'), 'spd', cdnUri('trace', 'IconSpeed.webp')),
-        mk(fmtPct(maxStat.critical_chance), t('prop.CriticalChanceBase'), 'crit-rate', cdnUri('trace', 'IconCriticalChance.webp')),
-        mk(fmtPct(maxStat.critical_damage), t('prop.CriticalDamageBase'), 'crit-dmg', cdnUri('trace', 'IconCriticalDamage.webp')),
+        mk(maxStat.speed_base, t('catalog.charge.speed'), 'spd', cdnSrc('trace', 'IconSpeed.webp')),
+        mk(fmtPct(maxStat.critical_chance), t('prop.CriticalChanceBase'), 'crit-rate', cdnSrc('trace', 'IconCriticalChance.webp')),
+        mk(fmtPct(maxStat.critical_damage), t('prop.CriticalDamageBase'), 'crit-dmg', cdnSrc('trace', 'IconCriticalDamage.webp')),
         mk(maxStat.base_aggro ?? 0, t('stat.taunt'), 'taunt', TRACE_TAUNT_SVG),
-        mk(props.d.sp_need ?? '—', t('stat.energyCap'), 'energy', cdnUri('trace', 'IconEnergyLimit.webp')),
+        mk(props.d.sp_need ?? '—', t('stat.energyCap'), 'energy', cdnSrc('trace', 'IconEnergyLimit.webp')),
       ],
     },
   ];
@@ -102,7 +102,7 @@ function fmtAdd(n: number): string {
       <div v-for="st in tier.items" :key="st.l" class="nk-stats__stat" :data-prop="st.k">
         <dt class="nk-stats__term">
           <span class="nk-stats__mark" aria-hidden="true"></span>
-          <img class="nk-stats__icon" :src="st.icon" alt="" aria-hidden="true">
+          <img class="nk-stats__icon" v-bind="imgAttrs(st.icon)" alt="" aria-hidden="true">
           <span class="nk-stats__label">{{ st.l }}</span>
         </dt>
         <dd class="nk-stats__readout">

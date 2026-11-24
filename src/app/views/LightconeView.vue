@@ -4,8 +4,8 @@ import { pathLabel } from '../../lib/enum-labels';
 import { useAppStore } from '../stores/app';
 import { useLightconeStore } from '../stores/lightcone';
 import { useDetailView } from '../composables/use-detail-view';
-import { avatarRoundIconUrl, fmtDesc, fmtNumber, fmtVal, gameTagsToHtml, iconImgAttrs, itemName, lightconeIconUrl, pathIconUrl } from '../../lib/format';
-import { cdnUri } from '../../services/cdn';
+import { avatarRoundIconUrl, fmtDesc, fmtNumber, fmtVal, gameTagsToHtml, itemName, lightconeIconUrl, pathIconUrl } from '../../lib/format';
+import { bgStyle, cdnSrc, imgAttrs, markImgError } from '../../lib/image';
 import { loadLocalCharacterList } from '../../services/api';
 import '../../lib/constants';
 import type { LightConeStats } from '../../services/types';
@@ -216,7 +216,7 @@ onBeforeUnmount(() => {
         <div class="nk-hero__visual" :data-rarity="d.rarity">
           <div
             class="nk-hero__bg nk-hero__bg--lc"
-            :style="{ backgroundImage: `url(${figureUrl})` }"
+            :style="bgStyle(figureUrl)"
           ></div>
           <div class="nk-hero__scrim"></div>
         </div>
@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
             <div class="nk-hero__meta">
               <span class="nk-hero__stars">{{ stars }}</span>
               <span class="nk-hero__tag">
-                <img v-bind="iconImgAttrs(pathIconUrl(d.path))" alt="">
+                <img v-bind="imgAttrs(pathIconUrl(d.path))" alt="">
                 {{ pathLabel(d.path) }}
               </span>
             </div>
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
               <div class="nk-hero__stat">
                 <img
                   class="nk-hero__stat-icon"
-                  :src="cdnUri('trace', 'IconMaxHP.webp')"
+                  v-bind="imgAttrs(cdnSrc('trace', 'IconMaxHP.webp'))"
                   alt=""
                   aria-hidden="true"
                 >
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
               <div class="nk-hero__stat">
                 <img
                   class="nk-hero__stat-icon"
-                  :src="cdnUri('trace', 'IconAttack.webp')"
+                  v-bind="imgAttrs(cdnSrc('trace', 'IconAttack.webp'))"
                   alt=""
                   aria-hidden="true"
                 >
@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
               <div class="nk-hero__stat">
                 <img
                   class="nk-hero__stat-icon"
-                  :src="cdnUri('trace', 'IconDefence.webp')"
+                  v-bind="imgAttrs(cdnSrc('trace', 'IconDefence.webp'))"
                   alt=""
                   aria-hidden="true"
                 >
@@ -295,7 +295,7 @@ onBeforeUnmount(() => {
             <div class="nk-skill__title-row">
               <img
                 class="nk-skill__icon"
-                v-bind="iconImgAttrs(lightconeIconUrl(d.id))"
+                v-bind="imgAttrs(lightconeIconUrl(d.id))"
                 alt=""
               >
               <div class="nk-skill__title">
@@ -368,10 +368,10 @@ onBeforeUnmount(() => {
                   >
                     <img
                       v-if="c.id !== 2"
-                      v-bind="iconImgAttrs(cdnUri('itemfigures', `${c.id}.webp`))"
+                      v-bind="imgAttrs(cdnSrc('itemfigures', `${c.id}.webp`))"
                       :alt="c.name"
                       loading="lazy"
-                      @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+                      @error="markImgError"
                     >
                     <span v-else class="nk-lc-phase__credit" :title="t('common.credits')" :aria-label="t('common.credits')">¤</span>
                     <span class="nk-lc-phase__cost-num">×{{ fmtNumber(c.num) }}</span>
@@ -394,7 +394,7 @@ onBeforeUnmount(() => {
               >
                 <img
                   class="nk-lc-adapt__icon"
-                  v-bind="iconImgAttrs(avatarRoundIconUrl(c.id))"
+                  v-bind="imgAttrs(avatarRoundIconUrl(c.id))"
                   alt=""
                   loading="lazy"
                 >

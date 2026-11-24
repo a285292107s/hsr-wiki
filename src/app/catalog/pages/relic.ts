@@ -1,6 +1,6 @@
 import { escHtml, itemIconUrl } from '../../../lib/format';
 import { activeHref } from '../../../lib/i18n/active';
-import { cdnImgFallbackAttr } from '../../../services/cdn';
+import { imgHtml } from '../../../lib/image';
 import { loadLocalRelicSets } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
 import { translate } from '../../i18n';
@@ -46,7 +46,7 @@ export const relicPage: CatalogPageConfig = {
     const tag = typeof item.set_tag === 'string' ? item.set_tag : '';
     return `<a class="nk-relic-card" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" data-set="${escHtml(String(item.set_type))}" title="${escHtml(item.name)}" style="--i:${i}">
       <div class="nk-relic-card__plate">
-        <img class="nk-relic-card__img" data-cdn-src="${escHtml(item.img)}"${cdnImgFallbackAttr(String(item.img || ''))} alt="${escHtml(item.name)}" loading="lazy">
+        ${imgHtml(String(item.img || ''), { className: 'nk-relic-card__img', alt: item.name as string, loading: 'lazy' })}
         ${tag ? `<span class="nk-relic-card__tag">${escHtml(tag)}</span>` : ''}
       </div>
       <div class="nk-relic-card__info">

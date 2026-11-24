@@ -4,6 +4,7 @@ import { pathLabel } from '../../lib/enum-labels';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { fmtDescWithFormat, fmtDescStar, avatarShopIconUrl, avatarDrawCardUrl, gridFightEquipIconWithFallback, gridFightTraitIconById, gridFightSkillIconSrc, gridFightPropIconUrl, lightconeIconUrl } from '../../lib/format';
+import { bgStyle, bgVar, imgAttrs, imgAttrsWith } from '../../lib/image';
 import { resolveCdnUri } from '../../services/cdn';
 import { heroFocusStyleVars, syncHeroFocusFromServer } from '../../services/currency-hero-focus';
 import { pageTitle } from '../seo';
@@ -61,7 +62,7 @@ const displayAvatarId = computed(() => {
 });
 
 const heroBgStyle = computed(() => ({
-  backgroundImage: `url(${avatarDrawCardUrl(displayAvatarId.value)})`,
+  ...bgStyle(avatarDrawCardUrl(displayAvatarId.value)),
   ...heroFocusStyleVars(String(displayAvatarId.value)),
 }));
 
@@ -156,9 +157,9 @@ function rankIconAttrs(rk: CurrencyRoleRank): Record<string, string | undefined>
   const id = displayAvatarId.value ? String(displayAvatarId.value) : '';
   if (!id) return {};
   const file = `${id}/${id}_Rank_${rk.rank}.webp`;
-  const { primary, fallback } = resolveCdnUri('rank', file);
+  const { primary } = resolveCdnUri('rank', file);
   if (!primary) return {};
-  return { src: primary, 'data-cdn-fallback': fallback || undefined, alt: rk.name || '', loading: 'lazy' };
+  return imgAttrsWith(primary, { alt: rk.name || '', loading: 'lazy' });
 }
 
 function skillStarIdx(sk: MergedSkill): number {
@@ -166,9 +167,9 @@ function skillStarIdx(sk: MergedSkill): number {
 }
 
 function skillIconAttrs(sk: MergedSkill): Record<string, string | undefined> {
-  const { src, fb } = gridFightSkillIconSrc(sk.icon);
+  const { src } = gridFightSkillIconSrc(sk.icon);
   if (!src) return {};
-  return { src, 'data-cdn-fallback': fb || undefined, alt: sk.name || '', loading: 'lazy' };
+  return imgAttrsWith(src, { alt: sk.name || '', loading: 'lazy' });
 }
 
 const SECTIONS = [
@@ -206,7 +207,7 @@ function hideOnError(e: Event) {
 </script>
 
 <template>
-  <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading" :style="{ '--nk-crole-bg': `url(${pageBgUrl})` }">
+  <div ref="pageRef" class="nk-page--detail nk-crole" :aria-busy="loading" :style="bgVar(pageBgUrl, '--nk-crole-bg')">
 
     <div v-if="showSkeleton" class="nk-crole__skeleton" role="status" aria-live="polite" :aria-label="t('cwRole.loadingAria')">
       <div class="nk-crole__sk-bar">
@@ -302,7 +303,7 @@ function hideOnError(e: Event) {
                   :class="`nk-crole-herotrait--${grp.cat}`"
                 >
                   <span class="nk-crole-herotrait__icon">
-                    <img :src="gridFightTraitIconById(tr.id)" :alt="tr.name || ''" loading="eager" @error="hideOnError" />
+                    <img v-bind="imgAttrs(gridFightTraitIconById(tr.id))" :alt="tr.name || ''" loading="eager" @error="hideOnError" />
                   </span>
                   <span class="nk-crole-herotrait__name">{{ tr.name || '?' }}</span>
                 </router-link>
@@ -310,7 +311,7 @@ function hideOnError(e: Event) {
             </div>
           </div>
           <div class="nk-crole-hero__portrait" :data-rarity="data.rarity">
-            <img :src="avatarShopIconUrl(displayAvatarId)" :alt="data.name" loading="eager" @error="hideOnError" />
+            <img v-bind="imgAttrs(avatarShopIconUrl(displayAvatarId))" :alt="data.name" loading="eager" @error="hideOnError" />
           </div>
         </div>
       </header>
@@ -389,7 +390,7 @@ function hideOnError(e: Event) {
                     </tr>
                     <tr v-for="row in grp.rows" :key="row.key">
                       <th class="nk-crole-gm__label" scope="row">
-                        <img v-if="row.icon" :src="gridFightPropIconUrl(row.icon)" alt="" class="nk-crole-gm__icon" loading="lazy" @error="hideOnError" />
+                        <img v-if="row.icon" v-bind="imgAttrs(gridFightPropIconUrl(row.icon))" alt="" class="nk-crole-gm__icon" loading="lazy" @error="hideOnError" />
                         {{ row.label }}
                       </th>
                       <td
@@ -499,13 +500,13 @@ function hideOnError(e: Event) {
                 <ul v-if="rk.owner_props.length || rk.all_props.length" class="nk-crole-layer__props">
                   <li v-for="(p, pi) in rk.owner_props" :key="'o' + pi">
                     <span class="nk-crole-layer__scope">{{ t('cwRole.scopeSelf') }}</span>
-                    <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
+                    <img v-if="p.icon" v-bind="imgAttrs(gridFightPropIconUrl(p.icon))" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
                   <li v-for="(p, pi) in rk.all_props" :key="'a' + pi">
                     <span class="nk-crole-layer__scope nk-crole-layer__scope--all">{{ t('cwRole.scopeAll') }}</span>
-                    <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
+                    <img v-if="p.icon" v-bind="imgAttrs(gridFightPropIconUrl(p.icon))" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
@@ -522,7 +523,7 @@ function hideOnError(e: Event) {
           <p class="nk-crole-section__hint">{{ t('cwRole.coneHint') }}</p>
           <template v-if="data.equipment.length">
             <div v-if="coneInfo" class="nk-crole-cone">
-              <img :src="lightconeIconUrl(coneInfo.id)" :alt="coneInfo.name" class="nk-crole-cone__icon" loading="lazy" @error="hideOnError" />
+              <img v-bind="imgAttrs(lightconeIconUrl(coneInfo.id))" :alt="coneInfo.name" class="nk-crole-cone__icon" loading="lazy" @error="hideOnError" />
               <div class="nk-crole-cone__body">
                 <div class="nk-crole-cone__name">{{ coneInfo.name }}</div>
                 <div class="nk-crole-cone__meta">
@@ -543,13 +544,13 @@ function hideOnError(e: Event) {
                 <ul v-if="eq.owner_props.length || eq.all_props.length" class="nk-crole-layer__props">
                   <li v-for="(p, pi) in eq.owner_props" :key="'o' + pi">
                     <span class="nk-crole-layer__scope">{{ t('cwRole.scopeSelf') }}</span>
-                    <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
+                    <img v-if="p.icon" v-bind="imgAttrs(gridFightPropIconUrl(p.icon))" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
                   <li v-for="(p, pi) in eq.all_props" :key="'a' + pi">
                     <span class="nk-crole-layer__scope nk-crole-layer__scope--all">{{ t('cwRole.scopeAll') }}</span>
-                    <img v-if="p.icon" :src="gridFightPropIconUrl(p.icon)" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
+                    <img v-if="p.icon" v-bind="imgAttrs(gridFightPropIconUrl(p.icon))" alt="" class="nk-crole-layer__icon" loading="lazy" @error="hideOnError" />
                     <span class="nk-crole-layer__pname">{{ propLabel(p) }}</span>
                     <b class="nk-crole-layer__pval">+{{ propValue(p.value) }}</b>
                   </li>
@@ -575,7 +576,7 @@ function hideOnError(e: Event) {
                     <div class="nk-crole-rec__items">
                       <div v-for="eq in grp.items" :key="eq.id" class="nk-crole-recitem">
                         <div class="nk-crole-recitem__icon">
-                          <img :src="gridFightEquipIconWithFallback(eq.icon, eq.id)" :alt="eq.name || ''" loading="lazy" @error="hideOnError" />
+                          <img v-bind="imgAttrs(gridFightEquipIconWithFallback(eq.icon, eq.id))" :alt="eq.name || ''" loading="lazy" @error="hideOnError" />
                         </div>
                         <span class="nk-crole-recitem__name">{{ eq.name || `#${eq.id}` }}</span>
                       </div>

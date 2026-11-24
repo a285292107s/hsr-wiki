@@ -1,4 +1,5 @@
 
+import { imgHtml } from '../../../lib/image';
 import { elemLabel } from '../../../lib/enum-labels';
 import { elementIconUrl, escHtml, monsterIconUrl } from '../../../lib/format';
 import { activeHref } from '../../../lib/i18n/active';
@@ -101,7 +102,7 @@ export const monsterPage: CatalogPageConfig = {
     ? t('mob.badge.variant', { i: variantIndex, n: variantCount })
     : '';
     const weakHtml = weakKeys.length
-      ? weakKeys.map((e, k) => `<img data-cdn-src="${escHtml(elementIconUrl(e))}" alt="${escHtml(weakNames[k] || e)}" loading="lazy">`).join('')
+      ? weakKeys.map((e, k) => imgHtml(elementIconUrl(e), { alt: weakNames[k] || e, loading: 'lazy' })).join('')
       : `<span class="nk-mob-card__none">${escHtml(t('mob.noWeak'))}</span>`;
     const title = [
       item.name,
@@ -112,7 +113,7 @@ export const monsterPage: CatalogPageConfig = {
     ].filter(Boolean).join(' · ');
     return `<a class="nk-mob-card" data-type="${escHtml(typeKey)}" href="${escHtml(item.href)}" data-name="${escHtml(item.name)}" title="${escHtml(title)}" style="--i:${i}">
       <span class="nk-mob-card__fig">
-        <img data-cdn-src="${escHtml(item.img)}" alt="${escHtml(item.name)}" loading="lazy">
+        ${imgHtml(String(item.img || ''), { alt: item.name as string, loading: 'lazy' })}
       </span>
       <span class="nk-mob-card__info">
         <span class="nk-mob-card__name">${escHtml(item.name)}</span>

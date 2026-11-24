@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { SITE_NAME } from '../../lib/constants';
-import { cdnUri } from '../../services/cdn';
+import { bgVar, cdnSrc, imgAttrs, imgAttrsPair } from '../../lib/image';
 import { STAR_SVG } from '../catalog/pages/shared';
 import {
   searchHome, useHomeRelease,
@@ -16,7 +16,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { release, loaded, failedCount, labels, load } = useHomeRelease();
 
-const groundUrl = cdnUri('bgpic', 'BgWiki.webp');
+const groundUrl = cdnSrc('bgpic', 'BgWiki.webp');
 const entries = computed<HomeEntry[]>(() =>
   release.value ? [...release.value.characters, ...release.value.lightcones, ...release.value.relics] : [],
 );
@@ -103,7 +103,7 @@ onBeforeUnmount(stopCoverRotation);
 </script>
 
 <template>
-  <div id="nk-home-app" :style="{ '--nk-home-ground': `url(${groundUrl})` }">
+  <div id="nk-home-app" :style="bgVar(groundUrl, '--nk-home-ground')">
     <main class="nk-intake nk-home">
       <header class="nk-hub-masthead">
         <h1 class="nk-hub-masthead__title">{{ SITE_NAME }}</h1>
@@ -214,12 +214,9 @@ onBeforeUnmount(stopCoverRotation);
               v-for="(cover, i) in release.cover"
               :key="cover.src"
               class="nk-home__cover-img"
-              :src="cover.src"
-              :data-cdn-fallback="cover.fallback"
-              :alt="cover.alt"
+              v-bind="imgAttrsPair(cover.src, cover.fallback, { alt: cover.alt, loading: 'eager' })"
               :data-active="i === coverIndex"
               :aria-hidden="i === coverIndex ? undefined : 'true'"
-              loading="eager"
             >
             <div v-if="release.cover.length > 1" class="nk-home__cover-dots">
               <button
@@ -249,17 +246,13 @@ onBeforeUnmount(stopCoverRotation);
             <article v-for="character in release.characters" :key="character.id" class="nk-home__char">
               <div class="nk-home__char-art">
                 <img
-                  :src="character.plate"
-                  :data-cdn-fallback="character.plateFallback"
-                  :alt="character.name"
-                  loading="lazy"
-                >
+                  v-bind="imgAttrsPair(character.plate, character.plateFallback, { alt: character.name, loading: 'lazy' })"
               </div>
               <div class="nk-home__char-copy">
                 <h3 class="nk-home__char-name">{{ character.name }}</h3>
                 <p class="nk-home__facts">
                   <span v-for="fact in character.facts" :key="fact.text" class="nk-home__fact">
-                    <img v-if="fact.icon" class="nk-home__fact-icon" :src="fact.icon" alt="" loading="lazy">
+                    <img v-if="fact.icon" class="nk-home__fact-icon" v-bind="imgAttrs(fact.icon)" alt="" loading="lazy">
                     <span>{{ fact.text }}</span>
                   </span>
                   <span class="nk-home__rarity">
@@ -278,10 +271,7 @@ onBeforeUnmount(stopCoverRotation);
                 <div class="nk-home__orbit-stage">
                   <img
                     class="nk-home__orbit-plate"
-                    :src="character.plate"
-                    :data-cdn-fallback="character.plateFallback"
-                    :alt="character.name"
-                    loading="lazy"
+                    v-bind="imgAttrsPair(character.plate, character.plateFallback, { alt: character.name, loading: 'lazy' })"
                   >
                   <span class="nk-home__orbit-rail" aria-hidden="true"></span>
                   <ul class="nk-home__icon-list nk-home__icon-list--eidolon">
@@ -294,7 +284,7 @@ onBeforeUnmount(stopCoverRotation);
                       <span class="nk-home__orbit-arm">
                         <span class="nk-home__orbit-upright">
                           <span class="nk-home__orbit-face">
-                            <img :src="eidolon.icon" :data-cdn-fallback="eidolon.fallback" :alt="eidolon.name" loading="lazy">
+                            <img v-bind="imgAttrsPair(eidolon.icon, eidolon.fallback, { alt: eidolon.name, loading: 'lazy' })">
                           </span>
                         </span>
                       </span>
@@ -328,13 +318,13 @@ onBeforeUnmount(stopCoverRotation);
           <ul class="nk-home__cones">
             <li v-for="cone in release.lightcones" :key="cone.id" class="nk-home__cone">
               <div class="nk-home__cone-art">
-                <img :src="cone.plate" :data-cdn-fallback="cone.plateFallback" :alt="cone.name" loading="lazy">
+                <img v-bind="imgAttrsPair(cone.plate, cone.plateFallback, { alt: cone.name, loading: 'lazy' })">
               </div>
               <div class="nk-home__cone-body">
                 <h3 class="nk-home__cone-name">{{ cone.name }}</h3>
                 <p class="nk-home__facts">
                   <span v-for="fact in cone.facts" :key="fact.text" class="nk-home__fact">
-                    <img v-if="fact.icon" class="nk-home__fact-icon" :src="fact.icon" alt="" loading="lazy">
+                    <img v-if="fact.icon" class="nk-home__fact-icon" v-bind="imgAttrs(fact.icon)" alt="" loading="lazy">
                     <span>{{ fact.text }}</span>
                   </span>
                   <span class="nk-home__rarity">
@@ -362,7 +352,7 @@ onBeforeUnmount(stopCoverRotation);
           <div class="nk-home__relics">
             <article v-for="relic in release.relics" :key="relic.id" class="nk-home__relic">
               <div class="nk-home__relic-art">
-                <img :src="relic.plate" :data-cdn-fallback="relic.plateFallback" :alt="relic.name" loading="lazy">
+                <img v-bind="imgAttrsPair(relic.plate, relic.plateFallback, { alt: relic.name, loading: 'lazy' })">
               </div>
               <div class="nk-home__relic-body">
                 <h3 class="nk-home__relic-name">{{ relic.name }}</h3>
@@ -409,7 +399,7 @@ onBeforeUnmount(stopCoverRotation);
         </svg>
       </button>
       <figure v-if="art" class="nk-home__dialog-fig">
-        <img class="nk-home__dialog-img" :src="art.src" :data-cdn-fallback="art.fallback" :alt="art.alt">
+        <img class="nk-home__dialog-img" v-bind="imgAttrsPair(art.src, art.fallback, { alt: art.alt })">
         <figcaption class="nk-home__dialog-cap">{{ art.alt }}</figcaption>
       </figure>
     </dialog>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { imgAttrs, swapImgOnError } from '../../lib/image';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from './renders';
 import type { MazeBuffInfo } from '../../services/types';
 
@@ -23,7 +24,7 @@ defineProps<{
         :style="{ '--i': i }"
       >
         <div class="nk-egd-buff__head">
-          <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+          <img v-if="b.icon" class="nk-egd-buff__icon" v-bind="imgAttrs(buffIconUrl(b))" alt="" loading="lazy" @error="swapImgOnError(BUFF_ICON_FALLBACK)($event)">
           <h3 v-if="title" class="nk-egd-buff__name">{{ b.name }}</h3>
           <span v-else class="nk-egd-buff__name">{{ b.name }}</span>
         </div>

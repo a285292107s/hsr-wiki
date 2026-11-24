@@ -1,4 +1,4 @@
-import { cdnUri } from '../../../services/cdn';
+import { cdnSrc, imgHtml } from '../../../lib/image';
 import { activeHref } from '../../../lib/i18n/active';
 import { escHtml, avatarShopIconUrl, gridFightTraitIconById } from '../../../lib/format';
 import { loadLocalCurrencyRoles } from '../../../services/api';
@@ -39,11 +39,11 @@ function renderCurrencyRoleCard(item: CatalogItem, index = 0): string {
   const costBadge = rarity >= 1 ? `<span class="nk-crole-card__cost" title="${escHtml(t(String(cwCostKey(String(rarity)))))}"><b>${rarity}</b></span>` : '';
   const traits = (item.traits as Array<{ id: number; name: string; cat: TraitCat }>) || [];
   const traitChips = traits
-    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}"><img class="nk-crole-tcard-trait__icon" data-cdn-src="${cdnUri('gridfight-icon', `${t.id}.webp`)}" alt="" loading="lazy">${escHtml(t.name || `#${t.id}`)}</span>`)
+    .map((t) => `<span class="nk-crole-tcard-trait nk-crole-tcard-trait--${t.cat}">${imgHtml(cdnSrc('gridfight-icon', `${t.id}.webp`), { className: 'nk-crole-tcard-trait__icon', loading: 'lazy' })}${escHtml(t.name || `#${t.id}`)}</span>`)
     .join('');
   return `<a class="nk-crole-card" href="${escHtml(item.href)}" data-id="${escHtml(id)}" data-name="${escHtml(item.name)}" data-rarity="${rarity}" style="--i:${index}">
       <div class="nk-crole-card__avatar">
-        <img loading="lazy" data-cdn-src="${escHtml(avatar)}" alt="${escHtml(item.name)}">
+        ${imgHtml(String(avatar), { alt: item.name as string, loading: 'lazy' })}
         ${fbBadge}
         ${costBadge}
         <span class="nk-crole-card__name"><span class="nk-crole-card__name-row" title="${escHtml(nameRowTitle)}">${escHtml(item.name)}${expert}</span>${chargeEl}</span>

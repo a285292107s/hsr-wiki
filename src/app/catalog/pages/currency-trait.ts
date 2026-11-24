@@ -1,3 +1,4 @@
+import { imgHtml } from '../../../lib/image';
 import { escHtml, fmtDesc, gridFightTraitIconUrl, avatarShopIconUrl } from '../../../lib/format';
 import { propLabel, propValue } from '../../../lib/currency-role';
 import { activeHref } from '../../../lib/i18n/active';
@@ -84,7 +85,7 @@ function renderTraitCard(item: CatalogItem, index = 0): string {
   const fullDesc = plainDesc(item.simple_desc);
 
   return `<a class="nk-cw-trait-card" href="${escHtml(activeHref(`/currency/trait/${item.id}`))}" data-id="${escHtml(item.id)}" title="${escHtml(item.name)}：${escHtml(fullDesc)}" style="--i:${index}">
-      <span class="nk-cw-trait-card__icon"><img loading="lazy" data-cdn-src="${escHtml(icon)}" alt=""></span>
+      <span class="nk-cw-trait-card__icon">${imgHtml(icon, { loading: 'lazy' })}</span>
       <span class="nk-cw-trait-card__body">
         <span class="nk-cw-trait-card__name">${escHtml(item.name)}</span>
       </span>
@@ -128,7 +129,7 @@ function renderMembers(members: TraitMember[]): string {
     const costKey = cwCostKey(String(member.rarity));
     const cost = costKey ? t(costKey) : '';
     return `<a class="nk-cwtp__member" href="${escHtml(activeHref(`/currency/role/${member.id}`))}" title="${escHtml(member.name)}">
-        <span class="nk-cwtp__member-avatar"><img loading="lazy" data-cdn-src="${escHtml(avatarShopIconUrl(member.avatar_id || member.id))}" alt=""></span>
+        <span class="nk-cwtp__member-avatar">${imgHtml(avatarShopIconUrl(member.avatar_id || member.id), { loading: 'lazy' })}</span>
         ${cost ? `<span class="nk-cwtp__member-cost">${escHtml(cost)}</span>` : ''}
         <span class="nk-cwtp__member-name">${escHtml(member.name)}</span>
       </a>`;
@@ -164,7 +165,7 @@ function renderTraitDetail(item: CatalogItem): string {
   const members = (item.members as TraitMember[]) || [];
   const id = String(item.id);
   const detailHref = escHtml(activeHref(`/currency/trait/${id}`));
-  const icon = escHtml(gridFightTraitIconUrl(item.icon as string));
+  const icon = gridFightTraitIconUrl(item.icon as string);
   const thresholdLayers = special ? special.thresholds : layers;
   const thresholds = thresholdLayers.map((layer) => `<span class="nk-cwtp__threshold" data-quality="${qualityClass(layer.quality)}">${layer.layer}</span>`).join('<span class="nk-cwtp__threshold-sep">/</span>');
   const baseFull = fmtDesc(item.desc as string, item.base_params as number[]);
@@ -179,7 +180,7 @@ function renderTraitDetail(item: CatalogItem): string {
   return `<article class="nk-cwtp" data-cat="${cat}">
       <input id="nk-cwtp-mode" class="nk-cwtp__mode" type="checkbox">
       <header class="nk-cwtp__head">
-        <span class="nk-cwtp__sigil"><img data-cdn-src="${icon}" alt="" fetchpriority="high"></span>
+        <span class="nk-cwtp__sigil">${imgHtml(icon, { fetchpriority: 'high' })}</span>
         <div class="nk-cwtp__ident">
           <div class="nk-cwtp__eyebrow">
             <span class="nk-cwtp__cat" data-cat="${cat}">${escHtml(catLabel(cat))}</span>

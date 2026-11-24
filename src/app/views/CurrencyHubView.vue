@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 import { useCwSeason, type CwRoleCard, type CwTraitCard } from '../composables/use-cw-season';
-import { iconImgAttrs } from '../../lib/icons';
+import { imgAttrs } from '../../lib/image';
 import '../../styles/currency-hub.css';
 
 const { season, seasons, seasonScale, currentSeasonId, selectedSeasonId, loaded, switching, failedCount, intakeFailed, selectSeason, load } = useCwSeason();
@@ -230,7 +230,7 @@ onMounted(() => { void load(); });
                 </ul>
               </div>
               <figure class="nk-cwsc-premiere__art">
-                <img v-bind="iconImgAttrs(coverRole.art)" :alt="coverRole.name" loading="eager">
+                <img v-bind="imgAttrs(coverRole.art)" :alt="coverRole.name" loading="eager">
                 <figcaption class="nk-cwsc-premiere__cap">
                   <span class="nk-cwsc-premiere__name">{{ coverRole.name }}</span>
                   <span v-if="coverRole.positionKey" class="nk-cwsc-premiere__pos">{{ t(coverRole.positionKey) }}</span>
@@ -272,7 +272,7 @@ onMounted(() => { void load(); });
                       @focusout="clearHighlight"
                     >
                       <span class="nk-cwsc-trait__no">{{ String(trait.seqCat).padStart(2, '0') }}</span>
-                      <span class="nk-cwsc-trait__icon"><img v-bind="iconImgAttrs(trait.icon)" alt="" loading="lazy"></span>
+                      <span class="nk-cwsc-trait__icon"><img v-bind="imgAttrs(trait.icon)" alt="" loading="lazy"></span>
                       <span class="nk-cwsc-trait__name">{{ trait.name }}</span>
                       <span v-if="trait.qualityKeys.length" class="nk-cwsc-trait__quality">{{ t(trait.qualityKeys[trait.qualityKeys.length - 1]!) }}</span>
                       <span class="nk-cwsc-trait__layers">{{ t('cwTrait.layerCount', { n: trait.layers }) }}</span>
@@ -314,7 +314,7 @@ onMounted(() => { void load(); });
                     <img
                       v-for="variant in role.variants"
                       :key="variant.id"
-                      v-bind="iconImgAttrs(role.avatar)"
+                      v-bind="imgAttrs(role.avatar)"
                       :alt="role.name"
                       loading="lazy"
                     >

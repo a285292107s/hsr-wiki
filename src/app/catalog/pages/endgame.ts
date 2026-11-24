@@ -3,6 +3,7 @@ import { activeHref } from '../../../lib/i18n/active';
 import { translate } from '../../i18n';
 
 const t = translate;
+import { imgHtml } from '../../../lib/image';
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
 
@@ -208,7 +209,7 @@ export const endgamePage: CatalogPageConfig = {
     const meta = (badge || date) ? `<span class="nk-eg-lrow__meta">${badge}${date}</span>` : '';
     const iconSrc = modeDefaultArtUrl(String(item.mode || ''));
     const iconHtml = iconSrc
-      ? `<span class="nk-eg-lrow__fig"><img class="nk-eg-lrow__icon" data-cdn-src="${escHtml(iconSrc)}" alt="" loading="lazy"></span>` : '';
+      ? `<span class="nk-eg-lrow__fig">${imgHtml(iconSrc, { className: 'nk-eg-lrow__icon', loading: 'lazy' })}</span>` : '';
     return `<a class="nk-eg-lrow nk-eg-lrow--${stCls}" href="${escHtml(String(item.href || ''))}" data-mode="${escHtml(String(item.mode || ''))}" data-name="${escHtml(name)} ${escHtml(idStr)}" data-status="${escHtml(st)}" style="--i:${i}">
       ${iconHtml}
       <span class="nk-eg-lrow__main">

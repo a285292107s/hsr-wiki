@@ -3,7 +3,8 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { activeHref } from '../../lib/i18n/active';
 import { loadLocalLightCones, loadLocalRelicSet } from '../../services/api';
 import { avatarRoundIconUrl, fmtDesc, itemName, pathIconUrl } from '../../lib/format';
-import { cdnUri } from '../../services/cdn';
+import { cdnSrc } from '../../lib/image';
+import CdnImage from '../components/CdnImage.vue';
 import { SLOT_ICONS } from '../../lib/constants';
 import { propLabel, relicSlotLabel } from '../../lib/enum-labels';
 import { SECTION_IDX, hasRelics } from './sections';
@@ -46,7 +47,7 @@ const cones = computed(() =>
       id,
       rank: i + 1,
       name: itemName(id, props.nameCache, props.itemDb),
-      img: cdnUri('lightconemediumicon', `${id}.webp`),
+      img: cdnSrc('lightconemediumicon', `${id}.webp`),
       rarity,
       stars: '★'.repeat(rarity),
       path,
@@ -138,7 +139,7 @@ onBeforeUnmount(() => {
 function setIcon(data: RelicSetData | null | undefined): string {
   if (data && data.icon) {
     const iconId = data.icon.split('/').pop()!.replace('.png', '');
-    return cdnUri('itemfigures', `${iconId}.webp`);
+    return cdnSrc('itemfigures', `${iconId}.webp`);
   }
   return '';
 }
@@ -170,10 +171,10 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         :title="c.name"
       >
         <div class="nk-lc-card__img">
-          <img class="lc-avatar" :src="c.img" :alt="c.name" loading="lazy">
+          <CdnImage class="lc-avatar" :src="c.img" :alt="c.name" loading="lazy" />
           <span class="nk-lc-mini__rec">REC. {{ c.rank }}</span>
           <div v-if="c.pathImg" class="nk-lc-card__badge">
-            <img :src="c.pathImg" :alt="c.path">
+            <CdnImage :src="c.pathImg" :alt="c.path" />
           </div>
           <div class="nk-lc-card__info">
             <span class="nk-lc-card__name">{{ c.name }}</span>
@@ -193,7 +194,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         </div>
         <div class="nk-build__team-slot nk-build__team-slot--main">
           <RouterLink :to="`/character/${charId}`" class="nk-build__team-link" :title="translate('build.currentChar')">
-            <img :src="avatarRoundIconUrl(charId)" :alt="translate('build.currentChar')">
+            <CdnImage :src="avatarRoundIconUrl(charId)" :alt="translate('build.currentChar')" />
             <span class="nk-build__team-name">{{ mainName }}</span>
           </RouterLink>
         </div>
@@ -201,12 +202,12 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
         <template v-for="(m, i) in t.members" :key="m.mid">
           <div class="nk-build__team-slot">
             <RouterLink :to="`/character/${m.mid}`" class="nk-build__team-link" :title="slotLabel(m.name, m.mid)">
-              <img :src="m.img" alt="">
+              <CdnImage :src="m.img" alt="" />
               <span class="nk-build__team-name">{{ m.name }}</span>
             </RouterLink>
             <div v-if="m.backups.length" class="nk-build__team-alt">
               <RouterLink v-for="b in m.backups" :key="b.id" :to="`/character/${b.id}`" class="nk-build__team-link" :title="slotLabel(b.name, b.id)">
-                <img :src="b.img" :alt="slotLabel(b.name, b.id)">
+                <CdnImage :src="b.img" :alt="slotLabel(b.name, b.id)" />
               </RouterLink>
             </div>
           </div>
@@ -224,7 +225,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
           :key="p.relic_type + p.property_type"
           class="nk-relic-slot"
         >
-          <img class="nk-relic-slot__icon" alt="" :src="cdnUri('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)">
+          <CdnImage class="nk-relic-slot__icon" alt="" :src="cdnSrc('relicfigures', `${SLOT_ICONS[p.relic_type] || 'IconRelicBody'}.webp`)" />
           <span class="nk-relic-slot__stat">{{ propLabel(p.property_type) }}</span>
           <span class="nk-relic-slot__slot">{{ relicSlotLabel({ type: p.relic_type, type_name: p.relic_type_name }) }}</span>
         </div>
@@ -238,7 +239,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       <div v-if="setIdList.length" class="nk-build__sets">
         <div v-for="s in setIdList" :key="`${s.id}-${s.pc}`" class="nk-build__set">
           <div class="nk-build__set-head">
-            <img alt="" :src="setIcon(relicSets[s.id]) || undefined">
+            <CdnImage alt="" :src="setIcon(relicSets[s.id])" />
             <div>
               <div class="nk-build__set-badge">{{ s.pc }}PC</div>
               <div class="nk-build__set-name">{{ setName(s.id, relicSets[s.id]) }}</div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
+import { imgAttrs, markImgError } from '../../lib/image';
 import { itemIconUrl, fmtNumber } from '../../lib/format';
 import { ensureRewardItemMap, rewardItemMap } from './renders';
 import type { MazeRewardItem } from '../../services/types';
@@ -39,11 +40,11 @@ const rows = computed(() => props.items.map((r) => ({
         <img
           v-if="r.icon"
           class="nk-egd-reward__icon"
-          :src="itemIconUrl(r.icon)"
+          v-bind="imgAttrs(itemIconUrl(r.icon))"
           alt=""
           :title="r.name"
           loading="lazy"
-          @error="($event.target as HTMLImageElement).classList.add('nk-img-error')"
+          @error="markImgError"
         >
         <span v-else class="nk-egd-reward__icon nk-egd-reward__icon--void">{{ String(r.id).slice(0, 2) }}</span>
         <span class="nk-egd-reward__name">{{ r.name }}</span>

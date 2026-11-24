@@ -1,3 +1,4 @@
+import { imgHtml } from '../../../lib/image';
 import { escHtml, gridFightEquipIconUrl } from '../../../lib/format';
 import { propLabel, propValue } from '../../../lib/currency-role';
 import { cwCostKey } from '../../../lib/enum-labels';
@@ -70,7 +71,7 @@ function renderEquipCard(item: CatalogItem, index = 0): string {
   const descHtml = fallbackDesc ? `<div class="nk-cw-equip-desc">${escHtml(fallbackDesc)}</div>` : '';
   return `<div class="nk-cw-card nk-cw-equip-card" style="--i:${index}" title="${escHtml(item.name)}">
       <div class="nk-cw-equip-header">
-        <div class="nk-cw-equip-icon" style="border-color:${borderColor}"><img loading="lazy" data-cdn-src="${escHtml(icon)}" alt="${escHtml(item.name)}"></div>
+        <div class="nk-cw-equip-icon" style="border-color:${borderColor}">${imgHtml(icon, { alt: item.name as string, loading: 'lazy' })}</div>
         <div class="nk-cw-equip-title">
           <div class="nk-cw-equip-name">${escHtml(item.name)}</div>
           ${catName ? `<div class="nk-cw-equip-cat">${escHtml(catName)}</div>` : ''}

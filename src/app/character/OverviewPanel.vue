@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { extraTerms } from './utils';
-import { escHtml, fmtDesc, iconUrl, iconImgAttrs } from '../../lib/format';
-import { cdnUri } from '../../services/cdn';
+import { escHtml, fmtDesc, iconUrl } from '../../lib/format';
+import { cdnSrc, imgAttrs } from '../../lib/image';
 import { PROP_ICON } from '../../lib/constants';
 import { propLabel } from '../../lib/enum-labels';
 import { SECTION_IDX, hasBonusNodes, hasProfile, hasStories, hasTalentNodes } from './sections';
@@ -89,7 +89,7 @@ const attrBonuses = computed<AttrBonus[]>(() => {
     return {
       name: propLabel(type, b.name && b.name !== '{}' ? b.name : type),
       v: fmtBonus(type, b.sum),
-      icon: key ? cdnUri('trace', `Icon${key}.webp`) : '',
+      icon: key ? cdnSrc('trace', `Icon${key}.webp`) : '',
     };
   });
 });
@@ -137,7 +137,7 @@ const abilities = computed<Ability[]>(() => {
     <h2 class="nk-title"><span class="nk-title__idx">{{ SECTION_IDX.bonuses }}</span>STAT BONUSES</h2>
     <div class="nk-bonus-grid">
       <div v-for="b in attrBonuses" :key="b.name" class="nk-bonus">
-        <img v-if="b.icon" class="nk-bonus__icon" :src="b.icon" alt="" loading="lazy">
+        <img v-if="b.icon" class="nk-bonus__icon" v-bind="imgAttrs(b.icon)" alt="" loading="lazy">
         <span class="nk-bonus__val">{{ b.v }}</span>
         <span class="nk-bonus__name">{{ b.name }}</span>
       </div>
@@ -151,7 +151,7 @@ const abilities = computed<Ability[]>(() => {
       class="nk-ability"
     >
       <div class="nk-skill__title-row">
-        <img v-if="ab.icon" class="nk-skill__icon" v-bind="iconImgAttrs(ab.icon)" alt="">
+        <img v-if="ab.icon" class="nk-skill__icon" v-bind="imgAttrs(ab.icon)" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ ab.name }}</span>
           <span class="nk-skill__tag">{{ t('char.bonusAbility', { n: ab.idx + 1 }) }}</span>

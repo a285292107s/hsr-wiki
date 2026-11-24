@@ -4,8 +4,8 @@ import { elemLabel, pathLabel } from '../../lib/enum-labels';
 import { useParallax } from '../composables/use-parallax';
 import { initSpineViewer } from './spine';
 import { avatarDrawCardUrl, elementIconUrl, escHtml, pathIconUrl } from '../../lib/format';
+import { bgStyle, imgAttrsWith } from '../../lib/image';
 import { characterBlurb } from '../../lib/character-blurb';
-import { cdnFallbackFromPrimary } from '../../services/cdn';
 import type { CharacterData } from '../../services/types';
 
 import { translate } from '../i18n';
@@ -24,7 +24,7 @@ const stars = computed(() =>
 function badgeIconAttrs(kind: 'element' | 'pathicon', key: string): Record<string, string | undefined> {
   const url = kind === 'element' ? elementIconUrl(key) : pathIconUrl(key);
   if (!url) return {};
-  return { src: url, 'data-cdn-fallback': cdnFallbackFromPrimary(url) || undefined, alt: '' };
+  return imgAttrsWith(url, { alt: '' });
 }
 
 const heroDesc = computed(() => escHtml(characterBlurb(props.d.chara_info?.stories)));
@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
         ref="heroBgRef"
         class="nk-hero__bg"
         :class="{ 'nk-dim': spineVisible }"
-        :style="{ backgroundImage: `url(${heroBg})` }"
+        :style="bgStyle(heroBg)"
       ></div>
       <div ref="spineRef" class="nk-hero__spine" :class="{ 'nk-ready': spineVisible }"></div>
       <button

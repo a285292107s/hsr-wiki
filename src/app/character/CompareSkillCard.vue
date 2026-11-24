@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { elemLabel, skillTypeLabel } from '../../lib/enum-labels';
+import { imgAttrs } from '../../lib/image';
 import { fmtDesc, skillIconUrl, fmtToughness } from '../../lib/format';
 
 import type { CharacterData, Skill } from '../../services/types';
@@ -81,7 +82,7 @@ const metricDiffs = computed<MetricDiff[]>(() => {
     </div>
     <div class="nk-skill__body">
       <div class="nk-skill__title-row">
-        <img v-if="icon" class="nk-skill__icon" :src="icon" alt="">
+        <img v-if="icon" class="nk-skill__icon" v-bind="imgAttrs(icon)" alt="">
         <div class="nk-skill__title">
           <span class="nk-skill__name">{{ diff.enh.name }}</span>
           <span class="nk-skill__meta">

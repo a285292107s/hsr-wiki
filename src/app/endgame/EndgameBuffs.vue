@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { imgAttrs, swapImgOnError } from '../../lib/image';
 import { BUFF_ICON_FALLBACK, buffDescHtml, buffIconUrl } from './renders';
 import type { MazeBuffInfo, MazeListEntry } from '../../services/types';
 
@@ -21,7 +22,7 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
       <span class="nk-egd-row__label">{{ t('egd.buffs.mech') }}</span>
       <article class="nk-egd-buff">
         <div class="nk-egd-buff__head">
-          <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" :src="buffIconUrl(subBuffsMech)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+          <img v-if="subBuffsMech.icon" class="nk-egd-buff__icon" v-bind="imgAttrs(buffIconUrl(subBuffsMech))" alt="" loading="lazy" @error="swapImgOnError(BUFF_ICON_FALLBACK)($event)">
           <h3 class="nk-egd-buff__name">{{ subBuffsMech.name }}</h3>
         </div>
         <p v-if="subBuffsMech.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(subBuffsMech)"></p>
@@ -37,7 +38,7 @@ const subBuffsEffects = computed<MazeBuffInfo[]>(() => props.data.sub_buffs?.sli
           :style="{ '--i': i + 1 }"
         >
           <div class="nk-egd-buff__head">
-            <img v-if="b.icon" class="nk-egd-buff__icon" :src="buffIconUrl(b)" alt="" loading="lazy" @error="($event.target as HTMLImageElement).src = BUFF_ICON_FALLBACK">
+            <img v-if="b.icon" class="nk-egd-buff__icon" v-bind="imgAttrs(buffIconUrl(b))" alt="" loading="lazy" @error="swapImgOnError(BUFF_ICON_FALLBACK)($event)">
             <h3 class="nk-egd-buff__name">{{ b.name }}</h3>
           </div>
           <p v-if="b.desc" class="nk-egd-buff__desc" v-html="buffDescHtml(b)"></p>
