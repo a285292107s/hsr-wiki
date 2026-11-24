@@ -13,6 +13,7 @@ const GUARDS = [
   ['check-i18n-packs.mjs'],
   ['check-i18n-messages.mjs'],
   ['check-ui-chinese.mjs'],
+  ['check-image-loading.mjs', '--strict'],
 ];
 
 const results = [];
