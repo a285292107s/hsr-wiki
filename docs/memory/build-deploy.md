@@ -90,4 +90,11 @@
 - **优先级/视口**：`fetchpriority="high"` 的 LCP 图立即放行（不受上限约束，并移除该属性避免过早请求），其余按「靠近视口优先」入队；名额靠全局 `load`/`error` 捕获释放（`load` 不冒泡，故必须 capture），并 rAF 合并重算，避免 1000 图页面里每次 release 都 O(n) 全扫。
 - **降级与闸门的耦合坑**：闸门把 `src` 设成**透明**占位（不是错误图标）——4×4 的透明图 `complete && naturalWidth>0` 成立，所以**任何「图已加载」的断言必须认真实 `src`（或 `data-cdn-src`），别只信 `naturalWidth>0`**（它会假阳性）。若用错误 SVG 当占位，会触发组件 `@error` 处理器误隐藏图，更糟。
 - **测试约定**：闸门接管后，本域图的真实 URL 统一在 `data-cdn-src`（不管在队还是已加载），`src` 可能是占位 GIF（未放行时）。e2e 断言图片地址一律读 `data-cdn-src || src`；旧 `toHaveAttribute('src', …)` 会假失败。全 404 占位类断言要先把目标 `scrollIntoViewIfNeeded()`，否则屏外图根本不会入队加载、404 永不触发。
+- **`IMAGE_GATE_ROOT_MARGIN`（IntersectionObserver 的 `rootMargin`）与 `isNearViewport()` 的像素余量是同一语义的两处实现**：后者必须从前者 `parseInt` 派生，禁止各写一个字面量——两处不同步会让「视口 ±N 预加载」静默失效（一处 300 一处 250 时，靠近边界的图在两判定间反复进出队列）。
 
+## 图片加载统一入口与背景图的边界
+
+业务层禁止私自加载（裸 `<img src>` / 模板串 `data-cdn-src` / `background-image: url()` / 内联 `@error` 改 src / `new Image()`），统一走 `src/lib/image.ts` + `CdnImage.vue`；`tools/check-image-loading.mjs` 以 `--strict` 进 `pnpm build` 守卫链，命中即构建失败。
+
+- **背景图（`bgStyle` / `bgVar`）是刻意保留的例外，不是漏网**：CSS `background-image` 的首帧计算样式里**必须**带 URL——`e2e/layout-endgame-mode.spec.ts`、`layout-character-hero.spec.ts` 直接断言 `getComputedStyle().backgroundImage` 含 `url(`，预渲染快照也要求爬虫拿到的 HTML 内联背景 URL。因此背景图**不能**像 `<img>` 那样「初始留空、加载成功后写入」，也就进不了闸门队列（闸门的前提是先占位再放行）。代价是背景图无并发上限、无自动回退、无占位降级；这是已知取舍，不要试图用「隐藏探针 `<img>`」绕路——隐藏元素 `getBoundingClientRect` 为 0，`isNearViewport` 恒 false 会卡死队列；放 `fetchpriority=high` 则绕过并发，等于没优化。真要给背景图补保护，须先改 e2e 断言与快照策略（待裁决）。
+- **两条 `<img>` 路径并存是刻意的**：`imgAttrs()` 产出普通 `src` 靠全局 `src` setter 拦截，`imgHtml()`/`CdnImage.vue` 产出 `data-cdn-src` 靠 MutationObserver。曾评估「统一成 data-cdn-src、删掉原型劫持」，但会重写 `img-gate.test.ts` 里 7 条针对 setter 路径的用例（那正是闸门的核心保护网），纯内部简化、用户零收益，性价比低，故暂缓。改动闸门前先读那 7 条用例，别误删保护。

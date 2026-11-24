@@ -9,7 +9,7 @@ src/
 ├── main.ts / app/bootstrap.ts → 入口：createApp + Pinia + Router；全局 CSS 仅导入 tokens.css + catalog.css + fonts.css
 ├── app/          → 应用层：router（meta.depth 驱动方向过渡、chunks.ts 预加载）、views 路由级页面、catalog 配置驱动目录引擎、character / endgame 详情子组件、stores、composables、components、debug（dev-only 研究线）
 ├── services/     → 数据层：api 按域加载器（index.ts barrel、singleton.ts 单例工厂、base.ts 数据基址）、cache 三级缓存、cdn 双源解析、types 共享接口
-├── lib/          → 纯函数：constants（CDN 基址与枚举映射）、format / icons / html（转义与富文本清洗）、compare（强化对比）、currency-role、theme（全站唯一强调色通道）、errors
+├── lib/          → 纯函数：constants（CDN 基址与枚举映射）、format / icons / html（转义与富文本清洗）、image（图片加载统一入口：imgAttrs/imgHtml/bgStyle + 错误处理，消费 services/cdn）、compare（强化对比）、currency-role、theme（全站唯一强调色通道）、errors
 ├── spine/        → 中立 Spine 引擎层：零 Vue 依赖，有副作用（DOM / WebGL / rAF / 全局注册表）
 └── styles/       → tokens.css（四层令牌 + 全局原语）+ catalog.css（目录引擎）；页面专属 CSS 随路由 chunk 懒加载
 ```
@@ -46,7 +46,8 @@ Pinia store（加载编排 / 缓存 / 错误态；不写业务计算）
    ▼
 view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
    │
-   ├─ 图片 / Spine → services/cdn/ 纯函数解析基址 → 图片经并发闸门（img-gate，全局在途上限）→ jsdelivr/raw 回退（运行期）
+   ├─ 图片 → lib/image.ts（统一入口：cdnSrc / imgAttrs / imgHtml / bgStyle / bgVar / 错误助手；Vue 用 CdnImage.vue）→ services/cdn/ 纯函数解析基址 → 并发闸门（img-gate，全局在途上限）→ jsdelivr/raw 回退（运行期）。**禁止私自 <img src> / data-cdn-src / background-image url() / new Image()**：`node tools/check-image-loading.mjs --strict` 机检（豁免见 commands.md）。
+   ├─ Spine 动画 → 运行期走 CDN（lib/constants.ts → CDN），机制见 docs/spine/
    └─ 构建期 gen-ai-endpoints.mjs：dist/index.html → dist/prerender/** 快照（AI 可见性）
 ```
 
