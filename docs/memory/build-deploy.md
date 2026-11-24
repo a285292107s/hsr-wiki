@@ -68,25 +68,23 @@
 - **补数走 AnimeStudio CLI 的 map 定向导出，不要全量扫包**：`AnimeStudio.CLI.exe "<game>\StarRail_Data" <导出目录> --game SR --map_op AssetMap,Load --map_type MessagePack --map_name "<textures>\index\game.map" --group_assets ByContainer --types Sprite --containers "<分类正则>" --dedupe_content`；`--containers` 让 map 只回捞相关包。前提是 `index/game.map` 建时已含当前版本——旧 map 只会回捞到旧资产（「map 里搜不到资产名」即此因，重建 map 等于整盘扫）；`--src` 要给 `<导出目录>/assets/asbres/spriteoutput`（解包根可能多一层 `ui/`，别依赖脚本默认路径）。
 - **`ingest-icons.py --crop-alpha 4:5` 的产物比例并不统一，这是算法而非流程漂移**：裁剪窗口宽高被 `min(w2, W) / min(h2, H)` 夹回画布后不再缩小，所以宽幅或几乎满画布的立绘会原样保留比例——目录里 4:5 与 0.9~1.1 的比例混存是正常形态；判据是「窗口受画布限制」，不要为了凑 4:5 手裁或换源。
 
-## 图片分发：jsdelivr 项目仓库镜像（主）+ raw.githubusercontent（回退）
+## 图片分发：本地同源（主）+ jsDelivr（二级）+ raw.githubusercontent（三级）
 
-图片不再从 Vercel 源站（`/data/assets/icons`）直发——跨境链路带宽低、单张立绘体量大，首屏 LCP 图会被拖到明显的秒级等待才出。改由 `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`（jsdelivr `@gh/<repo>@<ref>` 镜像）分发，`LOCAL_ICONS_FALLBACK_BASE`（raw.githubusercontent 同仓库同 ref）作 img 回退。**图标分类的 `local` 分支现在就是「镜像主源 + raw 回退」**，不再是原来的「Vercel 源站 + nanoka 回退」。
+图片主源是**站点同源** `/data/assets/icons`（`LOCAL_ICONS_BASE`），随 `pnpm build` 拷进 `dist/data/assets/icons` 部署；本地失败时回退 `cdn.jsdelivr.net/gh/<repo>@<ref>`（`LOCAL_ICONS_DELIVR_BASE`），再失败回退 `raw.githubusercontent.com`（`LOCAL_ICONS_FALLBACK_BASE`）。**图标分类的 `local` 分支现在是「本地主源 → jsDelivr → raw」三级链**（翻案自「jsDelivr 主源 + raw 回退」，见 [ADR 0069](../adr/0069-图片加载改为本地优先.md)）。
 
-- **dev 档不碰镜像，直读同源 `public/data/assets/icons`**：`LOCAL_ICONS_BASE` 按 `import.meta.env.DEV` 分流（`LOCAL_ICONS_DEV_BASE` = `/data/assets/icons` / `LOCAL_ICONS_CDN_BASE` = jsdelivr 镜像），dev server 直发 `public/`，无跨境、无镜像 burst 限流。两档共用同一反查（`localFallbackFromPrimary` 按基址前缀识别）与同一闸门，故 dev 缺文件照旧回退 raw 镜像——判据：`pnpm dev` 下图片请求必须**全部**是 `/data/assets/icons/**` 同源 200，出现 jsdelivr 即分流没生效。
-- **连带影响**：dev-only `/debug` 的死链审核（`collectUrls`）此时枚举到的是站点相对路径（`domainOf` 归 `other`），探测目标从远端镜像变成 dev server，语义即「本地入库存在性校验」；要审远端镜像状态得把 `LOCAL_ICONS_BASE` 指回镜像基址（ADR 0057 决策 6 的站点探针同理：build 档 `dist/data/assets/icons` 已被 `prune-dist-icons` 裁掉，同源断言只在 dev 有意义）。
-
-- **jsdelivr `@gh/<repo>@<ref>` 有 50 MB 的 ref 体积上限，本仓库远超它 → 未预热的冷文件会间歇返回 403 `Package size exceeded the configured limit of 50 MB`**：同一个文件重试往往又 200（官方 issue 定性为「取单文件偶尔失败，通常需预热」，不是路径写错）。只配 jsdelivr 会有概率性裂图，**必须接 raw.githubusercontent 回退**（raw 无该上限、稳定性更好，速度略慢）。判据：出现「部分图 403、同一 URL 重试 200」即此因。
-- **回退链两端必须同 ref**：jsdelivr 与 raw 的 ref（`ICON_MIRROR_REF`，现为 `main`）要一致，否则主源与回退各取不同提交，数据更新后可能一张新一张旧。
-- **`index.html` 的 `preconnect` 指向 jsdelivr、`dns-prefetch` 指向 raw.githubusercontent**：不要再 `preconnect` `static.nanoka.cc`——该 Cloudflare 域在目标网络常不可达（connect/TLS 超时），首屏 LCP 图会先卡在死主源上等超时才回退。
+- **`LOCAL_ICONS_BASE` 恒为同源相对路径**（`${import.meta.env.BASE_URL}data/assets/icons`），不再按 `DEV` 分流——dev 与 build 都直读 `public/`→`dist/` 同源文件；jsDelivr/raw 仅作失败回退。判据：`pnpm dev` 与线上图片首选请求全部是 `/data/assets/icons/**` 同源 200，不会被 minify 前的分支误判。
+- **三级链在属性层表达为两跳**：`resolveCdnUri` 返回 `{ primary, fallback, fallback2 }`；`imgHtml`/`cdnImgAttrs`/`imgAttrs` 输出 `data-cdn-src` + `data-cdn-fallback`（jsDelivr）+ `data-cdn-fallback2`（raw）。`dom.ts` 的 `handleFailure`：本地主源失败 → jsDelivr（保留 fallback2）→ raw → 占位；jsDelivr/raw 镜像自身失败沿链下一跳。`localFallbackFromPrimary` 返回 **jsDelivr** 二级，`localFallback2FromPrimary` 返回 raw 三级。
+- **本地图标源文件现在随构建产物投递**：`prune-dist-icons.mjs` 已删除，`dist/data/assets/icons`（4,585 文件 / 约 250 MB）随部署上线，`dist` 约 100 → 约 400 MB（实测 401 MB）。这是「本地优先」的必要代价——Vercel 走 Git 集成部署无产物硬上限，但 Deployment Storage 按部署数累加。
+- **jsdelivr 50 MB ref 上限仍在，但已退为二级**：只有本地缺文件（新版本图标尚未入库）才会打到 jsDelivr，冷文件偶发 403 `Package size exceeded the configured limit of 50 MB` 时由 raw 三级兜底；回退链两跳必须同 ref（`ICON_MIRROR_REF`=main）。
+- **`index.html` 只保留 `dns-prefetch`**（jsdelivr + raw），不再 `preconnect` jsdelivr——主源同源无需跨域预连接，回退前 `dns-prefetch` 足够；仍不得 `preconnect` `static.nanoka.cc`（Cloudflare 域在目标网络常不可达）。
 - **构建产物里基址是模板字面量拼接，grep 完整 URL 会 0 命中**：minify 后形如 ``a=`https://cdn.jsdelivr.net/gh/${repo}@${ref}/public/data/assets/icons` ``，核对时 grep `hsr-wiki` 或 `raw.githubusercontent` 片段，别因整串 grep 无果就以为没改到。
-- **改走 jsDelivr 后本地图标源文件不能再随构建产物投递**：Vite 会把整个 `public/` 原样复制进 `dist/`，于是 4,585 个已不经过 Vercel 的图标（约 263 MB）在每个部署里白存一遍，按部署数线性吃 Deployment Storage（12 个部署 = 3.16 GB）。`pnpm build` 末步 `tools/prune-dist-icons.mjs` 在 `dist/index.html` 已生成后删除 `dist/data/assets/icons`，源文件留在 `public/` 供 jsDelivr 读取。判据：dev 无此裁剪（走 `public/` 目录直读）、任何 e2e 若断言 `/data/assets/icons` 同源 200，在 build 档必然假红——该断言只对 dev 有意义。
 
 ## 图片并发闸门（避免一次性大量加载被 jsdelivr 限流）
 
 `src/services/cdn/img-gate.ts` 的 `installImageGate()`（bootstrap 里 `app.mount` 之前安装）给全站图片加了一个**全局在途并发上限**（`IMAGE_GATE_MAX_INFLIGHT=6`），避免列表首屏一次性把 30–40 个 jsdelivr 请求同时发出去、撞上突发限流。**列表页的并发峰值实测从 ~31 降到 6**，可见图仍全部加载。
 
 - **浏览器一旦拿到 `src` 就立即发请求，改属性/改 `src` 拦不住**——所以闸门必须让图**一开始就没有真 `src`**。实现：装一个 `HTMLImageElement.prototype.src` 属性 setter 拦截，本域图片一律改成透明占位、把真 URL 记在 `data-cdn-src`，等拿到名额再由闸门写回。`v-html`/`innerHTML` 出的图不走属性 setter（实测：setter 只拦属性赋值，`setAttribute`/`innerHTML` 都漏），因此**模板串里本域图片必须写 `data-cdn-src` 而非 `src`**，由闸门在插入时接管。
-- **本域判定**：`img-gate.ts` 的 `isGatedImageUrl` 认 `CDN`(nanoka) + `cdn.jsdelivr.net` + `raw.githubusercontent.com` + `${LOCAL_ICONS_BASE}/`。新增图片来源（换 CDN / 加域名）必须同步这里，否则新源不受闸门；dev 档本地基址是**站点相对路径**，漏了这一条则模板串的 `data-cdn-src` 永不被接管、图片全空（`dom.ts` 的降级判定 `isManagedImage` 同理会漏掉本地相对地址、失败时不给占位）。
+- **本域判定**：`img-gate.ts` 的 `isGatedImageUrl` 认 `CDN`(nanoka) + `cdn.jsdelivr.net` + `raw.githubusercontent.com` + `${LOCAL_ICONS_BASE}/`。新增图片来源（换 CDN / 加域名）必须同步这里，否则新源不受闸门；本地基址现在是**站点相对路径**（dev/build 一致），漏了这一条则模板串的 `data-cdn-src` 永不被接管、图片全空（`dom.ts` 的降级判定 `isManagedImage` 同理会漏掉本地相对地址、失败时不给占位）。
 - **优先级/视口**：`fetchpriority="high"` 的 LCP 图立即放行（不受上限约束，并移除该属性避免过早请求），其余按「靠近视口优先」入队；名额靠全局 `load`/`error` 捕获释放（`load` 不冒泡，故必须 capture），并 rAF 合并重算，避免 1000 图页面里每次 release 都 O(n) 全扫。
 - **降级与闸门的耦合坑**：闸门把 `src` 设成**透明**占位（不是错误图标）——4×4 的透明图 `complete && naturalWidth>0` 成立，所以**任何「图已加载」的断言必须认真实 `src`（或 `data-cdn-src`），别只信 `naturalWidth>0`**（它会假阳性）。若用错误 SVG 当占位，会触发组件 `@error` 处理器误隐藏图，更糟。
 - **测试约定**：闸门接管后，本域图的真实 URL 统一在 `data-cdn-src`（不管在队还是已加载），`src` 可能是占位 GIF（未放行时）。e2e 断言图片地址一律读 `data-cdn-src || src`；旧 `toHaveAttribute('src', …)` 会假失败。全 404 占位类断言要先把目标 `scrollIntoViewIfNeeded()`，否则屏外图根本不会入队加载、404 永不触发。
