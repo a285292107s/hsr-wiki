@@ -65,7 +65,7 @@ export const CDN_CATEGORIES: Record<CdnCategory, CdnCategorySpec> = {
   lightconemediumicon: { nanoka: 'lightconemediumicon', local: 'lightconemediumicon' },
   monstermiddleicon: { nanoka: 'monstermiddleicon', local: 'monstermiddleicon' },
   monsterfigure: { nanoka: 'monsterfigure', local: 'monsterfigure' },
-  relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^IconRelic(?:Body|Foot|Neck|Goods)\.webp$/ },
+  relicfigures: { nanoka: 'relicfigures', local: 'relicfigures', localFiles: /^(?:IconRelic(?:Body|Foot|Neck|Goods)|IconRelic_\d+_\d+)\.webp$/ },
   rank: { nanoka: 'rank/_dependencies/textures', local: 'rank' },
   avatarroundicon: { nanoka: 'avatarroundicon', local: 'avatarroundicon' },
   'gridfight-equipment': { nanoka: 'gridfight/equipment', local: 'gridfight-equipment' },

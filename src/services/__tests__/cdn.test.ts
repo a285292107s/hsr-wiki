@@ -207,13 +207,16 @@ describe('resolveCdnUri 双源解析', () => {
     });
   });
 
-  it('jsDelivr 映射分类：monstermiddleicon / relicfigures（套装件不受本地化影响）', () => {
+  it('relicfigures：部位图与套装单件图均已全量入库，local-first（回退 jsDelivr → raw）', () => {
     expect(resolveCdnUri('monstermiddleicon', 'Monster_1002011.webp', { nanoka: 'monstermiddleicon' }).primary)
       .toBe(`${BASE}/monstermiddleicon/Monster_1002011.webp`);
-    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').fallback)
-      .toBe(`${JS_DELIVR_BASE}/relicfigures/IconRelic_101_1.png`);
     expect(resolveCdnUri('relicfigures', 'IconRelicBody.webp').source).toBe('local');
-    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp').source).toBe('nanoka');
+    expect(resolveCdnUri('relicfigures', 'IconRelic_101_1.webp')).toEqual({
+      primary: `${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`,
+      fallback: `${JD}/relicfigures/IconRelic_101_1.webp`,
+      fallback2: `${RAW}/relicfigures/IconRelic_101_1.webp`,
+      source: 'local',
+    });
   });
 
   it('avatarroundicon：全量入库（含 1503 真珠 override），local-first，回退 jsDelivr → raw 镜像', () => {
@@ -315,7 +318,9 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
       .toBe(`${RAW}/element/fire.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelicBody.webp`))
       .toBe(`${JD}/relicfigures/IconRelicBody.webp`);
-    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`)).toBe('');
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`))
+      .toBe(`${JD}/relicfigures/IconRelic_101_1.webp`);
+    expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_a.webp`)).toBe('');
     expect(localFallbackFromPrimary('https://example.com/x.webp')).toBe('');
     expect(cdnFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
       .toBe(`${JD}/element/fire.webp`);
@@ -496,7 +501,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
   it('镜像基址 + 白名单外文件名（无回退）→ 降级为占位图形', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
-    img.src = `${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`;
+    img.src = `${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_a.webp`;
     document.body.appendChild(img);
     try {
       img.dispatchEvent(new Event('error', { bubbles: true }));
