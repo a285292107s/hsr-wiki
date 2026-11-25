@@ -78,6 +78,9 @@
 - **jsdelivr 50 MB ref 上限仍在，但已退为二级**：只有本地缺文件（新版本图标尚未入库）才会打到 jsDelivr，冷文件偶发 403 `Package size exceeded the configured limit of 50 MB` 时由 raw 三级兜底；回退链两跳必须同 ref（`ICON_MIRROR_REF`=main）。
 - **`index.html` 只保留 `dns-prefetch`**（jsdelivr + raw），不再 `preconnect` jsdelivr——主源同源无需跨域预连接，回退前 `dns-prefetch` 足够；仍不得 `preconnect` `static.nanoka.cc`（Cloudflare 域在目标网络常不可达）。
 - **构建产物里基址是模板字面量拼接，grep 完整 URL 会 0 命中**：minify 后形如 ``a=`https://cdn.jsdelivr.net/gh/${repo}@${ref}/public/data/assets/icons` ``，核对时 grep `hsr-wiki` 或 `raw.githubusercontent` 片段，别因整串 grep 无果就以为没改到。
+- **`official()` / `endgameArtUrl` 这类「官方原图直链」的分发是另一条链，不要和本地图标混淆**：它们指向**纹理镜像仓库 `a285292107s/StarRailTextures`** 的 jsDelivr（不是站点仓库 `hsr-wiki`）。两仓库互不相干——`LOCAL_ICONS_*` 回退指向 `hsr-wiki`，`OFFICIAL_ICON_BASE` 指向 `StarRailTextures`。
+- **需要本地化的官方原图走 `uiart` 清单白名单（`src/services/cdn/uiart.ts`）**：清单命中的 `(rel路径)` 从同源 `/data/assets/icons/uiart/<rel>` 发（随 dist 部署），未命中则回官方 `StarRailTextures` 镜像。`gridFightPropIconUrl` / `modeDefaultArtUrl`（`endgame.ts` 的 `endgameArtUrl`）均走 `uiartUri()`。**不要给 `uiart` 声明 `CDN_CATEGORIES` 分类**——那样会让所有官方原图都尝试本地并 404；用清单只本地化「策展过的少量文件」，其余（如数百张季节背景 185MB）留在镜像仓库不膨胀仓库。判据：要本地化某张官方原图时，把文件拷进 `public/data/assets/icons/uiart/<官方相对路径>`（路径规则同 `spriteOutputToRel`：目录小写、文件名保留、`.png`）并在 `UIART_LOCAL_FILES` 登记。
+- **Chimera 图标数据路径是陈旧死链**：`prop_icons.json` 写 `UI/Quest/Chimera/ChimeraTextIconAtk.png`，但镜像上是 404，真实图在解包源 `ui/quest/hipplen/_autogen/`；已用真实文件入库 `uiart/ui/quest/chimera/`。
 
 ## 图片并发闸门（避免一次性大量加载被 jsdelivr 限流）
 
