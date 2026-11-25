@@ -1,0 +1,534 @@
+{
+  "version": 2,
+  "description": "SpriteOutput 相对路径 → 导出分类/本地相对路径 的唯一路由真源。tools/ingest-icons.py、tools/check-icon-coverage.mjs、src/services/cdn/sprite-map.ts 三方共读。口径见 ADR 0070。",
+  "sourceRootCandidates": [
+    "ui/assets/asbres/spriteoutput",
+    "assets/asbres/spriteoutput"
+  ],
+  "localModes": {
+    "leaf": "只取文件名（保留原始大小写）",
+    "afterFirst": "去掉首段目录，其余原样保留",
+    "afterSub": "去掉首段 + 路由命中的子路径前缀",
+    "fullExact": "整条相对路径原样保留（目录大小写也保留）",
+    "lowerDirs": "整条相对路径，目录段全小写、文件名保留",
+    "element": "派生：IconDamageTypeFire → fire",
+    "pathicon": "派生：IconProfessionKnightMiddle → knight（priest/elation 保留官方错拼 Pirest/Joy）",
+    "afterFirstLower": "去掉首段目录，其余目录段全小写、文件名原样",
+    "leafLower": "只取文件名并全小写（gridfight-affix 的 TS 侧会 toLowerCase）"
+  },
+  "routes": [
+    {
+      "first": "avatarcutinfigures",
+      "category": "avatarcutinfigures",
+      "local": "leaf"
+    },
+    {
+      "first": "avatardrawcard",
+      "category": "avatardrawcard",
+      "local": "leaf"
+    },
+    {
+      "first": "avatarshopicon",
+      "category": "avatarshopicon",
+      "local": "leaf"
+    },
+    {
+      "first": "avatarroundicon",
+      "category": "avatarroundicon",
+      "local": "leaf"
+    },
+    {
+      "first": "lightconemaxfigures",
+      "category": "lightconemaxfigures",
+      "local": "leaf"
+    },
+    {
+      "first": "lightconemediumicon",
+      "category": "lightconemediumicon",
+      "local": "leaf"
+    },
+    {
+      "first": "monsterfigure",
+      "category": "monsterfigure",
+      "local": "leaf"
+    },
+    {
+      "first": "monstermiddleicon",
+      "category": "monstermiddleicon",
+      "local": "leaf"
+    },
+    {
+      "first": "mostericon",
+      "category": "monstermiddleicon",
+      "local": "leaf",
+      "aliasOf": "MonsterMiddleIcon"
+    },
+    {
+      "first": "monstericon",
+      "category": "monstermiddleicon",
+      "local": "leaf",
+      "aliasOf": "MonsterMiddleIcon"
+    },
+    {
+      "first": "monsterroundicon",
+      "category": "monstermiddleicon",
+      "local": "leaf",
+      "aliasOf": "MonsterMiddleIcon"
+    },
+    {
+      "first": "relicfigures",
+      "category": "relicfigures",
+      "local": "leaf"
+    },
+    {
+      "first": "bgpic",
+      "category": "bgpic",
+      "local": "leaf"
+    },
+    {
+      "first": "achievement",
+      "category": "achievement",
+      "local": "leaf"
+    },
+    {
+      "first": "itemfigures",
+      "category": "itemfigures",
+      "local": "leaf"
+    },
+    {
+      "first": "itemicon",
+      "category": "itemfigures",
+      "local": "leaf",
+      "aliasOf": "ItemFigures"
+    },
+    {
+      "first": "skillicons",
+      "category": "skillicons",
+      "local": "leaf"
+    },
+    {
+      "first": "ui",
+      "sub": "avatar/icon",
+      "categories": [
+        "trace",
+        "statusimmune"
+      ],
+      "local": "leaf"
+    },
+    {
+      "first": "icondamagetype",
+      "category": "element",
+      "local": "element"
+    },
+    {
+      "first": "professioniconmiddle",
+      "category": "pathicon",
+      "local": "pathicon"
+    },
+    {
+      "first": "ui",
+      "sub": "ui3d/rank/_dependencies/textures",
+      "category": "rank",
+      "local": "afterSub"
+    },
+    {
+      "first": "tutorialpic",
+      "category": "tutorialpic",
+      "local": "fullExact"
+    },
+    {
+      "first": "bufficon",
+      "category": "bufficon",
+      "local": "fullExact"
+    },
+    {
+      "first": "gridfight",
+      "sub": "equipment",
+      "category": "gridfight-equipment",
+      "local": "leaf"
+    },
+    {
+      "first": "gridfight",
+      "sub": "traiticon/icon",
+      "category": "gridfight-icon",
+      "local": "leaf"
+    },
+    {
+      "first": "gridfight",
+      "sub": "traiticon/miniicon",
+      "category": "gridfight-icon",
+      "local": "leaf"
+    },
+    {
+      "first": "gridfight",
+      "sub": "battleicon/bufficon",
+      "category": "gridfight-affix",
+      "local": "leafLower"
+    },
+    {
+      "first": "gridfight",
+      "sub": "augmentbig",
+      "category": "gridfight-asset",
+      "local": "afterFirstLower"
+    },
+    {
+      "first": "gridfight",
+      "sub": "portal",
+      "category": "gridfight-asset",
+      "local": "afterFirstLower"
+    }
+  ],
+  "fallback": {
+    "category": "uiart",
+    "local": "lowerDirs"
+  },
+  "categories": {
+    "achievement": {
+      "sourceDir": "Achievement",
+      "note": "扁平，按 leaf"
+    },
+    "avatarcutinfigures": {
+      "sourceDir": "AvatarCutinFigures",
+      "note": "扁平，按 leaf；入库时可用 --crop-alpha 4:5"
+    },
+    "avatardrawcard": {
+      "sourceDir": "AvatarDrawCard",
+      "note": "扁平，按 leaf"
+    },
+    "avatarshopicon": {
+      "sourceDir": "AvatarShopIcon",
+      "note": "ref 有 /Avatar/ 层，本地压平"
+    },
+    "avatarroundicon": {
+      "sourceDir": "AvatarRoundIcon",
+      "note": "ref 有 /Avatar/ 层，本地压平"
+    },
+    "lightconemaxfigures": {
+      "sourceDir": "LightConeMaxFigures",
+      "note": "扁平"
+    },
+    "lightconemediumicon": {
+      "sourceDir": "LightConeMediumIcon",
+      "note": "扁平"
+    },
+    "monsterfigure": {
+      "sourceDir": "MonsterFigure",
+      "note": "扁平"
+    },
+    "monstermiddleicon": {
+      "sourceDir": "MonsterMiddleIcon",
+      "note": "扁平；MosterIcon/MonsterIcon/MonsterRoundIcon 三个别名也归此处（官方拼错目录）",
+      "ignoreLocal": [
+        "Monster_2032040",
+        "Monster_2032050",
+        "Monster_2032060"
+      ],
+      "ignoreReason": "这 3 个只存在于 mostericon / monsterroundicon，官方 MonsterMiddleIcon 目录本就没有"
+    },
+    "relicfigures": {
+      "sourceDir": "RelicFigures",
+      "note": "扁平",
+      "ignoreLocal": [
+        "IconRelicBody",
+        "IconRelicFoot",
+        "IconRelicGoods",
+        "IconRelicNeck"
+      ],
+      "ignoreReason": "4 个通用部位图标解包盘无对应文件，靠 jsDelivr 兜底（base.ts 的 localFiles 白名单刻意排除）"
+    },
+    "bgpic": {
+      "sourceDir": "BgPic",
+      "note": "扁平"
+    },
+    "itemfigures": {
+      "sourceDir": "ItemFigures",
+      "note": "扁平；ItemIcon 也归此类（按数字 leaf 共用）"
+    },
+    "skillicons": {
+      "sourceDir": "SkillIcons",
+      "note": "解包在 avatar/<id> 等多层子目录，本地压平到根层"
+    },
+    "element": {
+      "sourceDir": "IconDamageType",
+      "note": "改名派生且仅 7 个，本地已入库；新增走 CDN",
+      "cdnBacked": true
+    },
+    "pathicon": {
+      "sourceDir": "ProfessionIconMiddle",
+      "note": "改名派生且仅 9 个，本地已入库；新增走 CDN",
+      "cdnBacked": true
+    },
+    "rank": {
+      "sourceDir": "UI/UI3D/Rank/_dependencies/Textures",
+      "note": "仅 nanoka/jsDelivr 源，本机无 ui3d 树，设计上不本地化",
+      "cdnBacked": true
+    },
+    "trace": {
+      "sourceDir": "UI/Avatar/Icon",
+      "note": "取自 ui/avatar/icon",
+      "ignoreLocal": [
+        "IconCriticalDamage"
+      ],
+      "ignoreReason": "IconCriticalDamage 解包盘全树无源（只有 IconCriticalChance）"
+    },
+    "statusimmune": {
+      "sourceDir": "UI/Avatar/Icon",
+      "note": "取自 ui/avatar/icon"
+    },
+    "tutorialpic": {
+      "sourceDir": "TutorialPic",
+      "note": "本地多一层 TutorialPic/（源自 nanoka 布局），故 fullExact"
+    },
+    "bufficon": {
+      "sourceDir": "BuffIcon",
+      "note": "本地多一层 BuffIcon/ 且子目录保留原大小写，故 fullExact"
+    },
+    "gridfight-equipment": {
+      "sourceDir": "GridFight/Equipment",
+      "note": "扁平按 leaf"
+    },
+    "gridfight-icon": {
+      "sourceDir": "GridFight/TraitIcon/Icon",
+      "note": "扁平按 leaf"
+    },
+    "gridfight-affix": {
+      "sourceDir": "GridFight/BattleIcon/BuffIcon",
+      "note": "扁平按 leaf"
+    },
+    "gridfight-asset": {
+      "sourceDir": "GridFight",
+      "note": "仅 augmentbig/portal 两层，afterFirst"
+    },
+    "uiart": {
+      "sourceDir": "",
+      "note": "设计上用官方 CDN 兜底的分类（uiart.ts 白名单 + OFFICIAL_ICON_BASE 回退），不作为本地缺导出计缺",
+      "cdnBacked": true
+    }
+  },
+  "knownDeadRefs": {
+    "description": "已知死链：引用存在但解包盘与上游都没有对应文件，属已知而非回归，coverage 不报警。分三组：ADR 0057 §7 历史死链 + 2026-11-25 全量核查出的 dump 陈旧/非图标/未替换模板。",
+    "counts": {
+      "total": 96,
+      "legacy_0057": 4,
+      "dump_stale_vanished": 78,
+      "non_icon_fonts": 1,
+      "unresolved_templates": 13
+    },
+    "patterns": [
+      "^itemfigures/0*[0-9]$",
+      "^relicfigures/IconRelic_\\d+_[56]$",
+      "^gridfight-equipment/2[0-9]{4}$",
+      "^skillicons/UltraItem_1506_00$",
+      "^avatarcutinfigures/1316$",
+      "^avatarshopicon/\\#1$",
+      "^avatarshopicon/%AvatarID$",
+      "^itemfigures/254001_\\#1$",
+      "^itemfigures/FrameIconRarity0%s$",
+      "^itemfigures/FrameItem0%s$",
+      "^itemfigures/FrameItemRarity0\\#1$",
+      "^trace/IconLevelLimit$",
+      "^uiart/ui/fonts/",
+      "^uiart/ui/nature/iconnatureforweak/",
+      "^uiart/drawcardpic/gachatabicon/TabIcon_MultiAvatar_Selected$",
+      "^uiart/drawcardpic/gachatabicon/TabIcon_MultiLightcone_Selected$",
+      "^uiart/phonetheme/shell/phoneshellitem/254000_\\#1$",
+      "^uiart/phonetheme/shell/phoneshellitem/254001_\\#1$",
+      "^uiart/phonetheme/shell/phoneshellmain/254000_\\#1$",
+      "^uiart/phonetheme/shell/phoneshellmain/254001_\\#1$",
+      "^uiart/trialrole/trialrolebg/TrialRoleBg_%AvatarID$",
+      "^uiart/trialrole/trialrolegachatab/TabIcon_%AvatarID$",
+      "^uiart/trialrole/trialrolequesttab/QuestTabIcon_%AvatarID$",
+      "^uiart/ui/adventurephase/mobilephone/MobilePhoneMessageStateNormal$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1402$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1404$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1405$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1406$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1407$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1408$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1409$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1410$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1412$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1413$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1414$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_1415$",
+      "^uiart/ui/avatar/special/special_1415/card/Card_8008$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon1$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon2$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon3$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon4$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon5$",
+      "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon6$",
+      "^uiart/ui/limaonews/limaoicon/LimaoNews_StaffIcon_07$",
+      "^uiart/ui/loading/LoadingIcon$",
+      "^uiart/ui/quest/challenge/iconstarchallengecover/IconStarChallenge_Stage01$",
+      "^uiart/ui/quest/chenlingfes/ChenLingFesTextIcon1$",
+      "^uiart/ui/quest/chenlingfes/ChenLingFesTextIcon2$",
+      "^uiart/ui/quest/chimera/ChimeraIconCookies$",
+      "^uiart/ui/quest/chimera/ChimeraTextIconATKBoss$",
+      "^uiart/ui/quest/chimera/ChimeraTextIconHPBoss$",
+      "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo1$",
+      "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo2$",
+      "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo3$",
+      "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo4$",
+      "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo5$",
+      "^uiart/ui/quest/fantasticstory/FantasticStoryAnecdoteImage01$",
+      "^uiart/ui/quest/fevertime/buff/IconFeverTime_Buff_02$",
+      "^uiart/ui/quest/fevertime/rankicon/ImgRank_A$",
+      "^uiart/ui/quest/finalitybattle/role/FinalityBattleMovieItemDeco1$",
+      "^uiart/ui/quest/graffit/GraffitiPhotoG1p1$",
+      "^uiart/ui/quest/matchthree/MTChallengeTaskIcon1$",
+      "^uiart/ui/quest/matchthree/MTChallengeTaskIcon2$",
+      "^uiart/ui/quest/matchthree/MTChallengeTaskIcon3$",
+      "^uiart/ui/quest/matchthree/MTChallengeTaskIcon4$",
+      "^uiart/ui/quest/matchthree/MTChallengeTaskIcon5$",
+      "^uiart/ui/quest/parkour/mainplaypage/icon/ParkourMainPlayIcon_Attack$",
+      "^uiart/ui/quest/parkour/mainplaypage/icon/ParkourMainPlayIcon_AvatarSkill0$",
+      "^uiart/ui/quest/sevendaysversion/CardCutV01$",
+      "^uiart/ui/quest/sevendaysversion/CardCutV02$",
+      "^uiart/ui/quest/sevendaysversion/CardCutV03$",
+      "^uiart/ui/quest/sevendaysversion/SevenDaysLieDH$",
+      "^uiart/ui/quest/sevendaysversion/SevenDaysVersionBG$",
+      "^uiart/ui/quest/trashcansummon/poster/Icon_Poster01$",
+      "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan01$",
+      "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan02$",
+      "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan03$",
+      "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan04$",
+      "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan05$",
+      "^uiart/ui/rogue/dlc/roguenous/IconRogueDlcNousDiceBuildTabICon1$",
+      "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon2$",
+      "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon3$",
+      "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon4$",
+      "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon5$",
+      "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon6$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnBigL1$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL1$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL2$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL3$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL4$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL5$",
+      "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL6$",
+      "^uiart/ui/rogue/tourn/tourn1/IconRogueTournTitanBoxIcon$",
+      "^uiart/ui/rogue/tourn/tourn1/RogueTournCurseBox$",
+      "^uiart/ui/shop/optionalshop/OptionalShopIcon$",
+      "^uiart/ui/train/jukebox/JukeboxAlbum06$"
+    ],
+    "groups": {
+      "legacy_0057": {
+        "note": "ADR 0057 §7 登记的既有死链（上游 CDN 与解包盘都没有）",
+        "patterns": [
+          "^itemfigures/0*[0-9]$",
+          "^relicfigures/IconRelic_\\d+_[56]$",
+          "^gridfight-equipment/2[0-9]{4}$",
+          "^skillicons/UltraItem_1506_00$"
+        ]
+      },
+      "dump_stale_vanished": {
+        "note": "game.map 与导出盘都没有：dump 里的旧赛季/活动条目，游戏已移除（ui/fonts 与 ui/nature/iconnatureforweak 用目录前缀，其余精确）",
+        "patterns": [
+          "^avatarcutinfigures/1316$",
+          "^trace/IconLevelLimit$",
+          "^uiart/ui/nature/iconnatureforweak/",
+          "^uiart/drawcardpic/gachatabicon/TabIcon_MultiAvatar_Selected$",
+          "^uiart/drawcardpic/gachatabicon/TabIcon_MultiLightcone_Selected$",
+          "^uiart/ui/adventurephase/mobilephone/MobilePhoneMessageStateNormal$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1402$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1404$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1405$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1406$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1407$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1408$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1409$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1410$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1412$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1413$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1414$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_1415$",
+          "^uiart/ui/avatar/special/special_1415/card/Card_8008$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon1$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon2$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon3$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon4$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon5$",
+          "^uiart/ui/limaonews/LimaoNewsAdvertiserIcon6$",
+          "^uiart/ui/limaonews/limaoicon/LimaoNews_StaffIcon_07$",
+          "^uiart/ui/loading/LoadingIcon$",
+          "^uiart/ui/quest/challenge/iconstarchallengecover/IconStarChallenge_Stage01$",
+          "^uiart/ui/quest/chenlingfes/ChenLingFesTextIcon1$",
+          "^uiart/ui/quest/chenlingfes/ChenLingFesTextIcon2$",
+          "^uiart/ui/quest/chimera/ChimeraIconCookies$",
+          "^uiart/ui/quest/chimera/ChimeraTextIconATKBoss$",
+          "^uiart/ui/quest/chimera/ChimeraTextIconHPBoss$",
+          "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo1$",
+          "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo2$",
+          "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo3$",
+          "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo4$",
+          "^uiart/ui/quest/clockpark/clockparktapedetail/SelectTapePageNo5$",
+          "^uiart/ui/quest/fantasticstory/FantasticStoryAnecdoteImage01$",
+          "^uiart/ui/quest/fevertime/buff/IconFeverTime_Buff_02$",
+          "^uiart/ui/quest/fevertime/rankicon/ImgRank_A$",
+          "^uiart/ui/quest/finalitybattle/role/FinalityBattleMovieItemDeco1$",
+          "^uiart/ui/quest/graffit/GraffitiPhotoG1p1$",
+          "^uiart/ui/quest/matchthree/MTChallengeTaskIcon1$",
+          "^uiart/ui/quest/matchthree/MTChallengeTaskIcon2$",
+          "^uiart/ui/quest/matchthree/MTChallengeTaskIcon3$",
+          "^uiart/ui/quest/matchthree/MTChallengeTaskIcon4$",
+          "^uiart/ui/quest/matchthree/MTChallengeTaskIcon5$",
+          "^uiart/ui/quest/parkour/mainplaypage/icon/ParkourMainPlayIcon_Attack$",
+          "^uiart/ui/quest/parkour/mainplaypage/icon/ParkourMainPlayIcon_AvatarSkill0$",
+          "^uiart/ui/quest/sevendaysversion/CardCutV01$",
+          "^uiart/ui/quest/sevendaysversion/CardCutV02$",
+          "^uiart/ui/quest/sevendaysversion/CardCutV03$",
+          "^uiart/ui/quest/sevendaysversion/SevenDaysLieDH$",
+          "^uiart/ui/quest/sevendaysversion/SevenDaysVersionBG$",
+          "^uiart/ui/quest/trashcansummon/poster/Icon_Poster01$",
+          "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan01$",
+          "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan02$",
+          "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan03$",
+          "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan04$",
+          "^uiart/ui/quest/trashcansummon/summonuniticon/TabTrashCan05$",
+          "^uiart/ui/rogue/dlc/roguenous/IconRogueDlcNousDiceBuildTabICon1$",
+          "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon2$",
+          "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon3$",
+          "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon4$",
+          "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon5$",
+          "^uiart/ui/rogue/tourn/persona/skill/RogueTournPersonaSkillBtnIcon6$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnBigL1$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL1$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL2$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL3$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL4$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL5$",
+          "^uiart/ui/rogue/tourn/rank/RogueTournRankIocnL6$",
+          "^uiart/ui/rogue/tourn/tourn1/IconRogueTournTitanBoxIcon$",
+          "^uiart/ui/rogue/tourn/tourn1/RogueTournCurseBox$",
+          "^uiart/ui/shop/optionalshop/OptionalShopIcon$",
+          "^uiart/ui/train/jukebox/JukeboxAlbum06$"
+        ]
+      },
+      "non_icon_fonts": {
+        "note": "UI/Fonts/RPG_*.png 是字体图集，不是图标",
+        "patterns": [
+          "^uiart/ui/fonts/"
+        ]
+      },
+      "unresolved_templates": {
+        "note": "源数据里 %AvatarID / #1 / %s 占位符从未被替换（盘上 0 个真实文件含 % 或 #）",
+        "patterns": [
+          "^avatarshopicon/\\#1$",
+          "^avatarshopicon/%AvatarID$",
+          "^itemfigures/254001_\\#1$",
+          "^itemfigures/FrameIconRarity0%s$",
+          "^itemfigures/FrameItem0%s$",
+          "^itemfigures/FrameItemRarity0\\#1$",
+          "^uiart/phonetheme/shell/phoneshellitem/254000_\\#1$",
+          "^uiart/phonetheme/shell/phoneshellitem/254001_\\#1$",
+          "^uiart/phonetheme/shell/phoneshellmain/254000_\\#1$",
+          "^uiart/phonetheme/shell/phoneshellmain/254001_\\#1$",
+          "^uiart/trialrole/trialrolebg/TrialRoleBg_%AvatarID$",
+          "^uiart/trialrole/trialrolegachatab/TabIcon_%AvatarID$",
+          "^uiart/trialrole/trialrolequesttab/QuestTabIcon_%AvatarID$"
+        ]
+      }
+    }
+  }
+}

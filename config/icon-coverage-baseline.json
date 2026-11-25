@@ -1,0 +1,15 @@
+{
+  "scope": "site",
+  "note": "ADR 0070 图标覆盖度基线。新增缺口会让 pnpm build 失败；补图后用 --write-baseline 刷新。",
+  "generatedAt": "2026-11-25T09:11:42.131Z",
+  "gaps": [
+    {
+      "cat": "gridfight-icon",
+      "lr": "101102S"
+    },
+    {
+      "cat": "gridfight-icon",
+      "lr": "200802S"
+    }
+  ]
+}

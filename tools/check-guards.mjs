@@ -14,6 +14,7 @@ const GUARDS = [
   ['check-i18n-messages.mjs'],
   ['check-ui-chinese.mjs'],
   ['check-image-loading.mjs', '--strict'],
+  ['check-icon-coverage.mjs', '--strict'],
 ];
 
 const results = [];
