@@ -147,6 +147,13 @@ export function collectUrls(data: DataMap): UrlMap {
     for (const ab of Object.values((d.extra as { abilities?: Record<string, { icon?: string; name?: string }> } | undefined)?.abilities || {})) {
       add(iconUrl(ab.icon), `${rel}#ability.${ab.name}`);
     }
+    for (const tree of Object.values((d.skill_trees as Record<string, Record<string, { point_id?: number; point_name?: string; point_desc?: string; icon?: string }>> | undefined) || {})) {
+      for (const node of Object.values(tree)) {
+        if (node.point_name && node.point_desc && node.icon) {
+          add(iconUrl(node.icon), `${rel}#skill_tree.${node.point_id ?? node.point_name}`);
+        }
+      }
+    }
   }
 
   for (const lc of list('light_cones.json') as Array<{ id: string | number; path?: string }>) {
