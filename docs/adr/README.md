@@ -73,3 +73,4 @@
 | 0067 | 货币战争枢纽页改为「赛季枢纽」页：按赛季展示主题 | Accepted（已实现） | 枢纽页以赛季时间线为骨架；新增 `currency_seasons` 产 `seasons.json`（名/简介/主题玩法计数），取代 0020 的「本赛季新增」形态 |
 | 0068 | 门禁按「低维护」口径收敛 | Accepted（已实现） | push 档跑 `pnpm build` + 单测 + guards；夜间只留骨架/冒烟；13 语言矩阵与布局契约改手动 full；删 firefox 项目、像素基线与周跑工作流 |
 | 0069 | 图片加载改为本地优先（本地 → jsDelivr → raw） | Accepted | 图标主源改为同源 `/data/assets/icons`（随构建产物部署），jsDelivr/raw 降为二级/三级回退；删 `prune-dist-icons` |
+| 0070 | 图标工具链：单一映射真源 + 按引用集同步 + 覆盖度门禁 | Accepted | 映射只写 `config/sprite-map.json`，`ingest --from-refs` 按引用集补缺，`check-icon-coverage` 作第 9 个守卫进构建 |

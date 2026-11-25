@@ -61,10 +61,18 @@ python tools/fill-ui-messages.py --check   # 只检查：官方译文是否与�
 ```bash
 node tools/fetch-fonts.mjs    # 自托管字体：抓 Google 的 unicode-range 分片 woff2 → public/fonts/ + src/styles/fonts.css（可重复执行，已存在的分片不重下）
 node tools/gen-og-image.mjs   # 社交分享图：无头浏览器渲染品牌卡 → public/og.png（1200×630）
+python tools/ingest-icons.py --from-refs [--scope site|excel] [--dry-run] [--sheet temp/sheet.jpg]
+                              # 【推荐】按引用集补缺（ADR 0070）：只转「数据引用了、但导出目录没有」的文件
+                              #   默认 scope=site（public/data/**）；--scope excel 放宽到解包 ExcelOutput 全量
+                              #   --verify 只做覆盖度核对，不转码；--dry-run 只打印清单
 python tools/ingest-icons.py --category <分类> [--crop-alpha 4:5] [--jobs 10] [--sheet temp/sheet.jpg]
-                              # 图标入库转码（口径 = ADR 0057）：读解包 spriteoutput PNG → public/data/assets/icons/<分类>/*.webp
-                              # --sheet 同批产出深底大字联系表（人眼核对，ADR 0057 决策 5）；--sheet-only 按已入库目录重建联系表
-                              # --only a,b / --limit N 冒烟；新增分类须同步 src/services/cdn/base.ts 的 CDN_CATEGORIES
+                              # 旧行为：按分类全量转码。口径 = ADR 0057（读解包 PNG → icons/<分类>/*.webp）
+                              # --sheet 同批产出深底大字联系表（人眼核对，ADR 0057 决策 5）；--sheet-only 按已入库目录重建
+                              # 映射真源 = config/sprite-map.json（新增分类改这里，不要硬编码）；不再需要手动指定 --src
+node tools/check-icon-coverage.mjs [--strict] [--scope excel] [--write-baseline]
+                              # 图标覆盖度门禁（ADR 0070，已进 check-guards 第 9 个守卫）
+                              # 报「当前缺口 / 有源可补 / 上游也无源 / cdnBacked / 基线内已知 / 新增 / 已消失」；--strict 有新增缺口即退出 1
+                              # 补完图后跑 --write-baseline 刷新 config/icon-coverage-baseline.json（仅 site 基线；--scope excel 是诊断视图，勿覆盖 site 基线）
 ```
 
 `fetch-fonts.mjs` 的存在理由：`index.html` 不再引 `fonts.googleapis.com` —— 那条跨域样式表既**渲染阻塞**

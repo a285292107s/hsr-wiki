@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/currency-catalog-5LuVE_y8.css","assets/currency-trait-browser-BzRayk6U.css"])))=>i.map(i=>d[i]);
-import{N as e}from"./index-D2-MxyN_.js";var t=`<svg class="nk-cat-select__star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.8L12 17.3l-5.9 3.2 1.15-6.8L2.5 9.3l6.6-1.04z"/></svg>`,n=()=>e(()=>Promise.resolve({}),__vite__mapDeps([0])),r=()=>e(()=>Promise.resolve({}),__vite__mapDeps([1]));export{n,r,t};
