@@ -239,7 +239,7 @@ function setDescHtml(pc: number, data: RelicSetData | null | undefined): string 
       <div v-if="setIdList.length" class="nk-build__sets">
         <div v-for="s in setIdList" :key="`${s.id}-${s.pc}`" class="nk-build__set">
           <div class="nk-build__set-head">
-            <CdnImage alt="" :src="setIcon(relicSets[s.id])" />
+            <CdnImage v-if="setIcon(relicSets[s.id])" alt="" :src="setIcon(relicSets[s.id])" />
             <div>
               <div class="nk-build__set-badge">{{ s.pc }}PC</div>
               <div class="nk-build__set-name">{{ setName(s.id, relicSets[s.id]) }}</div>
