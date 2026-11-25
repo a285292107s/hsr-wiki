@@ -4,7 +4,7 @@ import { charFamilyIds, collectNavAnchors, noUnknownOverflow } from './layout.sh
 import { EDGES, NODES, TIERS } from '../src/app/debug/system-map/map-data';
 
 test.describe('布局验收：研究线调试台 dev 入口', () => {
-  test('平板/桌面（≥768px）：调试台入口可见且位于设置上方', { tag: ['@viewport-pinned', '@dev-only'] }, async ({ page }) => {
+  test('平板/桌面（≥768px）：调试台入口可见且排在设置之前', { tag: ['@viewport-pinned', '@dev-only'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/settings');
@@ -13,9 +13,11 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     await expect(debugLink).toHaveAttribute('href', '/debug');
     const settingsLink = page.locator('.ui-sidebar-settings');
     await expect(settingsLink).toBeVisible();
-    const debugY = await debugLink.evaluate((el) => el.getBoundingClientRect().top);
-    const settingsY = await settingsLink.evaluate((el) => el.getBoundingClientRect().top);
-    expect(debugY).toBeLessThan(settingsY);
+    const debugBox = await debugLink.boundingBox();
+    const settingsBox = await settingsLink.boundingBox();
+    expect(debugBox && settingsBox, '两个工具入口都必须有可测盒').toBeTruthy();
+    expect(Math.abs(debugBox!.y - settingsBox!.y), '两个工具入口应同行（顶栏工具组）').toBeLessThanOrEqual(1);
+    expect(debugBox!.x, '调试台入口应排在设置左侧').toBeLessThan(settingsBox!.x);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -28,7 +30,8 @@ test.describe('布局验收：研究线调试台 dev 入口', () => {
     await waitForCatalogCards(page);
     await expect(page.locator('.ui-sidebar-debug')).toBeHidden();
     const anchors = await collectNavAnchors(page);
-    expect(anchors.length).toBeGreaterThan(1);
+    expect(anchors.filter((a) => a.visible).length, '紧凑态至少常显当前章节').toBeGreaterThanOrEqual(1);
+    await expect(page.locator('.ui-sidebar-more')).toBeVisible();
     await noUnknownOverflow(page);
     assertNoErrors();
   });

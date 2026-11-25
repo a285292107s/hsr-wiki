@@ -150,7 +150,7 @@ node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 →
 - **退出码**：`0` = 报告完成（含无 `--strict` 时的命中）；`1` = 漂移检查器带 `--strict` 且有命中。
 - `doc-audit.mjs`：九条可断言检查——① 体量红线（估 token >5 万必须「总索引+分片」）② `docs/agents/*` 必须在 AGENTS.md 路由表登记 ③ living docs 禁 AI 汇报腔（「当然，这是 / 以下是为 / 本文将介绍」）④ 禁会过期的断言（「已修复 / 已全部完成」）⑤ **版本号禁入叙述性文档**（README / AGENTS / `docs/agents/` 只写选型名），外加 `tech-stack.md` 的 `<!--ver:包名-->` 标记与 `package.json` / `requirements.txt` / CI 工作流 / spine constants **逐字比对** ⑥ ADR 必须有**结构化**的「替代方案 / 否决」落点（标题或加粗字段；只有行文暗示则报「疑似缺失待复核」）⑦ memory 域索引（每份域文件须在 README 登记、索引无断链、禁止回流出按月/时序命名）⑧ `DATA_CATALOG.md` 引用的分片存在 ⑨ 文档不得把 `temp/` 当引用目标（该目录不入库、随时清空 ⇒ 引用必然烂掉）。**运行时打印覆盖面与豁免数**（哪些文档受写法规则管辖、哪些是历史档案豁免），避免「命中 0」被误读为全覆盖。判据出处：conventions.md「文档体量 / 文档写法」+ AGENTS.md 强制规则。受管范围与跳过名单的唯一来源是 `tools/doc-scope.mjs`（本文件与 `check-doc-links.mjs` 共用，禁止再各写一份）。
 - `check-field-map.mjs`：只查 `docs/data/转换器字段映射.md` 一份文件的四条结构不变量——① 任一物理行 >400 字符即报（长行必须拆成父/子 bullet）② `## ` 标题按模块 token 不得重复 ③ 每个 H2 之后前 2 个非空行内必须有 `> 产物：… ｜ 源：…` 契约行（后半段可省）④ 文首模块索引表的 token 集合与 H2 token 集合**完全一致**（多 / 少都报；token 取 `## ` 后至第一个空格或 `—` 前的连续非空格串）。四条都是「目标 0」判据，故 `--strict` 下任一命中即退出 1；默认 report-only，**刻意不进 `pnpm build` 与 CI**（理由同本节其它工具）。
-- `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败；`--write-baseline` 落盘新基线。只统计**断言调用里的** px（注释 / 用例标题 / `setViewportSize` 不计）。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如侧栏避让 / 断点）。
+- `check-e2e-literals.mjs`：`--baseline <json>` 改计数基线；基线文件缺失时以「当前计数」为基线并提示生成，不报失败；`--write-baseline` 落盘新基线。只统计**断言调用里的** px（注释 / 用例标题 / `setViewportSize` 不计）。行内豁免 `// e2e-literal-ok: 理由`（不可漂移的契约值，如顶栏高度 / 断点）。
 - `check-e2e-viewport-tags.mjs`：两条判据——① `--strict` 时「用例体调用 `page.setViewportSize` 但签名未声明 `@viewport-pinned`」即退出 1（行内豁免 `// e2e-viewport-ok: 理由`，缺理由不豁免）；② `playwright.config.ts` 的 `mobile-chromium` 必须在该 project 块内出现 `@viewport-pinned` 的 `grepInvert`（含 `mobile-chromium` project 本身缺失也算命中）。**不是风格洁癖**：漏标或删掉 `grepInvert` 都让 `mobile-chromium` 用 Pixel 7 的触摸仿真重跑本已钉死视口的桌面契约，实测把 CI 拖成 30s 超时 × 3 次重试、或让 5 条桌面契约在夜间慢档连红（见 [testing.md](../memory/testing.md) 的 `@viewport-pinned` 条）。
 - `check-doc-drift.mjs`：**只扫 living docs**（`docs/agents/` 与 `CONTEXT.md`）；`docs/memory/` 是历史档案，必须排除，否则全是假阳性。句中带「已退场 / 已移除 / 不复用 / 历史 …」等标记的条目降级为「历史提及」，不计入 `--strict`；某一行确属历史说明时补行内 `<!-- doc-drift-ok: 理由 -->` 整体豁免该行。
 - `check-css-dup-selectors.mjs`：判据 = **同一条选择器在同一个 at-rule 上下文里重复声明了同一个属性**（属性不重叠的分组写法不算）。A 段（同文件）必为静默覆盖；B 段（跨文件）由加载序决定生效者，计为 conflict；两侧都是 `<style scoped>` 的 SFC 降级为 C 段（运行时不冲突，只是重复实现）。**命中不都是缺陷**：刻意的变体覆盖（`focus-visible` 收掉投影、断点补偿）也会命中，需人工判读——它只负责把「谁会静默吃掉谁」摆到台面上。
@@ -174,7 +174,7 @@ node tools/e2e-affected.mjs             # 按 git diff 推导受影响路由 →
 
 ## 研究线（Spine Lab 调试台）
 
-- dev server 内 `http://localhost:6188/debug`（侧栏「调试台」入口 ≥768px 显示，手机隐藏）；生产构建不含该路由、深链落 404（机制见 [architecture.md](architecture.md)）
+- dev server 内 `http://localhost:6188/debug`（顶栏「调试台」入口 ≥768px 显示，手机隐藏）；生产构建不含该路由、深链落 404（机制见 [architecture.md](architecture.md)）
 - 调试台测试并入主 `pnpm test`
 - 研究文档在 `docs/spine/`，研究脚本在 `spine-lab/tools/`（脚本非应用资产，不进 CI / 部署）
 

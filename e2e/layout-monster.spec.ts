@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, readJson, settleAnimations, waitForCatalogCards } from './helpers';
-import { CN_NUM, expectTokenNumber, noUnknownOverflow, readContentOffset } from './layout.shared';
+import { CN_NUM, noUnknownOverflow } from './layout.shared';
 
 interface MonsterListEntry { id: number; name: string; icon: string; weak?: string[]; atlas_group?: number }
 interface MonsterDropTierJson { world_level: number | null; avatar_exp: number; items: { id: number; name: string; icon: string }[] }
@@ -676,30 +676,19 @@ test.describe('布局验收：敌方详情页', () => {
   );
 
   test(
-    '敌方详情页全断点避让侧栏：内容左缘落在侧栏右侧，且无未知横向溢出',
+    '敌方详情页全断点：内容在顶部导航下方，且无未知横向溢出',
     { tag: ['@visual-detail', '@viewport-pinned'] },
     async ({ page }) => {
       const { assertNoErrors } = collectConsoleIssues(page);
-      const cases = [
-        { w: 1024, h: 900, offset: 148 },
-        { w: 800, h: 900, offset: 88 },
-        { w: 390, h: 844, offset: 0 },
-      ];
-      for (const { w, h, offset } of cases) {
-        await page.setViewportSize({ width: w, height: h });
+      for (const width of [1024, 800, 390]) {
+        await page.setViewportSize({ width, height: 844 });
         await page.goto(`/monster/${MONSTER_ID}`);
-        await expect(page.locator('.nk-mob-hero__name')).toBeVisible();
-        expect(await readContentOffset(page), `${w}px 档避让令牌`).toBe(offset);
-        await expectTokenNumber(page.locator('.nk-mob-page'), 'padding-left', offset, `${w}px 档内容区左避让`);
-        if (offset > 0) {
-          const sidebar = await page.locator('.ui-sidebar').boundingBox();
-          const title = await page.locator('.nk-mob-sec__title').first().boundingBox();
-          expect(sidebar, `${w}px 档侧栏应可见`).toBeTruthy();
-          expect(
-            title!.x - (sidebar!.x + sidebar!.width),
-            `${w}px 档区块标题必须落在侧栏右侧（不得被压住）`,
-          ).toBeGreaterThanOrEqual(0);
-        }
+        const title = page.locator('.nk-mob-hero__name');
+        const nav = page.locator('nav.ui-top-nav');
+        await expect(title).toBeVisible();
+        await expect(nav).toBeVisible();
+        const navBottom = await nav.evaluate((el) => el.getBoundingClientRect().bottom);
+        expect((await title.boundingBox())!.y, `${width}px 档标题不得被顶栏遮挡`).toBeGreaterThanOrEqual(navBottom);
         await noUnknownOverflow(page);
       }
       assertNoErrors();

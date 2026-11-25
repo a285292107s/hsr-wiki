@@ -1,7 +1,3 @@
-.nk-mob-page {
-  padding-left: var(--nk-content-offset);
-}
-
 .nk-mob-hero {
   display: flex;
   align-items: stretch;
@@ -944,7 +940,7 @@
 }
 
 @media (max-width: 767px) {
-  .nk-mob-page { padding-bottom: calc(var(--nk-nav-bar-h) + env(safe-area-inset-bottom, 0px)); }
+  .nk-mob-page { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .nk-mob-hero {
     flex-direction: column;
   }

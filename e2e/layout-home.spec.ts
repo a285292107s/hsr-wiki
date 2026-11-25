@@ -371,7 +371,7 @@ test.describe('布局验收：常规主题', () => {
     assertNoErrors();
   });
 
-  test('首页 /：390×844 手机档角色名 / 光锥名可见，底栏不遮挡入册末行，搜索按钮在首屏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('首页 /：390×844 手机档角色名 / 光锥名可见，顶栏不遮挡入册清单，搜索按钮在首屏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
@@ -392,7 +392,7 @@ test.describe('布局验收：常规主题', () => {
     }
 
     const geometry = await page.evaluate(() => {
-      const bar = document.querySelector('.ui-sidebar');
+      const bar = document.querySelector('.ui-top-nav');
       const rows = [...document.querySelectorAll('.nk-home__ledger-item')];
       const last = rows[rows.length - 1];
       const lastBox = last.getBoundingClientRect();
@@ -402,18 +402,17 @@ test.describe('布局验收：常规主题', () => {
         Math.round(lastBox.bottom - 3),
       );
       return {
-        barTop: barBox ? Math.round(barBox.top) : null,
+        barBottom: barBox?.bottom ?? null,
+        firstTop: rows[0].getBoundingClientRect().top,
         lastBottom: Math.round(lastBox.bottom),
         hitInRow: !!(hit && hit.closest('.nk-home__ledger-item')),
         innerHeight: window.innerHeight,
       };
     });
-    expect(geometry.barTop, '390 档应有底部导航栏（否则本判据失去意义）').not.toBeNull();
-    expect(
-      geometry.lastBottom,
-      `入册末行底部 ${geometry.lastBottom} 应高于底栏顶部 ${geometry.barTop}`,
-    ).toBeLessThanOrEqual(geometry.barTop!);
-    expect(geometry.hitInRow, '入册末行的命中点不得落在底栏上').toBe(true);
+    expect(geometry.barBottom, '390 档应有顶部导航栏').not.toBeNull();
+    expect(geometry.firstTop, '入册首行应在顶栏下方').toBeGreaterThanOrEqual(geometry.barBottom!);
+    expect(geometry.lastBottom, '入册末行应在首屏内').toBeLessThanOrEqual(geometry.innerHeight);
+    expect(geometry.hitInRow, '入册末行在首屏内应可点击').toBe(true);
 
     const go = page.locator('.nk-home__search-go');
     await expect(go).toBeVisible();

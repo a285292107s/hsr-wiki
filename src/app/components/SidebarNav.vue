@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch, watchPostEffect } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { NORMAL_NAV_ITEMS, CW_NAV_ITEMS, NORMAL_HUB_ITEM, CW_HUB_ITEM, SWAP_ITEM, type NavItem } from './nav-items';
@@ -29,86 +29,81 @@ function onSwap(): void {
   void router.push(isCw.value ? '/character' : '/currency/role');
 }
 
-const swapping = ref(false);
-let swapTimer: ReturnType<typeof setTimeout> | null = null;
-watch(isCw, () => {
-  swapping.value = true;
-  if (swapTimer !== null) clearTimeout(swapTimer);
-  swapTimer = setTimeout(() => { swapping.value = false; }, 420);
-});
-
 function isActive(item: NavItem): boolean {
   const p = route.path;
   const paths = item.activePaths || [item.path];
   return paths.some((ap) => p === ap || (!item.exact && p.startsWith(ap + '/')));
 }
 
-const sidebarRef = ref<HTMLElement | null>(null);
-const moreOpen = ref(false);
+const navRef = ref<HTMLElement | null>(null);
+const measureRef = ref<HTMLElement | null>(null);
+const brandRef = ref<{ $el: HTMLElement } | null>(null);
+const swapRef = ref<HTMLElement | null>(null);
+const toolsRef = ref<HTMLElement | null>(null);
 const moreBtnRef = ref<HTMLElement | null>(null);
 const sheetRef = ref<HTMLElement | null>(null);
+const nativePopover = typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype;
+const moreOpen = ref(false);
+const fitsInline = ref(false);
+const currentItem = computed(() => navItems.value.find(isActive) ?? navItems.value[0]);
+const visibleItems = computed(() => fitsInline.value ? navItems.value : [currentItem.value]);
+const foldedItems = computed(() => fitsInline.value ? [] : navItems.value.filter(item => item !== currentItem.value));
 
-const visibleCount = ref(navItems.value.length);
-const visibleItems = computed(() => navItems.value.slice(0, visibleCount.value));
-const foldedItems = computed(() => navItems.value.slice(visibleCount.value));
-const moreActive = computed(() => foldedItems.value.some(isActive));
-
-function recomputeFold(): void {
-  const el = sidebarRef.value;
-  if (!el) return;
-  if (window.matchMedia('(min-width: 768px)').matches) {
-    visibleCount.value = navItems.value.length;
-    return;
-  }
-  const cs = getComputedStyle(el);
-  const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const toolW = parseFloat(cs.getPropertyValue('--nk-nav-tool-w')) || 44;
-  const slotMin = parseFloat(cs.getPropertyValue('--nk-nav-slot-min')) || 44;
-  const dividerW = parseFloat(cs.getPropertyValue('--nk-nav-divider-w')) || 0;
-  const n = navItems.value.length;
-  const full = avail - toolW * 2 - dividerW;
-  if (Math.floor(full / slotMin) >= n) {
-    visibleCount.value = n;
-    return;
-  }
-  const budget = avail - toolW * 3 - dividerW;
-  visibleCount.value = Math.max(2, Math.min(n, Math.floor(budget / slotMin)));
+function recomputeFit(): void {
+  const nav = navRef.value;
+  const pieces = [brandRef.value?.$el, measureRef.value, swapRef.value, toolsRef.value];
+  if (!nav || pieces.some(piece => !piece)) return;
+  const css = getComputedStyle(nav);
+  const available = nav.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+  const required = pieces.reduce((sum, piece) => sum + (piece?.getBoundingClientRect().width ?? 0), 0);
+  fitsInline.value = Math.ceil(required + (parseFloat(css.columnGap) || 0) * 3) <= available;
 }
 
-let foldObserver: ResizeObserver | null = null;
-
-watch(() => route.path, () => { moreOpen.value = false; });
-watch(isCw, (cw) => { if (cw) moreOpen.value = false; });
-watch(navItems, () => { void nextTick(recomputeFold); });
-watch(visibleCount, () => {
-  if (visibleCount.value >= navItems.value.length) moreOpen.value = false;
-});
-
-function onKeydown(e: KeyboardEvent): void {
-  if (e.key === 'Escape') moreOpen.value = false;
+function closeMore(): void {
+  if (nativePopover && sheetRef.value?.matches(':popover-open')) sheetRef.value.hidePopover();
+  moreOpen.value = false;
 }
-watch(moreOpen, async (open) => {
-  if (open) {
-    window.addEventListener('keydown', onKeydown);
-    await nextTick();
-    sheetRef.value?.querySelector<HTMLElement>('.ui-more__item')?.focus();
-  } else {
-    window.removeEventListener('keydown', onKeydown);
-    moreBtnRef.value?.focus();
-  }
-});
+
+function onMoreClick(): void {
+  if (!nativePopover) moreOpen.value = !moreOpen.value;
+}
+
+function onMoreToggle(event: Event): void {
+  moreOpen.value = (event.target as HTMLElement).matches(':popover-open');
+}
+
+function onFallbackPointer(event: PointerEvent): void {
+  if (!moreOpen.value || !(event.target instanceof Node)) return;
+  if (!sheetRef.value?.contains(event.target) && !moreBtnRef.value?.contains(event.target)) closeMore();
+}
+
+function onFallbackKey(event: KeyboardEvent): void {
+  if (!moreOpen.value || event.key !== 'Escape') return;
+  event.preventDefault();
+  closeMore();
+  moreBtnRef.value?.focus();
+}
+
+let fitObserver: ResizeObserver | undefined;
+watch(() => route.fullPath, closeMore);
+watch(fitsInline, (inline) => { if (inline) closeMore(); });
+watchPostEffect(recomputeFit);
 onMounted(() => {
-  recomputeFold();
-  if (sidebarRef.value) {
-    foldObserver = new ResizeObserver(recomputeFold);
-    foldObserver.observe(sidebarRef.value);
+  fitObserver = new ResizeObserver(recomputeFit);
+  for (const element of [navRef.value, measureRef.value, brandRef.value?.$el, swapRef.value, toolsRef.value]) {
+    if (element) fitObserver.observe(element);
+  }
+  if (!nativePopover) {
+    document.addEventListener('pointerdown', onFallbackPointer);
+    document.addEventListener('keydown', onFallbackKey);
   }
 });
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown);
-  if (swapTimer !== null) clearTimeout(swapTimer);
-  foldObserver?.disconnect();
-  foldObserver = null;
+  fitObserver?.disconnect();
+  if (!nativePopover) {
+    document.removeEventListener('pointerdown', onFallbackPointer);
+    document.removeEventListener('keydown', onFallbackKey);
+  }
 });
 
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
@@ -169,116 +164,65 @@ const DEBUG_ITEM = {
 </script>
 
 <template>
-  <nav ref="sidebarRef" class="ui-sidebar" :class="{ 'ui-sidebar--cw': isCw, 'ui-sidebar--swap-anim': swapping }" :aria-label="t('nav.ariaMain')">
-    <RouterLink to="/" class="ui-sidebar-brand" :title="`${SITE_NAME} · ${t('nav.home')}`">
-      <span class="ui-sidebar-brand__mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.7 4 2.3 7.2 4.9 8.6-2.6 1.4-4.2 4.6-4.9 8.6-.7-4-2.3-7.2-4.9-8.6C9.7 9.2 11.3 6 12 2z"/><circle cx="18.4" cy="5.6" r="1.1"/><circle cx="5.2" cy="18.6" r="0.9"/></svg>
-      </span>
-      <span class="ui-sidebar-brand__text">
-        <span class="ui-sidebar-brand__cn">{{ SITE_NAME }}</span>
-        <span class="ui-sidebar-brand__en">HSR Archive</span>
-      </span>
-    </RouterLink>
-
-    <span class="ui-sidebar-divider" aria-hidden="true"></span>
-
-    <RouterLink
-      v-for="item in visibleItems"
-      :key="item.path"
-      :to="item.path"
-      :title="`${itemLabel(item)} · ${item.en}`"
-      :aria-current="isActive(item) ? 'page' : undefined"
-      :class="['ui-sidebar-link', { 'ui-sidebar-link--active': isActive(item) }]"
-      @pointerenter="prefetchByPath(item.path)"
-    >
-      <span class="ui-sidebar-link__icon" v-html="item.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">{{ itemLabel(item) }}</span>
-        <span class="ui-sidebar-link__en">{{ item.en }}</span>
-      </span>
-      <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
-    </RouterLink>
-
-    <button
-      type="button"
-      class="ui-sidebar-link ui-sidebar-swap"
-      :title="swapAria"
-      :aria-label="swapAria"
-      @click="onSwap"
-    >
-      <span class="ui-sidebar-link__icon" v-html="SWAP_ITEM.icon" />
-      <span class="ui-sidebar-link__text">
-        <span class="ui-sidebar-link__cn">{{ swapDest }}</span>
-        <span class="ui-sidebar-link__en">{{ swapLabel.en }}</span>
-      </span>
-      <span class="ui-sidebar-link__label">{{ swapDest }}</span>
-    </button>
-
-    <button
-      ref="moreBtnRef"
-      type="button"
-      :title="t('nav.titleMore')"
-      :aria-label="t('nav.ariaMore')"
-      class="ui-sidebar-link ui-sidebar-more"
-      :class="{
-        'ui-sidebar-link--active': moreActive || moreOpen,
-        'ui-sidebar-more--hidden': foldedItems.length === 0,
-      }"
-      :aria-expanded="moreOpen"
-      aria-controls="ui-more-sheet"
-      @click="moreOpen = !moreOpen"
-    >
-      <span class="ui-sidebar-link__icon" v-html="MORE_ICON" />
-      <span class="ui-sidebar-link__label">{{ t('nav.more') }}</span>
-    </button>
-
-    <div class="ui-sidebar-tools">
-      <RouterLink
-        v-if="IS_DEV"        :to="DEBUG_PATH"
-        :title="t('nav.titleDebug')"
-        class="ui-sidebar-link ui-sidebar-debug"
-        :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
-        @pointerenter="prefetchByPath(DEBUG_PATH)"
-      >
-        <span class="ui-sidebar-link__icon" v-html="DEBUG_ITEM.icon" />
-        <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">{{ t('nav.debug') }}</span>
-          <span class="ui-sidebar-link__en">DEBUG</span>
+  <header class="ui-site-header">
+    <nav ref="navRef" class="ui-sidebar ui-top-nav" :class="{ 'ui-top-nav--compact': !fitsInline }" :aria-label="t('nav.ariaMain')">
+      <RouterLink ref="brandRef" to="/" class="ui-sidebar-brand" aria-current="false" :aria-label="`${SITE_NAME} · ${t('nav.home')}`">
+        <span class="ui-sidebar-brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.7 4 2.3 7.2 4.9 8.6-2.6 1.4-4.2 4.6-4.9 8.6-.7-4-2.3-7.2-4.9-8.6C9.7 9.2 11.3 6 12 2z"/><circle cx="18.4" cy="5.6" r="1.1"/><circle cx="5.2" cy="18.6" r="0.9"/></svg>
         </span>
-        <span class="ui-sidebar-link__label">{{ t('nav.debug') }}</span>
+        <span class="ui-sidebar-brand__text">{{ SITE_NAME }}</span>
       </RouterLink>
 
-      <RouterLink
-        :to="settingsPath"
-        :title="t('nav.titleSettings')"
-        class="ui-sidebar-link ui-sidebar-settings"
-        :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
-        @click="onSettingsClick"
-      >
-        <span class="ui-sidebar-link__icon" v-html="SETTINGS_ITEM.icon" />
-        <span class="ui-sidebar-link__text">
-          <span class="ui-sidebar-link__cn">{{ t('nav.settings') }}</span>
-          <span class="ui-sidebar-link__en">SETTINGS</span>
-        </span>
-        <span class="ui-sidebar-link__label">{{ t('nav.settings') }}</span>
-      </RouterLink>
-    </div>
-  </nav>
-
-  <Transition name="ui-more">
-    <div v-if="moreOpen" class="ui-more" @click.self="moreOpen = false">
-      <div id="ui-more-sheet" ref="sheetRef" class="ui-more__sheet" role="dialog" :aria-label="t('nav.ariaMore')">
-        <RouterLink
-          v-for="item in foldedItems"
-          :key="item.path"
-          :to="item.path"
-          :class="['ui-more__item', { 'ui-more__item--active': isActive(item) }]"
-        >
-          <span class="ui-more__icon" v-html="item.icon" />
-          <span class="ui-more__label">{{ itemLabel(item) }}</span>
-          <span class="ui-more__en">{{ item.en }}</span>
+      <div class="ui-top-nav__links" :class="{ 'ui-top-nav__links--compact': !fitsInline }">
+        <RouterLink v-for="item in visibleItems" :key="item.path" :to="item.path"
+          :title="itemLabel(item)" :aria-label="itemLabel(item)" :aria-current="isActive(item) ? 'page' : undefined"
+          :class="['ui-sidebar-link', { 'ui-sidebar-link--active': isActive(item) }]"
+          @pointerenter="prefetchByPath(item.path)">
+          <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
         </RouterLink>
       </div>
-    </div>
-  </Transition>
+
+      <div ref="measureRef" class="ui-top-nav__measure" aria-hidden="true" inert>
+        <span v-for="item in navItems" :key="item.path" class="ui-sidebar-link">
+          <span class="ui-sidebar-link__label">{{ itemShort(item) }}</span>
+        </span>
+      </div>
+
+      <button v-show="!fitsInline" ref="moreBtnRef" type="button" class="ui-sidebar-link ui-sidebar-more"
+        :title="t('nav.titleMore')" :aria-label="t('nav.ariaMore')"
+        :aria-expanded="moreOpen" aria-controls="ui-more-sheet"
+        :popovertarget="nativePopover ? 'ui-more-sheet' : undefined" @click="onMoreClick">
+        <span class="ui-sidebar-link__icon" aria-hidden="true" v-html="MORE_ICON" />
+        <span class="ui-sidebar-link__label">{{ t('nav.more') }}</span>
+      </button>
+      <div id="ui-more-sheet" ref="sheetRef" class="ui-more ui-more__sheet"
+        :class="{ 'ui-more--fallback': !nativePopover }"
+        :popover="nativePopover ? 'auto' : undefined" :hidden="!nativePopover && !moreOpen" @toggle="onMoreToggle">
+        <RouterLink v-for="item in foldedItems" :key="item.path" :to="item.path" class="ui-more__item"
+          @pointerenter="prefetchByPath(item.path)" @click="closeMore">
+          <span class="ui-more__icon" aria-hidden="true" v-html="item.icon" />
+          <span class="ui-more__label">{{ itemLabel(item) }}</span>
+        </RouterLink>
+      </div>
+
+      <button ref="swapRef" type="button" class="ui-sidebar-link ui-sidebar-swap"
+        :title="swapAria" :aria-label="swapAria" @click="onSwap">
+        <span class="ui-sidebar-link__icon" aria-hidden="true" v-html="SWAP_ITEM.icon" />
+        <span class="ui-sidebar-link__label">{{ swapDest }}</span>
+      </button>
+
+      <div ref="toolsRef" class="ui-sidebar-tools">
+        <RouterLink v-if="IS_DEV" :to="DEBUG_PATH" :title="t('nav.titleDebug')" :aria-label="t('nav.debug')"
+          class="ui-sidebar-link ui-sidebar-debug" :class="{ 'ui-sidebar-link--active': route.path === DEBUG_PATH }"
+          @pointerenter="prefetchByPath(DEBUG_PATH)">
+          <span class="ui-sidebar-link__icon" aria-hidden="true" v-html="DEBUG_ITEM.icon" />
+        </RouterLink>
+        <RouterLink :to="settingsPath" :title="t('nav.titleSettings')" :aria-label="t('nav.settings')"
+          class="ui-sidebar-link ui-sidebar-settings" :class="{ 'ui-sidebar-link--active': route.path === settingsPath }"
+          @click="onSettingsClick">
+          <span class="ui-sidebar-link__icon" aria-hidden="true" v-html="SETTINGS_ITEM.icon" />
+        </RouterLink>
+      </div>
+    </nav>
+  </header>
 </template>

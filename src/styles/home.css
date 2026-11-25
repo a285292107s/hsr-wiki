@@ -8,7 +8,7 @@
 .nk-intake {
   max-width: var(--nk-content-max);
   margin: 0 auto;
-  padding: 44px 40px 0 var(--nk-content-offset);
+  padding: 44px 40px 0;
 }
 
 .nk-intake > .nk-hub-masthead {
@@ -1126,7 +1126,7 @@
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .nk-intake {
-    padding: 30px 32px 0 var(--nk-content-offset);
+    padding: 30px 32px 0;
   }
 
   .nk-home__release {

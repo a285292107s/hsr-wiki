@@ -90,9 +90,6 @@ onBeforeUnmount(unsubscribe);
     var(--bg);
   min-height: 100%;
 }
-@media (min-width: 768px) {
-  .nk-spine-debug { margin-left: var(--nk-content-offset); }
-}
 
 .nk-spine-debug__head { max-width: 1480px; margin-bottom: 24px; }
 .nk-spine-debug__kicker {

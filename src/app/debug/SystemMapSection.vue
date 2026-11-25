@@ -735,7 +735,7 @@ function domLabelOf(node: MapNode | null): string {
   .nk-sysmap__find input { width: 100%; }
   .nk-sysmap__panel-btn { margin-left: auto; }
   .nk-sysmap__panel {
-    bottom: calc(var(--nk-nav-bar-h, 56px) + 14px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     max-height: 56dvh;
   }
 }

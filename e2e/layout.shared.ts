@@ -69,12 +69,6 @@ export async function navEntryReachable(
   return inDrawer;
 }
 
-export async function readContentOffset(page: import('@playwright/test').Page): Promise<number> {
-  return page.locator('html').evaluate((el) =>
-    parseFloat(getComputedStyle(el).getPropertyValue('--nk-content-offset')) || 0,
-  );
-}
-
 export interface MonsterLike {
   id?: string;
   name: string;

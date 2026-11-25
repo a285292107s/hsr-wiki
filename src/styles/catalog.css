@@ -1,4 +1,4 @@
-#nk-catalog-app { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) 80px var(--nk-content-offset); --cat-max: 1440px; --cat-pad-x: 24px; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
+#nk-catalog-app { position: absolute; inset: var(--nk-nav-bar-size) 0 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) calc(24px + env(safe-area-inset-bottom, 0px)); --cat-max: 1440px; --cat-pad-x: 24px; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--nk-scrollbar-thumb); border-radius: var(--nk-radius-1); }
 #nk-catalog-app::-webkit-scrollbar-track { background: var(--nk-scrollbar-track); }
@@ -406,7 +406,7 @@
 .nk-mob-card[data-type="BOSS"] .nk-mob-card__type { color: var(--accent); }
 .nk-mob-card[data-type="ELITE"] .nk-mob-card__type { color: var(--text2); }
 
-#nk-home-app { position: absolute; inset: 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+#nk-home-app { position: absolute; inset: var(--nk-nav-bar-size) 0 0; font-family: var(--font-body); color: var(--text); overflow-y: auto; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #nk-home-app * { box-sizing: border-box; }
 
 @media (hover: none) {
@@ -415,7 +415,7 @@
 }
 
 @media (max-width: 767px) {
-  #nk-catalog-app { --cat-pad-x: 16px; padding-left: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  #nk-catalog-app { --cat-pad-x: 16px; }
   .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
   .nk-cat-title { font-size: var(--nk-fs-6); letter-spacing: 0.06em; }
   .nk-cat-count { font-size: var(--nk-fs-1); letter-spacing: 0.14em; }

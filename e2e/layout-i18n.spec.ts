@@ -36,10 +36,11 @@ test.describe('布局验收：多语言', () => {
     assertNoErrors();
   });
 
-  test('/en/character：站内链接保留语言前缀（导航与目录卡都不落回缺省语言）', { tag: ['@viewport-independent'] }, async ({ page }) => {
+  test('/en/character：站内链接保留语言前缀（导航与目录卡都不落回缺省语言）', { tag: '@viewport-pinned' }, async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 900 });
     await page.goto('/en/character');
     await settleAnimations(page);
-    await expect(page.locator('.ui-sidebar a[href="/en/lightcone"]')).toHaveCount(1);
+    await expect(page.locator('.ui-top-nav a[href="/en/lightcone"]')).toBeVisible();
     await expect(page.locator('a.nk-idx-card').first()).toBeVisible();
     const cardHrefs = await page.locator('a.nk-idx-card').evaluateAll(
       (els) => els.map((e) => e.getAttribute('href') ?? ''),
@@ -52,12 +53,11 @@ test.describe('布局验收：多语言', () => {
     await expect(page.locator('.ui-sidebar a[href="/en/character"]')).toHaveCount(1);
   });
 
-  test('/en/character：壳层文案走词典（侧栏主标英文），缺省语言仍为中文', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
+  test('/en/character：顶栏可达名走词典，缺省语言仍为中文', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {
     await page.goto('/en/character');
-    await expect(page.locator('.ui-sidebar a[href="/en/character"] .ui-sidebar-link__cn')).toHaveText('Characters');
-    await expect(page.locator('.ui-sidebar a[href="/en/character"] .ui-sidebar-link__en')).toHaveText('CHARACTERS');
+    await expect(page.locator('.ui-top-nav a[href="/en/character"]')).toHaveAccessibleName('Characters');
     await page.goto('/character');
-    await expect(page.locator('.ui-sidebar a[href="/character"] .ui-sidebar-link__cn')).toHaveText('角色');
+    await expect(page.locator('.ui-top-nav a[href="/character"]')).toHaveAccessibleName('角色');
   });
 
   test('/en/character/1001：hero 简介随语言（前端从角色档案首行派生，非转换器组合的中文）', { tag: ['@viewport-independent', '@i18n-detail'] }, async ({ page }) => {

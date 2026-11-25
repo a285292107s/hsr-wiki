@@ -228,9 +228,6 @@ const CHECK_PATH = 'M5 12.5l4.5 4.5L19 7.5';
   font-family: var(--font-body);
   color: var(--text);
 }
-@media (min-width: 768px) {
-  .nk-settings { margin-left: var(--nk-content-offset); }
-}
 
 .nk-settings__head {
   max-width: 1480px;

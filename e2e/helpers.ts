@@ -192,7 +192,7 @@ async function afterSkeletonGone(page: Page, timeout = 5_000): Promise<void> {
   );
 }
 
-const SHELL_OWNED = ['.ui-sidebar', '.nk-toast-container'];
+const SHELL_OWNED = ['.ui-site-header', '.nk-toast-container'];
 
 export async function waitForViewMounted(page: Page, timeout = 10_000): Promise<void> {
   await page

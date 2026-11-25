@@ -3,12 +3,6 @@
   margin: 0 auto;
   padding: 0 16px 60px;
 }
-@media (min-width: 768px) {
-  .nk-ctrait {
-    margin-left: calc(var(--nk-content-offset) + max(0px, (100vw - var(--nk-content-offset) - var(--nk-detail-max)) / 2));
-    margin-right: auto;
-  }
-}
 
 @keyframes nk-ctrait-fade-up {
   from { opacity: 0; transform: translateY(16px); }

@@ -1,89 +1,75 @@
 import { test, expect, type Page } from '@playwright/test';
-import { collectConsoleIssues, settleAnimations, waitForCatalogCards } from './helpers';
-import { collectNavAnchors, noUnknownOverflow, waitForNavMode } from './layout.shared';
+import { collectConsoleIssues, waitForCatalogCards } from './helpers';
+import { noUnknownOverflow } from './layout.shared';
 
-test.describe('布局验收：导航动态溢出折叠', () => {
-
-  test('窄视口：可见项恒为规范序前缀，尾部折叠进"更多"抽屉', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto('/settings');
-    await expect(page.locator('.ui-sidebar-more')).toBeVisible();
-    const anchors = await collectNavAnchors(page);
-    expect(anchors.length).toBeGreaterThan(1);
-    const visIdx = anchors.map((a, i) => (a.visible ? i : -1)).filter((i) => i >= 0);
-    expect(visIdx).toEqual(Array.from({ length: visIdx.length }, (_, i) => i));
-
-    const allHrefs = await page.evaluate(() => {
-      const bar = document.querySelector('.ui-sidebar')!;
-      return [...bar.querySelectorAll('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')]
-        .map((el) => el.getAttribute('href'));
-    });
-    expect(allHrefs.length).toBeGreaterThan(0);
-    await page.locator('.ui-sidebar-more').click();
-    await expect(page.locator('.ui-more__item').first()).toBeVisible();
-    const drawerHrefs = await page.locator('.ui-more__item').evaluateAll((els) =>
-      els.map((el) => el.getAttribute('href')),
-    );
-    const union = [...allHrefs, ...drawerHrefs];
-    expect(new Set(union).size, '底栏与抽屉不得重复同一路由').toBe(union.length);
-    expect(drawerHrefs.length, '320px 档必须确有折叠项').toBeGreaterThan(0);
-    await noUnknownOverflow(page);
-    assertNoErrors();
-  });
-
-  test('窄视口（≥768px）：全部平铺，无折叠、"更多"入口隐藏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto('/settings');
-    await waitForNavMode(page, 'normal');
-    await expect(page.locator('.ui-sidebar-more')).toBeHidden();
-    const anchors = await collectNavAnchors(page);
-    expect(anchors.length).toBeGreaterThan(1);
-    await expect(page.locator('.ui-more__item')).toHaveCount(0);
-    expect(anchors.every((a) => a.visible)).toBe(true);
-    await noUnknownOverflow(page);
-    assertNoErrors();
-  });
-});
-
-test.describe('布局验收：底栏槽位数与语言无关', () => {
-  test('中文与葡语（最长译文）在窄视口下槽位数一致', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    const count = async (url: string, width: number): Promise<number> => {
+test.describe('布局验收：全站顶部导航', () => {
+  for (const width of [390, 800, 1600]) {
+    test(`${width}px：顶部导航随页面滚动保持可见`, { tag: '@viewport-pinned' }, async ({ page }) => {
       await page.setViewportSize({ width, height: 780 });
-      await page.goto(url);
-      await settleAnimations(page);
-      await waitForNavMode(page, 'normal');
-      return page.locator('.ui-sidebar')
-        .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
-        .evaluateAll((els) => els.filter((el) => el.offsetParent !== null).length);
-    };
-    for (const width of [320, 390, 430]) {
-      const cn = await count('/character', width);
-      const pt = await count('/pt/character', width);
-      expect(pt, `${width}px：葡语底栏槽位数应与中文一致（改前葡语更少）`).toBe(cn);
-      expect(cn, `${width}px：底栏至少 2 槽`).toBeGreaterThanOrEqual(2);
-    }
-    assertNoErrors();
-  });
+      await page.goto('/');
+      const nav = page.locator('nav.ui-top-nav');
+      await expect(nav).toBeVisible();
+      await expect(page.locator('.ui-site-header')).toHaveCSS('position', 'sticky');
+      await expect(page.locator('.nk-hub-footer')).toBeVisible();
+      const top = await nav.evaluate((el) => el.getBoundingClientRect().top);
+      const scroller = page.locator('#nk-home-app');
+      await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeGreaterThan(0);
+      await scroller.evaluate((el) => el.scrollTo({ top: el.scrollHeight, behavior: 'instant' }));
+      await expect.poll(() => scroller.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+      await expect.poll(() => nav.evaluate((el) => el.getBoundingClientRect().top)).toBe(top);
+      await noUnknownOverflow(page);
+    });
+  }
+  const normalSections = ['/', '/character', '/lightcone', '/relic', '/endgame'];
+  const cwSections = ['/currency', '/currency/role', '/currency/item', '/currency/buff', '/currency/augment', '/currency/trait'];
+  const stripLocale = (href: string | null): string => {
+    const raw = href ?? '';
+    if (raw === '/en') return '/';
+    return raw.startsWith('/en/') ? raw.slice(3) : raw;
+  };
 
-  test('货币战争模式：常规手机档全量平铺（无「更多」抽屉）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    await page.setViewportSize({ width: 390, height: 780 });
-    await page.goto('/currency/role');
-    await settleAnimations(page);
-    await waitForNavMode(page, 'cw');
-    const all = await page.locator('.ui-sidebar')
-      .locator('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)')
-      .evaluateAll((els) => els.map((el) => ({ href: el.getAttribute('href'), vis: el.offsetParent !== null })));
-    expect(all.length, '货币战争模式的章节项应全部渲染').toBeGreaterThan(1);
-    expect(all.every((a) => a.vis), '390px 档货币战争模式应全量平铺（ADR 0007 的 6 槽位口径）').toBe(true);
-    await expect(page.locator('.ui-sidebar-more'), '全量平铺时不得出现「更多」入口').toBeHidden();
-    assertNoErrors();
+  for (const { width, route, activeHref, sections } of [
+    { width: 320, route: '/relic', activeHref: '/relic', sections: normalSections },
+    { width: 390, route: '/currency/role', activeHref: '/currency/role', sections: cwSections },
+    { width: 600, route: '/en/relic', activeHref: '/en/relic', sections: normalSections },
+  ]) {
+    test(`${width}px：${route} 当前项常显，折叠项可访问`, { tag: '@viewport-pinned' }, async ({ page }) => {
+      await page.setViewportSize({ width, height: 780 });
+      await page.goto(route);
+      const nav = page.locator('nav.ui-top-nav');
+      const active = nav.locator(`a[href="${activeHref}"][aria-current="page"]`);
+      await expect(active).toBeVisible();
+      const more = nav.locator('.ui-sidebar-more');
+      await expect(more).toHaveAttribute('aria-expanded', 'false');
+      await more.click();
+      await expect(more).toHaveAttribute('aria-expanded', 'true');
+      const dropdown = page.locator('.ui-more');
+      await expect(dropdown).toBeVisible();
+      await expect(dropdown.locator(`a[href="${activeHref}"]`)).toHaveCount(0);
+      const headerHrefs = await nav.locator('.ui-top-nav__links a').evaluateAll((els) => els.map((el) => el.getAttribute('href')));
+      const drawerHrefs = await dropdown.locator('a.ui-more__item').evaluateAll((els) => els.map((el) => el.getAttribute('href')));
+      const union = [...headerHrefs, ...drawerHrefs];
+      expect(new Set(union).size, '顶栏与「更多」不得重复同一路由').toBe(union.length);
+      expect([...new Set(union.map(stripLocale))].sort(), '当前模式的每个章节都必须可达').toEqual([...sections].sort());
+      const firstItem = dropdown.locator('.ui-more__item').first();
+      await expect(firstItem).toBeVisible();
+      await noUnknownOverflow(page);
+      await page.keyboard.press('Escape');
+      await expect(dropdown).toBeHidden();
+      await expect(more).toHaveAttribute('aria-expanded', 'false');
+    });
+  }
+
+  test('宽桌面：章节项全量平铺，不出现折叠入口', { tag: '@viewport-pinned' }, async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 900 });
+    await page.goto('/relic');
+    const nav = page.locator('nav.ui-top-nav');
+    await expect(nav.locator('a[href="/relic"][aria-current="page"]')).toBeVisible();
+    await expect(nav.locator('a[href="/character"]')).toBeVisible();
+    await expect(nav.locator('.ui-sidebar-more')).toBeHidden();
+    await noUnknownOverflow(page);
   });
 });
-
 test.describe('布局验收：跨模式入口文案', () => {
 
   test('可见标签 = 目的地模式名（常规↔货币战争双向），点击落到对方图签页', async ({ page }) => {
@@ -91,36 +77,15 @@ test.describe('布局验收：跨模式入口文案', () => {
     const swap = page.locator('.ui-sidebar-swap');
 
     await page.goto('/character');
-    await expect(swap.locator('.ui-sidebar-link__cn')).toHaveText('货币战争');
-    await expect(swap.locator('.ui-sidebar-link__en')).toHaveText('CURRENCY WAR');
     await expect(swap.locator('.ui-sidebar-link__label')).toHaveText('货币战争');
     await expect(swap).toHaveAttribute('aria-label', '前往货币战争');
     await expect(swap).toHaveAttribute('title', '前往货币战争');
-    await expect(swap).not.toContainText('交换');
 
-    expect(await page.locator('.ui-sidebar-tools .ui-sidebar-swap').count(), '切换按钮已移出工具组，直接置于章节项之后').toBe(0);
-    expect(
-      await swap.evaluate((el) => el.parentElement?.classList.contains('ui-sidebar') ?? false),
-      '切换按钮应是侧栏直接子节点（排在章节项之后）',
-    ).toBe(true);
-    const order = await page.evaluate(() => {
-      const kids = [...document.querySelector('.ui-sidebar')!.children];
-      const navIdx = kids
-        .map((k, i) => (k.matches('a.ui-sidebar-link:not(.ui-sidebar-settings):not(.ui-sidebar-debug)') ? i : -1))
-        .filter((i) => i >= 0);
-      return {
-        swapIdx: kids.findIndex((k) => k.classList.contains('ui-sidebar-swap')),
-        lastNavIdx: navIdx[navIdx.length - 1] ?? -1,
-      };
-    });
-    expect(order.lastNavIdx, '常规模式应渲染章节项').toBeGreaterThanOrEqual(0);
-    expect(order.swapIdx, '切换按钮应排在最后一个章节项之后').toBeGreaterThan(order.lastNavIdx);
+    await expect(swap).toBeVisible();
 
     await swap.click();
     await expect(page).toHaveURL(/\/currency\/role$/);
 
-    await expect(swap.locator('.ui-sidebar-link__cn')).toHaveText('常规模式');
-    await expect(swap.locator('.ui-sidebar-link__en')).toHaveText('NORMAL MODE');
     await expect(swap.locator('.ui-sidebar-link__label')).toHaveText('常规模式');
     await expect(swap).toHaveAttribute('aria-label', '前往常规模式');
     await expect(swap).toHaveAttribute('title', '前往常规模式');
@@ -132,53 +97,6 @@ test.describe('布局验收：跨模式入口文案', () => {
   });
 });
 
-test.describe('布局验收：侧栏各项风格一致', () => {
-  test('侧栏文案落位一致：内容项（a）与工具项（button）的两行文案左缘必须对齐', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/character');
-    await settleAnimations(page);
-    await expect(page.locator('.ui-sidebar-link').first()).toBeVisible();
-
-    const rows = await page.evaluate(() => {
-      const inkLeft = (node: Element) => {
-        const range = document.createRange();
-        range.selectNodeContents(node);
-        return Math.round(range.getBoundingClientRect().left);
-      };
-      return [...document.querySelectorAll('.ui-sidebar-link')]
-        .filter((el) => getComputedStyle(el).display !== 'none')
-        .map((el) => {
-          const cn = el.querySelector('.ui-sidebar-link__cn');
-          const en = el.querySelector('.ui-sidebar-link__en');
-          const label = el.querySelector('.ui-sidebar-link__label');
-          const visible = (n: Element | null) => n && getComputedStyle(n).display !== 'none' && n.getBoundingClientRect().width > 0;
-          return {
-            name: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 12),
-            tag: el.tagName.toLowerCase(),
-            textAlign: getComputedStyle(el).textAlign,
-            cnLeft: visible(cn) ? inkLeft(cn!) : null,
-            enLeft: visible(en) ? inkLeft(en!) : null,
-            labelLeft: visible(label) ? inkLeft(label!) : null,
-          };
-        });
-    });
-    expect(rows.length, '侧栏应有可见项').toBeGreaterThan(5);
-
-    const ref = rows[0];
-    expect(ref.textAlign, '基准项应为左对齐').toBe('start');
-    for (const r of rows) {
-      expect(r.textAlign, `${r.name}（${r.tag}）的 text-align 应与基准一致`).toBe(ref.textAlign);
-      if (r.cnLeft !== null && r.enLeft !== null) {
-        expect(Math.abs(r.cnLeft - r.enLeft), `${r.name}：CN 与 EN 两行左缘必须对齐（居中即不对齐）`).toBeLessThanOrEqual(1);
-      }
-      if (r.cnLeft !== null && r.labelLeft !== null) {
-        expect(Math.abs(r.cnLeft - r.labelLeft), `${r.name}：CN 与底栏标签左缘必须对齐`).toBeLessThanOrEqual(1);
-      }
-    }
-    assertNoErrors();
-  });
-});
 
 test.describe('布局验收：设置入口可收起', () => {
   const pathname = (page: Page) => new URL(page.url()).pathname;
@@ -235,7 +153,7 @@ test.describe('布局验收：设置入口可收起', () => {
     await expect(settings).toBeVisible();
     const shellOnly = await page.evaluate(() => {
       const app = document.getElementById('app');
-      return !!app && [...app.children].every((el) => el.matches('.ui-sidebar, .nk-toast-container'));
+      return !!app && [...app.children].every((el) => el.matches('.ui-site-header, .nk-toast-container'));
     });
     expect(shellOnly, '前置条件：点进设置时首屏视图尚未挂载（延迟 chunk 生效）').toBe(true);
     await settings.click();
