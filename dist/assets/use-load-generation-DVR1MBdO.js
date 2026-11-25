@@ -1,0 +1,1 @@
+function e(){let e=0;return{begin:()=>++e,isCurrent:t=>t===e}}export{e as t};

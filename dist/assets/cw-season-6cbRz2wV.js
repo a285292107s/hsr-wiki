@@ -1,0 +1,1 @@
+var e=`HSR_WIKI_CW_SEASON`;function t(){try{let t=localStorage.getItem(e);if(t==null||t===``)return null;let n=Number(t);return Number.isInteger(n)&&n>0?n:null}catch{return null}}function n(t){try{t==null?localStorage.removeItem(e):localStorage.setItem(e,String(t))}catch{}}export{n,t};

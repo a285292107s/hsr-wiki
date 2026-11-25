@@ -202,10 +202,12 @@ python -m pytest tests/ -v               # converter 单元测试
 - Vercel 生产构建（`pnpm build`，含 vue-tsc 与七守卫）是上线前最后一道守卫：构建失败不部署，可一键回滚。
 - 本地推送前先跑 `pnpm build` + `pnpm test` 自检——CI 红不会拦 push，但会留失败记录。
 
-### 可部署 dist 下载（不影响 Vercel）
+### 可部署 dist：直接提交进仓库
 
-`release-dist.yml`：**打 tag（`v*`）或手动触发**时，在 Actions 里跑完整 `pnpm build`，把 `dist/` 打包为 `dist.tar.gz`（约 285 MB，压缩后）+ `.sha256` 传到 GitHub Release。**不改 main、不动 Vercel 部署链**——Vercel 仍从源码自动构建。
+构建产物 `dist/` **直接提交进 `main`**（`.gitignore` 不再忽略它），从仓库检出即可拿到完整静态站。**不改 Vercel 部署链**——Vercel 仍从源码自动构建。
 
-- 产物根目录可直接作任意静态托管根目录（含 `index.html`、`prerender/`、`data/`、`sitemap.xml` 等）；`data/assets/icons` 图标随包（约 250 MB，[ADR 0069](../adr/0069-图片加载改为本地优先.md)）。
-- **该产物不能直接丢给不认识 SPA 重写的托管**：深层路由（如 `/character/1212`）刷新依赖 `vercel.json` 里的 rewrites（快照投递 + catch-all → `prerender/_shell.html`）；包内附 `vercel.json` 仅作参照，非 Vercel 托管需自行实现等价重写，否则深层刷新 404。
-- **它不加速 Vercel 部署**：Vercel Git 集成每次仍从头构建（含 1137 页预渲染）。若真要“免构建部署”，得改 `vercel deploy --prebuilt`，但那只是把构建搬到 Actions + 多两次 ~285 MB 传输，总时长未必降，且多一个失败面——当前小站（日均 ≤10）不值得。
+- **刷新方式**：本地 `pnpm build` 后把新的 `dist/` 一并提交（与源码同一提交或独立提交均可，但要同源一致，别让产物与源码脱节）。
+- 产物根目录可直接作任意静态托管根目录（含 `index.html`、`prerender/`、`data/`、`sitemap.xml` 等）；`data/assets/icons` 图标含在内（约 250 MB，[ADR 0069](../adr/0069-图片加载改为本地优先.md)）。
+- **该产物不能直接丢给不认识 SPA 重写的托管**：深层路由（如 `/character/1212`）刷新依赖 `vercel.json` 里的 rewrites（快照投递 + catch-all → `prerender/_shell.html`）；非 Vercel 托管需自行实现等价重写，否则深层刷新 404。
+- **它不加速 Vercel 部署**：Vercel Git 集成每次仍从头构建（含 1137 页预渲染）；dist 虽已入库，但其大部分内容（`dist/data/**`）与 `public/**` 是同一批 blob，git checkout 不会多拉一份，故不会因入库而变慢。若真要“免构建部署”得改 `vercel deploy --prebuilt`，那是把构建搬到 Actions + 多一次大体积传输，小站（日均 ≤10）不划算。
+- **仓库体积代价远小于“体积”直觉**：`dist/data/**` 与 `public/data/**` 字节一致，git 按 blob 哈希去重 → 提交 dist 几乎不涨 `.git`（实测 402 → 406 MiB）；真正新增的是 `dist/prerender/**`（每次构建唯一，~15 MB/次）与极少量 assets。故“直接提交 dist”在 git 层面很便宜，不至于“每版 +400 MB”。

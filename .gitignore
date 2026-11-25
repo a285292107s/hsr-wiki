@@ -10,8 +10,7 @@ lerna-debug.log*
 # Dependencies
 node_modules
 
-# Build outputs
-dist
+# Build outputs（dist 不再忽略：构建产物直接提交进仓库，见 docs/agents/commands.md「可部署 dist」）
 dist-ssr
 *.local
 

@@ -1,0 +1,1 @@
+function e(e){return(e?.[`0`]??``).split(`\\n`)[0]?.trim()??``}export{e as t};
