@@ -1,5 +1,6 @@
 
 import { cdnFallbackFromPrimary, cdnUri, localFallback2FromPrimary, nanokaUrl, resolveCdnUri } from '../services/cdn';
+import { uiartUri } from '../services/cdn/uiart';
 import {
   USE_OFFICIAL_PATHS,
   OFFICIAL_ICON_BASE,
@@ -201,7 +202,7 @@ export function gridFightPropIconUrl(icon: string | null | undefined): string {
   if (!m) return '';
   const parts = m[1].split('/');
   const name = parts.pop()!;
-  return official(`${parts.join('/').toLowerCase()}/${name}.png`);
+  return uiartUri(`${parts.join('/').toLowerCase()}/${name}.png`);
 }
 
 export function itemName(id: string | number, nameCache: NameCache, itemDb: ItemDb): string {

@@ -1,4 +1,3 @@
-import { OFFICIAL_ICON_BASE } from '../../../lib/constants';
 import { activeHref } from '../../../lib/i18n/active';
 import { translate } from '../../i18n';
 
@@ -6,6 +5,7 @@ const t = translate;
 import { imgHtml } from '../../../lib/image';
 import { escHtml, stripAllTags } from '../../../lib/format';
 import { spriteOutputToRel } from '../../../services/cdn/jsdelivr';
+import { uiartUri } from '../../../services/cdn/uiart';
 
 const ART_PREFIXES = [
   'TabIcon',
@@ -17,15 +17,11 @@ const ART_PREFIXES = [
   'Quest/TabIcon',
   'Abyss',
 ] as const;
-const TAB_ART_PREFIXES = [
-  ...ART_PREFIXES,
-  'UI/Abyss',
-] as const;
 
 function endgameArtUrl(path: string | undefined, prefixes: readonly string[]): string {
   if (!path) return '';
   if (!prefixes.some((p) => path.startsWith(`SpriteOutput/${p}/`))) return '';
-  return `${OFFICIAL_ICON_BASE}/${spriteOutputToRel(path)}`;
+  return uiartUri(spriteOutputToRel(path));
 }
 
 export function seasonBannerUrl(arts?: { theme_banner?: string } | null): string {
@@ -122,7 +118,7 @@ export const ENDGAME_MODES: EndgameMode[] = [
 
 export function modeDefaultArtUrl(modeKey: string): string {
   const mode = ENDGAME_MODES.find((m) => m.key === modeKey);
-  return mode?.icon ? endgameArtUrl(mode.icon, TAB_ART_PREFIXES) : '';
+  return mode?.icon ? uiartUri(spriteOutputToRel(mode.icon)) : '';
 }
 
 export function bySeasonDesc(a: CatalogItem, b: CatalogItem): number {

@@ -1,0 +1,1 @@
+import{$ as e,E as t,I as n,O as r,S as i,v as a}from"./vendor-5wuGX6_1.js";import{r as o}from"./image-DoCOivmx.js";var s=t({__name:`CdnImage`,props:{src:{},alt:{default:``},loading:{},fetchpriority:{}},setup(t){let s=t,c=a(()=>o(s.src,s.alt,{loading:s.loading,fetchpriority:s.fetchpriority}));return(t,a)=>(n(),i(`img`,e(r(c.value)),null,16))}});export{s as t};

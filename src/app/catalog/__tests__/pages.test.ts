@@ -3,6 +3,7 @@ import { CATALOG_PAGES } from '../pages';
 import type { CatalogFilter } from '../types';
 import { bySeasonDesc, mazeDateRange, mazeStatus, modeDefaultArtUrl, seasonBannerUrl, seasonDateParts, seasonHeroBgUrl, seasonPosterTabUrl, seasonTimeMs } from '../pages/endgame';
 import cnMessages from '../../../lib/i18n/messages/cn.json';
+import { LOCAL_ICONS_BASE } from '../../../services/cdn';
 
 const CN_KEYS = new Set(Object.keys(cnMessages));
 
@@ -285,10 +286,10 @@ describe('endgame 图标 URL（白名单 + 玩法级默认兜底）', () => {
   const BASE = 'https://cdn.jsdelivr.net/gh/a285292107s/StarRailTextures@main/assets/asbres/spriteoutput';
 
   it('modeDefaultArtUrl 四模式统一用玩法级默认图标（Img1-4，抛弃每季页签图）', () => {
-    expect(modeDefaultArtUrl('maze')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
-    expect(modeDefaultArtUrl('story')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
-    expect(modeDefaultArtUrl('boss')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg3.png`);
-    expect(modeDefaultArtUrl('peak')).toBe(`${BASE}/ui/challengeboss/ChallengeBossQuestTabImg4.png`);
+    expect(modeDefaultArtUrl('maze')).toBe(`${LOCAL_ICONS_BASE}/uiart/ui/challengeboss/ChallengeBossQuestTabImg1.png`);
+    expect(modeDefaultArtUrl('story')).toBe(`${LOCAL_ICONS_BASE}/uiart/ui/challengeboss/ChallengeBossQuestTabImg2.png`);
+    expect(modeDefaultArtUrl('boss')).toBe(`${LOCAL_ICONS_BASE}/uiart/ui/challengeboss/ChallengeBossQuestTabImg3.png`);
+    expect(modeDefaultArtUrl('peak')).toBe(`${LOCAL_ICONS_BASE}/uiart/ui/challengeboss/ChallengeBossQuestTabImg4.png`);
   });
 
   it('modeDefaultArtUrl 未知/空模式回退空串', () => {
