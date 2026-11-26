@@ -188,7 +188,7 @@
   --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
 
-  --nk-content-max: 1440px;
+  --nk-content-max: 1280px;
   --nk-nav-bar-h: 56px;
   --nk-nav-bar-size: calc(var(--nk-nav-bar-h) + env(safe-area-inset-top, 0px));
   --nk-detail-max: 1000px;

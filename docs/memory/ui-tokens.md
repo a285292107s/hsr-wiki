@@ -35,6 +35,8 @@
 - **定时 dismiss 的 toast 要先看焦点**：焦点落在 toast 内时自动消失等于抢走正在读的内容。判据 = `host.contains(document.activeElement)` 为真时**顺延重排定时器**，不能直接丢弃（丢弃会让它永不消失）；关闭入口必须是真按钮，不可用整块 `div` 的 click 兼作关闭。
 - **sticky 侧栏放进滚动页时要连「容器底边」一起算，不能只算 `top`**：sticky 元素的底边不得越过其包含块底边，双栏目录的左栏一旦高到 `top + height > 包含块可见底边`，浏览器恒定地把左栏**底边贴容器底边**向上顶，页签正好滑到 sticky 工具栏（z-index 100）下面。判据 = 左栏 `max-height` 须 ≤ `100vh - 160px`（68px 工具栏 + 80px 页底留白 + 余量）；只写 `top: 68px` 不够，长详情与短详情两种高度都要量。无头目录（`headless`，没有工具栏）另开一组覆盖：`.nk-cat--headless .nk-cat-split__rail { top: 14px; max-height: calc(100vh - 28px) }`，且 `scrollSplitTop()` 回滚偏移从 64px 降为 24px。`src/styles/catalog.css`、`CatalogPage.vue`
 
+- **只在放大档媒体块里消费的宽度令牌，等于低档没有上限**：目录族 `--cat-max` 曾写 `1440px`，但唯一的 `max-width: var(--cat-max)` 落在 `min-width: 1600` 块里 ⇒ 1440 档沿用满宽，把令牌改小不生效（实测 1440 视口网格仍 1392px）。上限要与 `max-width` 同处写在基态，或把消费点一并搬出媒体块；判据是逐断点量容器宽，不是只看令牌值。`src/styles/catalog.css`
+
 ## 令牌收口与迁移
 
 - **改主题色 = 必须全仓搜「为旧主色明度写的对比补偿」**：一批「浅底深字」补偿（`color: var(--blk-900)`、进度条渐变、局部令牌覆盖）只为旧色的明度成立，静态审查看不出「这条只在旧色下才对」，可靠办法是让 e2e 跑一遍。（ADR 0041）
