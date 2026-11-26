@@ -176,6 +176,8 @@
 
 ## 坐标系与断点
 
+- **删掉一条吸顶条必须同批改「按条高写死的避让值」**：目录页原本 `scroll-margin-top: 76px` 与 `scrollSplitTop()` 里的 `offset = 64` 都是为 60px 工具条 + 间距留的，条撤除后不改就等于每次锚点落位都多留 48px 空窗（不报错、看上去「到了」）。判据：全仓搜 `scroll-margin-top` / `offset =` / sticky 的 `top:`，逐条确认是否仍在为已删元素让位。`src/styles/catalog.css`、`CatalogPage.vue`
+
 - **base 改了 `display`，断点块里只写 `gap` 不会继承结构**：桌面网格化后手机断点必须显式回 `display: flex`。
 - **走文档流的页不能用视口级 `margin: 0 auto`**：侧栏偏移后居中基准与侧栏避让页差一个侧栏宽，要用 `calc(offset + max(0px, (100vw - offset - detail-max)/2))`。
 - **走文档流的详情页拿不到 `.nk-page--detail` 的侧栏避让，必须自己声明**：那份避让是 `position: absolute` + `left: var(--nk-content-offset)` 提供的，页面一旦改成文档流滚动，整页就退回「版心以视口居中」⇒ **768~1279 视口被侧栏压住**。修法：页面容器 `padding-left: var(--nk-content-offset)`（该令牌 <768 为 0，无需媒体查询）。**这类缺陷不会报错、只在特定视口可见** ⇒ 新增 / 改造文档流页面时同批补一条「内容左缘 ≥ 侧栏右缘」的几何断言（读令牌落值 + 比 rect，而不是写死 x）。`e2e/layout-monster.spec.ts`

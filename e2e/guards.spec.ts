@@ -10,9 +10,9 @@ interface GuardRoute {
 
 const ROUTES: GuardRoute[] = [
   { path: '/', roots: ['#nk-home-app', '.nk-hub-masthead__title', '.nk-home__version'] },
-  { path: '/character', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },
+  { path: '/character', roots: ['#nk-catalog-app', '.nk-cat-search'], catalog: true },
   { path: '/character/1001', roots: ['.nk-hero--char', '.nk-hero__archive'] },
-  { path: '/endgame', roots: ['#nk-catalog-app', '.nk-cat-toolbar'], catalog: true },
+  { path: '/endgame', roots: ['#nk-catalog-app', '.nk-cat-search'], catalog: true },
   { path: '/endgame/maze', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
   { path: '/endgame/story', roots: ['.nk-egm__hero', '.nk-egm__rule'] },
   { path: '/endgame/boss', roots: ['.nk-egm__hero', '.nk-egm__rule'] },

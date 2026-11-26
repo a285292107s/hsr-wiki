@@ -1,37 +1,27 @@
-#nk-catalog-app { position: absolute; inset: var(--nk-nav-bar-size) 0 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) calc(24px + env(safe-area-inset-bottom, 0px)); --cat-max: 1280px; --cat-pad-x: 24px; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); }
+#nk-catalog-app { position: absolute; inset: var(--nk-nav-bar-size) 0 0; overflow-y: auto; overflow-x: hidden; padding: 0 var(--cat-pad-x) calc(24px + env(safe-area-inset-bottom, 0px)); --cat-max: 1280px; --cat-pad-x: 24px; scrollbar-color: var(--nk-scrollbar-thumb) var(--nk-scrollbar-track); background-image: var(--nk-catalog-ground); background-size: cover; background-position: 50% 0; background-repeat: no-repeat; }
 #nk-catalog-app::-webkit-scrollbar { width: 6px; }
 #nk-catalog-app::-webkit-scrollbar-thumb { background: var(--nk-scrollbar-thumb); border-radius: var(--nk-radius-1); }
 #nk-catalog-app::-webkit-scrollbar-track { background: var(--nk-scrollbar-track); }
 
 .nk-cat-masthead,
-.nk-cat-toolbar,
 .nk-idx-grid,
 .nk-cat-grid,
 .nk-cat-split,
 .nk-cat-empty { max-width: var(--cat-max); margin-left: auto; margin-right: auto; }
 
-.nk-cat-masthead { display: flex; align-items: flex-end; gap: 18px; padding: 44px 0 16px; position: relative; border-bottom: 1px solid var(--line-2); }
+.nk-cat-masthead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 340px); grid-template-rows: auto auto; align-items: end; column-gap: 24px; row-gap: 14px; padding: 44px 0 18px; position: relative; border-bottom: 1px solid var(--line-2); }
 .nk-cat-masthead::before { content: ''; position: absolute; left: 0; bottom: -1px; width: 96px; height: 2px; background: linear-gradient(90deg, var(--primary), transparent 88%); }
-.nk-cat-title { flex: 1; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; font-family: var(--font-body); font-size: clamp(var(--nk-fs-title-1), 2.3vw, var(--nk-fs-title-3)); font-weight: 900; letter-spacing: 0.015em; line-height: 1.5; text-wrap: balance; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; overflow: hidden; }
+.nk-cat-title { grid-column: 1; grid-row: 1; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; font-family: var(--font-body); font-size: clamp(var(--nk-fs-title-1), 2.3vw, var(--nk-fs-title-3)); font-weight: 900; letter-spacing: 0.015em; line-height: 1.5; text-wrap: balance; color: var(--text-bright); white-space: normal; overflow-wrap: break-word; overflow: hidden; }
 #nk-catalog-app .nk-cat-subtitle { display: inline-block; font-family: var(--font-mono); font-size: var(--nk-fs-2); font-weight: 500; letter-spacing: 0.26em; text-transform: uppercase; color: var(--text3); border-left: 1px solid var(--line-2); padding-left: 10px; margin-left: 2px; flex-shrink: 0; transform: translateY(-0.32em); }
-.nk-cat-count { flex-shrink: 0; margin-left: auto; font-family: var(--font-mono); font-size: var(--nk-fs-3); letter-spacing: 0.12em; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-bottom: 0.28em; }
-.nk-cat-toolbar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; padding: 10px 8px 12px; margin-top: 0; }
-.nk-cat-toolbar::before {
-  content: ''; position: absolute; inset: 0 calc(-1 * var(--cat-pad-x)); z-index: -1;
-  background: var(--nk-header-bg);
-  backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15);
-}
-.nk-cat-toolbar::after { content: ''; position: absolute; left: calc(-1 * var(--cat-pad-x)); right: calc(-1 * var(--cat-pad-x)); bottom: -1px; height: 1px; background: var(--nk-header-border); }
-@media (prefers-reduced-transparency: reduce) {
-  .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 97%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
-}
-.nk-cat-search { flex: 1; min-width: 140px; max-width: 360px; display: flex; align-items: center; gap: 9px; height: 40px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: var(--nk-radius-2); padding: 0 14px; transition: all 0.2s var(--nk-ease-out); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
+.nk-cat-tools { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.nk-cat-count { flex-shrink: 0; font-family: var(--font-hud); font-size: var(--nk-fs-3); letter-spacing: 0.12em; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nk-cat-search { grid-column: 2; grid-row: 1; width: 100%; min-width: 0; max-width: none; display: flex; align-items: center; gap: 9px; height: 40px; background: var(--nk-input-bg); border: 1px solid var(--nk-input-border); border-radius: var(--nk-radius-2); padding: 0 14px; transition: all 0.2s var(--nk-ease-out); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent); }
 .nk-cat-search:hover:not(:focus-within) { border-color: color-mix(in srgb, var(--primary) 34%, transparent); }
 .nk-cat-search:focus-within { border-color: var(--primary); background: var(--nk-shell-hover); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--blk-950) 55%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
 .nk-cat-search svg { width: 14px; height: 14px; color: var(--text3); flex-shrink: 0; }
 .nk-cat-search input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: var(--text); font-size: var(--nk-fs-4); font-family: var(--font-body); }
 .nk-cat-search input::placeholder { color: var(--text3); }
-.nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.nk-cat-filters-bar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: flex-start; flex-wrap: wrap; }
 @media (max-width: 1023px) { .nk-cat-filters-bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } }
 .nk-cat-filters-bar::-webkit-scrollbar { display: none; }
 .nk-cat-filters-bar { --nk-fade-w: 24px; }
@@ -88,7 +78,7 @@
 .nk-cat-grid,
 .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 14px; }
 .nk-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--nk-grid-min), 1fr)); gap: var(--nk-grid-gap); padding-top: 16px; }
-.nk-cat-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding-top: 16px; scroll-margin-top: 76px; }
+.nk-cat-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding-top: 16px; scroll-margin-top: 16px; }
 .nk-cat-split__rail { display: flex; flex-direction: column; min-width: 0; }
 .nk-cat-split__main { min-width: 0; }
 .nk-cat-split__tabs { display: flex; gap: 4px; padding: 0 2px; border-bottom: 1px solid var(--line-2); overflow-x: auto; scrollbar-width: none; }
@@ -423,13 +413,12 @@
 
 @media (max-width: 767px) {
   #nk-catalog-app { --cat-pad-x: 16px; }
-  .nk-cat-masthead { padding: 18px 0 12px; gap: 10px; }
+  .nk-cat-masthead { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-items: start; column-gap: 0; row-gap: 12px; padding: 18px 0 14px; }
   .nk-cat-title { font-size: var(--nk-fs-6); letter-spacing: 0.06em; }
   .nk-cat-count { font-size: var(--nk-fs-1); letter-spacing: 0.14em; }
-  .nk-cat-toolbar { gap: 8px; padding: 6px 8px 10px; flex-wrap: wrap; }
-  .nk-cat-toolbar::before { background: color-mix(in srgb, var(--blk-850) 94%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .nk-cat-search { flex: 1 1 100%; max-width: none; min-width: 0; }
-  .nk-cat-filters-bar { flex: 1 1 100%; justify-content: flex-start; overflow-x: auto; }
+  .nk-cat-tools { grid-column: 1; grid-row: 3; flex-wrap: wrap; gap: 10px; }
+  .nk-cat-search { grid-column: 1; grid-row: 2; width: 100%; }
+  .nk-cat-filters-bar { flex: 1 1 auto; min-width: 0; justify-content: flex-start; overflow-x: auto; }
   .nk-cat-filters-bar .nk-cat-select { flex-shrink: 0; }
   .nk-cat-select__btn { padding: 6px 8px; }
   .nk-cat-grid, .nk-skeleton__grid { --nk-grid-min: 150px; --nk-grid-gap: 10px; }

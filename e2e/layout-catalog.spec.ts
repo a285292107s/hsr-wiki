@@ -48,6 +48,41 @@ test.describe('布局验收：目录引擎 · 卡片渲染', () => {
     await noUnknownOverflow(page);
     assertNoErrors();
   });
+  test('/character：搜索与筛选并入刊头，页面不设第二条吸顶条', { tag: '@viewport-pinned' }, async ({ page }) => {
+    const { assertNoErrors } = collectConsoleIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/character');
+    await expect(page.locator('.nk-idx-card').first()).toBeVisible();
+    await expect(page.locator('.nk-cat-toolbar')).toHaveCount(0);
+
+    const layout = await page.evaluate(() => {
+      const rect = (sel: string) => document.querySelector(sel)!.getBoundingClientRect();
+      const mast = rect('.nk-cat-masthead');
+      const search = rect('.nk-cat-search');
+      const filters = rect('.nk-cat-filters-bar');
+      return {
+        position: getComputedStyle(document.querySelector('.nk-cat-masthead')!).position,
+        searchInMast: search.top >= mast.top && search.bottom <= mast.bottom,
+        filtersInMast: filters.top >= mast.top && filters.bottom <= mast.bottom + 1,
+      };
+    });
+    expect(layout.position, '刊头不得吸顶').not.toBe('sticky');
+    expect(layout.searchInMast, '搜索框应在刊头内').toBe(true);
+    expect(layout.filtersInMast, '筛选行应在刊头内').toBe(true);
+
+    await page.evaluate(() => { document.querySelector<HTMLElement>('#nk-catalog-app')!.scrollTop = 600; });
+    await page.waitForTimeout(250);
+    const scrolled = await page.evaluate(() => ({
+      searchTop: document.querySelector('.nk-cat-search')!.getBoundingClientRect().top,
+      mastBottom: document.querySelector('.nk-cat-masthead')!.getBoundingClientRect().bottom,
+      navBottom: document.querySelector('nav.ui-top-nav')!.getBoundingClientRect().bottom,
+    }));
+    expect(scrolled.searchTop, '滚动后搜索框应随刊头滚出视口').toBeLessThan(scrolled.navBottom);
+    expect(scrolled.mastBottom, '滚动后刊头应随内容滚出视口').toBeLessThan(scrolled.navBottom);
+
+    await noUnknownOverflow(page);
+    assertNoErrors();
+  });
 
   for (const route of ['/monster']) {
     test(`${route}：被截断的卡片文本必须给出完整文本（title / aria-label）`, async ({ page }) => {

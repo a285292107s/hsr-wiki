@@ -464,7 +464,7 @@ test.describe('布局验收：货币战争主题', () => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/currency/trait');
-    await expect(page.locator('.nk-cat-toolbar')).toHaveCount(0);
+    await expect(page.locator('.nk-cat-search')).toHaveCount(0);
     await expect(page.locator('.nk-cat-masthead')).toHaveCount(0);
     await expect(page.locator('#nk-catalog-app > h1.nk-sr-only')).toHaveCount(1);
     const railTop = await page.locator('.nk-cat-split__rail').evaluate((el) => el.getBoundingClientRect().top - document.querySelector('#nk-catalog-app')!.getBoundingClientRect().top);

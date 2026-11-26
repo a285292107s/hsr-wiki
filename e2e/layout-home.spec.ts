@@ -699,7 +699,7 @@ test.describe('布局验收：常规主题', () => {
     await waitForCatalogCards(page);
     const cardCount = await page.locator('[class*="-grid"] a').count();
     expect(cardCount).toBeGreaterThan(0);
-    await expect(page.locator('.nk-cat-toolbar').first()).toBeVisible();
+    await expect(page.locator('.nk-cat-search').first()).toBeVisible();
     await noUnknownOverflow(page);
     assertNoErrors();
   });

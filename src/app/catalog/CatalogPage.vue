@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { stripLocalePrefix } from '../../lib/i18n/locales';
+import { bgVar, cdnSrc } from '../../lib/image';
 import { userErrorDetail } from '../../lib/errors';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -15,6 +16,7 @@ import type { CatalogItem, CatalogPageConfig, CatalogFilterOption } from './type
 
 const props = defineProps<{ config: CatalogPageConfig }>();
 
+const groundUrl = cdnSrc('bgpic', 'BgWiki.webp');
 const app = useAppStore();
 const router = useRouter();
 const route = useRoute();
@@ -272,7 +274,7 @@ function scrollSplitTop(): void {
   const delta = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
   if (scroller.scrollTop <= delta + 8) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const offset = props.config.headless ? 24 : 64;
+  const offset = props.config.headless ? 24 : 16;
   scroller.scrollTo({ top: scroller.scrollTop + delta - offset, behavior: reduce ? 'auto' : 'smooth' });
 }
 
@@ -359,6 +361,7 @@ onBeforeUnmount(() => {
   <div
     id="nk-catalog-app"
     ref="scrollerRef"
+    :style="bgVar(groundUrl, '--nk-catalog-ground')"
     :class="{ 'nk-cat--headless': config.headless }"
     :aria-busy="phase === 'loading'"
     @click="onContentClick"
