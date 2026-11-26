@@ -20,7 +20,7 @@ test.describe('布局验收：角色详情页', () => {
     const icons = page.locator('[data-panel="skills"] .nk-skill__icon');
     await expect(icons.first()).toBeVisible();
     await expect.poll(() => icons.count()).toBeGreaterThanOrEqual(5);
-    await expect(icons.first()).toHaveAttribute('data-cdn-fallback', /^https:\/\/.+\/skillicons\//);
+    await expect(icons.first()).toHaveAttribute('data-cdn-src', /\/data\/assets\/icons\/skillicons\//);
     await expect
       .poll(async () => icons.evaluateAll((els) => els.every((el) => (el as HTMLImageElement).complete)), { timeout: 15_000 })
       .toBe(true);

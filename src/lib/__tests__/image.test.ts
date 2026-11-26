@@ -10,22 +10,16 @@ describe('image 模块统一图片加载', () => {
     expect(cdnSrc('element', 'fire.webp')).toBe(cdnUri('element', 'fire.webp'));
   });
 
-  it('imgAttrs 为主源补上回退源，供 Vue :src 绑定', () => {
-    expect(imgAttrs(localSrc)).toEqual({
-      src: localSrc,
-      'data-cdn-fallback': expect.any(String),
-      'data-cdn-fallback2': expect.any(String),
-    });
+  it('imgAttrs 只绑主源：回退链在失败时推导，不再逐图内联', () => {
+    expect(imgAttrs(localSrc)).toEqual({ src: localSrc });
   });
 
-  it('cdnImgAttrs 产出 data-cdn-src + 回退 + 无障碍/加载属性', () => {
+  it('cdnImgAttrs 产出 data-cdn-src + 无障碍/加载属性', () => {
     const attrs = cdnImgAttrs(localSrc, '火焰', { loading: 'lazy', fetchpriority: 'high' });
     expect(attrs['data-cdn-src']).toBe(localSrc);
     expect(attrs.alt).toBe('火焰');
     expect(attrs.loading).toBe('lazy');
     expect(attrs.fetchpriority).toBe('high');
-    expect(attrs['data-cdn-fallback']).toBeTruthy();
-    expect(attrs['data-cdn-fallback2']).toBeTruthy();
   });
 
   it('imgHtml 用 data-cdn-src 输出模板串图片，转义全部用户可见文本', () => {

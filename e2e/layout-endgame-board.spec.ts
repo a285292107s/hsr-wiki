@@ -231,7 +231,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       .toHaveText(debuffs.map((d) => `${Math.round(d.value * 100)}%`));
     const immImg = immRow.locator('.nk-egd-mon__immicon').first();
     await expect(immImg).toHaveAttribute('data-cdn-src', new RegExp(debuffs[0].icon));
-    await expect(immImg).toHaveAttribute('data-cdn-fallback', /\/statusimmune\/IconImmune.*\.webp$/);
+    await expect(immImg).toHaveAttribute('data-cdn-src', /\/data\/assets\/icons\/statusimmune\/IconImmune.*\.webp$/);
     await immImg.scrollIntoViewIfNeeded();
     await expect.poll(() => immImg.evaluate((el) => (el as HTMLImageElement).naturalWidth),
       { timeout: 10_000 }).toBeGreaterThan(0);

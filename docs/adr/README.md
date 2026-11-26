@@ -74,4 +74,5 @@
 | 0068 | 门禁按「低维护」口径收敛 | Accepted（已实现） | push 档跑 `pnpm build` + 单测 + guards；夜间只留骨架/冒烟；13 语言矩阵与布局契约改手动 full；删 firefox 项目、像素基线与周跑工作流 |
 | 0069 | 图片加载改为本地优先（本地 → jsDelivr → raw） | Accepted | 图标主源改为同源 `/data/assets/icons`（随构建产物部署），jsDelivr/raw 降为二级/三级回退；删 `prune-dist-icons` |
 | 0070 | 图标工具链：单一映射真源 + 按引用集同步 + 覆盖度门禁 | Accepted | 映射只写 `config/sprite-map.json`，`ingest --from-refs` 按引用集补缺，`check-icon-coverage` 作第 9 个守卫进构建 |
+| 0071 | 图片回退链改为失败时推导 | Accepted | 回退链只在运行期由主源 URL 推导（`nextFallbackFrom`），取消逐图内联的 `data-cdn-fallback`/`-fallback2` |
 | 0072 | 全站导航统一为持久顶栏 | Accepted | 全断点用实际宽度决定行内 / 紧凑顶栏，替代侧栏与底部 Dock |

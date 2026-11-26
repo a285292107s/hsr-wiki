@@ -337,14 +337,12 @@ test.describe('布局验收：货币战争主题', () => {
     const icon = page.locator('.nk-crole-skill__icon').first();
     await expect(icon).toBeVisible();
     await expect(icon).toHaveAttribute('data-cdn-src', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
-    await expect(icon).toHaveAttribute('data-cdn-fallback', /\/skillicons\/SkillIcon_1001_BP\.webp$/);
     const gmIcon = page.locator('.nk-crole-gm__label', { hasText: '基础前台强度' }).first().locator('.nk-crole-gm__icon');
     await expect(gmIcon).toBeVisible();
-    await expect(gmIcon).toHaveAttribute('data-cdn-src', /spriteoutput\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png/);
+    await expect(gmIcon).toHaveAttribute('data-cdn-src', /\/uiart\/gridfight\/attributeicon\/normalicon\/IconFrontRow\.png$/);
     const rankIcon = page.locator('.nk-crole-timeline__icon img').first();
     await expect(rankIcon).toBeVisible();
     await expect(rankIcon).toHaveAttribute('data-cdn-src', /\/rank\/1001\/1001_Rank_1\.webp$/);
-    await expect(rankIcon).toHaveAttribute('data-cdn-fallback', /\/rank\/1001\/1001_Rank_1\.webp$/);
     await expect(page.locator('[data-panel="cones"] .nk-slot-empty')).toHaveText('该角色没有专属光锥数据');
     const crole = page.locator('.nk-crole');
     await expect(crole).toHaveCSS('background-attachment', /fixed/);

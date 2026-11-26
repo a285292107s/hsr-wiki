@@ -1,5 +1,4 @@
 import { CDN } from '../../lib/constants';
-import { escHtml } from '../../lib/html';
 import { CDN_CATEGORIES, LOCAL_ICONS_BASE, LOCAL_ICONS_DELIVR_BASE, LOCAL_ICONS_FALLBACK_BASE, NANOKA_HUD, OFFICIAL_BASE, type CdnCategory, type CdnCategorySpec, type CdnSource } from './base';
 import { JS_DELIVR_BASE, JS_DELIVR_RULES, JS_DELIVR_UI3D_BASE, jsdelivrToNanokaFile } from './jsdelivr';
 export interface CdnUri {
@@ -61,8 +60,12 @@ export function cdnRawUrl(subpath: string): string {
   return `${CDN}${NANOKA_HUD}/${subpath}`;
 }
 
-export function localFallbackFromPrimary(primary: string): string {
-  if (!primary.startsWith(`${LOCAL_ICONS_BASE}/`)) return '';
+export function isLocalIconUrl(url: string): boolean {
+  return url.startsWith(`${LOCAL_ICONS_BASE}/`);
+}
+
+function localMirrorFromPrimary(primary: string, mirrorBase: string): string {
+  if (!isLocalIconUrl(primary)) return '';
   const rest = primary.slice(LOCAL_ICONS_BASE.length + 1);
   const slash = rest.indexOf('/');
   if (slash <= 0) return '';
@@ -71,24 +74,24 @@ export function localFallbackFromPrimary(primary: string): string {
   for (const spec of Object.values(CDN_CATEGORIES) as CdnCategorySpec[]) {
     if (spec.local !== dir) continue;
     if (spec.localFiles && !spec.localFiles.test(file)) continue;
-    return `${LOCAL_ICONS_DELIVR_BASE}/${spec.local}/${file}`;
+    return `${mirrorBase}/${spec.local}/${file}`;
   }
   return '';
 }
 
-export function localFallback2FromPrimary(primary: string): string {
-  if (!primary.startsWith(`${LOCAL_ICONS_BASE}/`)) return '';
-  const rest = primary.slice(LOCAL_ICONS_BASE.length + 1);
-  const slash = rest.indexOf('/');
-  if (slash <= 0) return '';
-  const dir = rest.slice(0, slash);
-  const file = rest.slice(slash + 1);
-  for (const spec of Object.values(CDN_CATEGORIES) as CdnCategorySpec[]) {
-    if (spec.local !== dir) continue;
-    if (spec.localFiles && !spec.localFiles.test(file)) continue;
-    return `${LOCAL_ICONS_FALLBACK_BASE}/${spec.local}/${file}`;
+export function localFallbackFromPrimary(primary: string): string {
+  return localMirrorFromPrimary(primary, LOCAL_ICONS_DELIVR_BASE);
+}
+
+export function nextFallbackFrom(src: string): string {
+  if (!src) return '';
+  if (isLocalIconUrl(src)) return localFallbackFromPrimary(src);
+  if (src.startsWith(`${LOCAL_ICONS_DELIVR_BASE}/`)) {
+    return `${LOCAL_ICONS_FALLBACK_BASE}/${src.slice(LOCAL_ICONS_DELIVR_BASE.length + 1)}`;
   }
-  return '';
+  if (src.startsWith(`${LOCAL_ICONS_FALLBACK_BASE}/`)) return '';
+  if (src.startsWith(JS_DELIVR_BASE) || src.startsWith(JS_DELIVR_UI3D_BASE)) return '';
+  return cdnFallbackFromPrimary(src);
 }
 
 export function cdnFallbackFromPrimary(primary: string): string {
@@ -132,9 +135,3 @@ export function cdnFallbackFromPrimary(primary: string): string {
   return '';
 }
 
-export function cdnImgFallbackAttr(src: string): string {
-  const fb = cdnFallbackFromPrimary(src);
-  if (!fb) return '';
-  const fb2 = localFallback2FromPrimary(src);
-  return ` data-cdn-fallback="${escHtml(fb)}"${fb2 ? ` data-cdn-fallback2="${escHtml(fb2)}"` : ''}`;
-}

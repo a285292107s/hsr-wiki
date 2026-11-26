@@ -46,7 +46,7 @@ Pinia store（加载编排 / 缓存 / 错误态；不写业务计算）
    ▼
 view / catalog 组件（模板字符串卡片 + escHtml；虚拟滚动）
    │
-   ├─ 图片 → lib/image.ts（统一入口：cdnSrc / imgAttrs / imgHtml / bgStyle / bgVar / 错误助手；Vue 用 CdnImage.vue）→ services/cdn/ 纯函数解析基址 → 并发闸门（img-gate，全局在途上限）→ jsdelivr/raw 回退（运行期）。**禁止私自 <img src> / data-cdn-src / background-image url() / new Image()**：`node tools/check-image-loading.mjs --strict` 机检（豁免见 commands.md）。
+   ├─ 图片 → lib/image.ts（统一入口：cdnSrc / imgAttrs / imgHtml / bgStyle / bgVar / 错误助手；Vue 用 CdnImage.vue）→ services/cdn/ 纯函数解析基址 → 并发闸门（img-gate：视口调度 + 远端在途上限）→ 回退链运行期推导（jsdelivr/raw）。**禁止私自 <img src> / data-cdn-src / background-image url() / new Image()**：`node tools/check-image-loading.mjs --strict` 机检（豁免见 commands.md）。
    ├─ Spine 动画 → 运行期走 CDN（lib/constants.ts → CDN），机制见 docs/spine/
    └─ 构建期 gen-ai-endpoints.mjs：dist/index.html → dist/prerender/** 快照（AI 可见性）
 ```

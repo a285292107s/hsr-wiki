@@ -1,0 +1,1 @@
+import{J as e,V as t,Y as n}from"./vendor-COSgQzOk.js";function r(r,i=150){let a=n(!1),o=null;return t(typeof r==`function`?r:()=>r.value,e=>{e?(o!==null&&clearTimeout(o),o=setTimeout(()=>{a.value=!0},i)):(o!==null&&(clearTimeout(o),o=null),a.value=!1)},{immediate:!0}),e(()=>{o!==null&&(clearTimeout(o),o=null)}),a}export{r as t};

@@ -341,10 +341,10 @@ _Avoid_: 注释可删性（旧判据已作废）、注释比例、注释占比
 
 ### 图片 CDN
 图片资源解析统一收口于 `src/services/cdn/`（见 ADR 0013）：本地图标（element / pathicon / trace / statusimmune / 遗器通用部位图标，根 = `src/services/cdn/base.ts` 的 `LOCAL_ICONS_BASE`，物理目录 `public/data/assets/icons/`）local-first，未入库的新图标自动回退远端；另有一个单文件例外——真珠 1503 圆头像（`avatarroundicon`）因上游资产为占位贴图而本地顶替，见该分类 `localFiles` 白名单注释；其余图片走 jsDelivr 官方镜像（自建 fork StarRailTextures 仓库，`OFFICIAL_ICON_BASE`）首选 + nanoka（`static.nanoka.cc`）回退。converter 不改动 CDN，只输出相对路径；本地图标为构建期一次性入库，converter 同样不产出。注意 nanoka 的 trace 分类是 146 字节占位图（非真图标），trace 本地缺失时必须回退 jsDelivr（`ui/avatar/icon/Icon{key}.png`）；`statusimmune`（效果抵抗免疫图标，ADR 0044）同理——nanoka 无该批文件，故是「本地为主 + jsDelivr 兜底」的第二个 `jdPrimary` 分类。
-**运行期回退链**：`<img>` 失败由全局事件委托（`src/services/cdn/dom.ts`）接管——主源失败先换第二源（模板须绑 `data-cdn-fallback` 绑定的回退源），两源皆失效才落到「图标占位」（见下条）；CDN 整体不可用（健康探测判定 down）时短路、不上占位。**只绑 `:src` 的图标位读不到回退源，主源 404 即判死**。
+**运行期回退链**：`<img>` 失败由全局事件委托（`src/services/cdn/dom.ts`）接管——主源失败时按**主源 URL** 现场推导下一级（`src/services/cdn/resolve.ts → nextFallbackFrom`：本地 → jsDelivr → raw；nanoka → jsDelivr 旧档），链条走完才落到「图标占位」（见下条）；CDN 整体不可用（健康探测判定 down）时短路、不上占位。**回退能力只取决于主源 URL**：模板不必再绑 `data-cdn-fallback`，只有「回退源不由 URL 决定」的少数位点（首页立绘）用 `imgAttrsPair` 显式覆盖（见 [ADR 0071](docs/adr/0071-图片回退链改为失败时推导.md)）。
 
 ### 图标占位（Icon Placeholder）
-`<img>` 首选源与回退源皆失效（或加载挂起超时）后由全局委托顶替 `src` 的**中性占位图形**：单点常量在 `src/services/cdn/placeholder.ts`（内联 SVG 描边问号、中性灰），并打 `data-cdn-placeholder`；被顶替的原 URL 存 `dataset.cdnSrc` 供 CDN 恢复链还原。它读作「此处无图」，**不是**「加载中」；CDN 整体不可用（down 短路）与预留在 `data-cdn-noph` 上的有意空图**不上**占位。组件自带语义兜底的图标面（物品卡立方体 / 遗器部位图 / 终局 buff 星形）不由本占位接管。**禁止改用 `<text>` 字形**（字体可用性随宿主变化）。
+`<img>` 首选源与回退源皆失效（或加载挂起超时）后由全局委托顶替 `src` 的**中性占位图形**：单点常量在 `src/services/cdn/placeholder.ts`（内联 SVG 描边问号、中性灰），并打 `data-cdn-placeholder`；被顶替的原 URL 存 `data-cdn-degraded-src`（`data-cdn-src` 是闸门接管凭据，两者不得混用）供 CDN 恢复链还原。它读作「此处无图」，**不是**「加载中」；CDN 整体不可用（down 短路）与预留在 `data-cdn-noph` 上的有意空图**不上**占位。组件自带语义兜底的图标面（物品卡立方体 / 遗器部位图 / 终局 buff 星形）不由本占位接管。**禁止改用 `<text>` 字形**（字体可用性随宿主变化）。
 _Avoid_: 破图、默认图、加载中占位
 
 ### 图片路径映射

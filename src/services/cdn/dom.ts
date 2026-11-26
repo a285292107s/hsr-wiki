@@ -1,13 +1,14 @@
 import { isCdnDown, subscribeCdnHealth } from './health';
-import { LOCAL_ICONS_BASE, LOCAL_ICONS_DELIVR_BASE, LOCAL_ICONS_FALLBACK_BASE } from './base';
-import { localFallback2FromPrimary, localFallbackFromPrimary } from './resolve';
+import { isLocalIconUrl, nextFallbackFrom } from './resolve';
 import { MISSING_ICON_SRC } from './placeholder';
-import { gateImagesIn } from './img-gate';
+import { gateImagesIn, replaceImageSrc } from './img-gate';
 
 export const CDN_STALL_TIMEOUT_MS = 10_000;
 
+const DEGRADED_SRC_ATTR = 'data-cdn-degraded-src';
+
 function isManagedImage(src: string): boolean {
-  return /^https?:\/\//.test(src) || src.startsWith(`${LOCAL_ICONS_BASE}/`);
+  return /^https?:\/\//.test(src) || isLocalIconUrl(src);
 }
 
 function markDown(img: HTMLImageElement, noPlaceholder = false): void {
@@ -19,7 +20,7 @@ function markDown(img: HTMLImageElement, noPlaceholder = false): void {
     return;
   }
   let placeholderLoaded = false;
-  img.dataset.cdnSrc = src;
+  img.setAttribute(DEGRADED_SRC_ATTR, src);
   img.setAttribute('data-cdn-placeholder', '1');
   watchDegradedSrcSwap(img);
   img.addEventListener('load', () => {
@@ -35,7 +36,7 @@ function markDown(img: HTMLImageElement, noPlaceholder = false): void {
 function watchDegradedSrcSwap(img: HTMLImageElement): void {
   new MutationObserver(() => {
     const cur = img.getAttribute('src') || '';
-    if (img.hasAttribute('data-cdn-down') && cur !== img.dataset.cdnSrc && !isPlaceholderSrc(cur)) {
+    if (img.hasAttribute('data-cdn-down') && cur !== img.getAttribute(DEGRADED_SRC_ATTR) && !isPlaceholderSrc(cur)) {
       clearDegrade(img);
     }
   }).observe(img, { attributes: true, attributeFilter: ['src'] });
@@ -44,7 +45,7 @@ function watchDegradedSrcSwap(img: HTMLImageElement): void {
 function clearDegrade(img: HTMLImageElement): void {
   img.removeAttribute('data-cdn-down');
   img.removeAttribute('data-cdn-placeholder');
-  delete img.dataset.cdnSrc;
+  img.removeAttribute(DEGRADED_SRC_ATTR);
 }
 
 function isPlaceholderSrc(src: string): boolean {
@@ -53,9 +54,9 @@ function isPlaceholderSrc(src: string): boolean {
 
 function reloadDownedImages(): void {
   document.querySelectorAll<HTMLImageElement>('img[data-cdn-down]').forEach((img) => {
-    const src = img.dataset.cdnSrc || img.getAttribute('src');
+    const src = img.getAttribute(DEGRADED_SRC_ATTR) || img.getAttribute('src');
     clearDegrade(img);
-    if (src && !src.startsWith('data:')) img.src = src;
+    if (src && !src.startsWith('data:')) replaceImageSrc(img, src);
   });
 }
 
@@ -69,48 +70,20 @@ function clearStallTimer(img: HTMLImageElement): void {
   }
 }
 
-function isLocalMirrorUrl(src: string): boolean {
-  return src.startsWith(`${LOCAL_ICONS_DELIVR_BASE}/`) || src.startsWith(`${LOCAL_ICONS_FALLBACK_BASE}/`);
-}
-
 function handleFailure(img: HTMLImageElement): void {
   const src = img.getAttribute('src') || '';
-  if (src.startsWith(`${LOCAL_ICONS_BASE}/`)) {
-    const jd = img.getAttribute('data-cdn-fallback') || localFallbackFromPrimary(src);
-    if (jd) {
-      const raw = img.getAttribute('data-cdn-fallback2') || localFallback2FromPrimary(src);
-      img.removeAttribute('data-cdn-fallback');
-      if (raw) img.setAttribute('data-cdn-fallback2', raw);
-      else img.removeAttribute('data-cdn-fallback2');
-      img.src = jd;
-      return;
-    }
-    markDown(img);
-    return;
-  }
   if (!isManagedImage(src)) return;
-
-  if (isCdnDown()) {
+  if (!isLocalIconUrl(src) && isCdnDown()) {
     markDown(img, true);
     return;
   }
-  if (isLocalMirrorUrl(src)) {
-    const fb2 = img.getAttribute('data-cdn-fallback2');
-    if (fb2 && fb2 !== src) {
-      img.removeAttribute('data-cdn-fallback2');
-      img.src = fb2;
-      return;
-    }
-    markDown(img);
-    return;
-  }
-  const fb = img.getAttribute('data-cdn-fallback');
-  if (fb && fb !== src) {
+  const override = img.getAttribute('data-cdn-fallback');
+  const next = override || nextFallbackFrom(src);
+  if (next && next !== src) {
     img.removeAttribute('data-cdn-fallback');
-    img.src = fb;
+    replaceImageSrc(img, next);
     return;
   }
-
   markDown(img);
 }
 

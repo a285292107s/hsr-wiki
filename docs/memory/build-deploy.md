@@ -73,7 +73,7 @@
 图片主源是**站点同源** `/data/assets/icons`（`LOCAL_ICONS_BASE`），随 `pnpm build` 拷进 `dist/data/assets/icons` 部署；本地失败时回退 `cdn.jsdelivr.net/gh/<repo>@<ref>`（`LOCAL_ICONS_DELIVR_BASE`），再失败回退 `raw.githubusercontent.com`（`LOCAL_ICONS_FALLBACK_BASE`）。**图标分类的 `local` 分支现在是「本地主源 → jsDelivr → raw」三级链**（翻案自「jsDelivr 主源 + raw 回退」，见 [ADR 0069](../adr/0069-图片加载改为本地优先.md)）。
 
 - **`LOCAL_ICONS_BASE` 恒为同源相对路径**（`${import.meta.env.BASE_URL}data/assets/icons`），不再按 `DEV` 分流——dev 与 build 都直读 `public/`→`dist/` 同源文件；jsDelivr/raw 仅作失败回退。判据：`pnpm dev` 与线上图片首选请求全部是 `/data/assets/icons/**` 同源 200，不会被 minify 前的分支误判。
-- **三级链在属性层表达为两跳**：`resolveCdnUri` 返回 `{ primary, fallback, fallback2 }`；`imgHtml`/`cdnImgAttrs`/`imgAttrs` 输出 `data-cdn-src` + `data-cdn-fallback`（jsDelivr）+ `data-cdn-fallback2`（raw）。`dom.ts` 的 `handleFailure`：本地主源失败 → jsDelivr（保留 fallback2）→ raw → 占位；jsDelivr/raw 镜像自身失败沿链下一跳。`localFallbackFromPrimary` 返回 **jsDelivr** 二级，`localFallback2FromPrimary` 返回 raw 三级。
+- **回退链在运行期推导，属性层不再内联**：`resolveCdnUri` 的 `{ primary, fallback, fallback2 }` 只是声明，真正跳转由 `resolve.ts → nextFallbackFrom(src)` 单点决定（本地 → jsDelivr → raw → 终止；nanoka → jsDelivr 旧档 → 终止），`dom.ts` 的 `handleFailure` 每次只问它一跳。`imgHtml`/`cdnImgAttrs`/`imgAttrs` 不再输出 `data-cdn-fallback`/`-fallback2`；`data-cdn-fallback` 仅作 `imgAttrsPair` 的显式覆盖（[ADR 0071](../adr/0071-图片回退链改为失败时推导.md)）。**jsDelivr 规则地址必须是终点**：再反查 nanoka 会让两个 404 地址互相回退成环。
 - **本地图标源文件现在随构建产物投递**：`prune-dist-icons.mjs` 已删除，`dist/data/assets/icons`（4,585 文件 / 约 250 MB）随部署上线，`dist` 约 100 → 约 400 MB（实测 401 MB）。这是「本地优先」的必要代价——Vercel 走 Git 集成部署无产物硬上限，但 Deployment Storage 按部署数累加。
 - **jsdelivr 50 MB ref 上限仍在，但已退为二级**：只有本地缺文件（新版本图标尚未入库）才会打到 jsDelivr，冷文件偶发 403 `Package size exceeded the configured limit of 50 MB` 时由 raw 三级兜底；回退链两跳必须同 ref（`ICON_MIRROR_REF`=main）。
 - **`index.html` 只保留 `dns-prefetch`**（jsdelivr + raw），不再 `preconnect` jsdelivr——主源同源无需跨域预连接，回退前 `dns-prefetch` 足够；仍不得 `preconnect` `static.nanoka.cc`（Cloudflare 域在目标网络常不可达）。
@@ -84,13 +84,15 @@
 
 ## 图片并发闸门（避免一次性大量加载被 jsdelivr 限流）
 
-`src/services/cdn/img-gate.ts` 的 `installImageGate()`（bootstrap 里 `app.mount` 之前安装）给全站图片加了一个**全局在途并发上限**（`IMAGE_GATE_MAX_INFLIGHT=6`），避免列表首屏一次性把 30–40 个 jsdelivr 请求同时发出去、撞上突发限流。**列表页的并发峰值实测从 ~31 降到 6**，可见图仍全部加载。
+`src/services/cdn/img-gate.ts` 的 `installImageGate()`（bootstrap 里 `app.mount` 之前安装）给全站图片加了两层调度：**视口 ±300px 才放行** + **远端在途并发上限**（`IMAGE_GATE_MAX_INFLIGHT=6`），避免列表首屏一次性把 30–40 个跨域请求同时发出去、撞上突发限流。**同源 `/data/assets/icons` 只做视口调度、不占名额**——本地优先后它是绝大多数图的主源，继续卡 6 路只会拖慢首屏。
 
 - **浏览器一旦拿到 `src` 就立即发请求，改属性/改 `src` 拦不住**——所以闸门必须让图**一开始就没有真 `src`**。实现：装一个 `HTMLImageElement.prototype.src` 属性 setter 拦截，本域图片一律改成透明占位、把真 URL 记在 `data-cdn-src`，等拿到名额再由闸门写回。`v-html`/`innerHTML` 出的图不走属性 setter（实测：setter 只拦属性赋值，`setAttribute`/`innerHTML` 都漏），因此**模板串里本域图片必须写 `data-cdn-src` 而非 `src`**，由闸门在插入时接管。
 - **本域判定**：`img-gate.ts` 的 `isGatedImageUrl` 认 `CDN`(nanoka) + `cdn.jsdelivr.net` + `raw.githubusercontent.com` + `${LOCAL_ICONS_BASE}/`。新增图片来源（换 CDN / 加域名）必须同步这里，否则新源不受闸门；本地基址现在是**站点相对路径**（dev/build 一致），漏了这一条则模板串的 `data-cdn-src` 永不被接管、图片全空（`dom.ts` 的降级判定 `isManagedImage` 同理会漏掉本地相对地址、失败时不给占位）。
 - **优先级/视口**：`fetchpriority="high"` 的 LCP 图立即放行（不受上限约束，并移除该属性避免过早请求），其余按「靠近视口优先」入队；名额靠全局 `load`/`error` 捕获释放（`load` 不冒泡，故必须 capture），并 rAF 合并重算，避免 1000 图页面里每次 release 都 O(n) 全扫。
+- **`release` 必须同时清掉元素的等待标记**：不清的话该元素此后再改写 `src`（含回退跳转）会被当成「已接管」而直连——本地整体不可用时会一次性把所有图推去 jsDelivr，闸门在最该限流的时刻失效（2026-11-25 修）。占位 GIF 自己的 `load` 不代表请求结束，`release` 里按 `src === BLANK_SRC` 早退。
+- **回退跳转一律走 `replaceImageSrc`**：`dom.ts` 只能在拿到 `load`/`error` 后靠事件释放，挂起超时（`CDN_STALL_TIMEOUT_MS`）触发的降级没有事件可依；改写受管图地址统一用 `img-gate.ts → replaceImageSrc(img, url)`（先退掉上一跳占用的名额、清等待标记，再赋值），否则那一跳绕过闸门。**退名额不能漏**：挂起超时跳转的上一跳既无 `load` 也无 `error`，不在这里还名额就吞一个在途名额，累计到上限后远端图再也放不出去。
 - **降级与闸门的耦合坑**：闸门把 `src` 设成**透明**占位（不是错误图标）——4×4 的透明图 `complete && naturalWidth>0` 成立，所以**任何「图已加载」的断言必须认真实 `src`（或 `data-cdn-src`），别只信 `naturalWidth>0`**（它会假阳性）。若用错误 SVG 当占位，会触发组件 `@error` 处理器误隐藏图，更糟。
-- **测试约定**：闸门接管后，本域图的真实 URL 统一在 `data-cdn-src`（不管在队还是已加载），`src` 可能是占位 GIF（未放行时）。e2e 断言图片地址一律读 `data-cdn-src || src`；旧 `toHaveAttribute('src', …)` 会假失败。全 404 占位类断言要先把目标 `scrollIntoViewIfNeeded()`，否则屏外图根本不会入队加载、404 永不触发。
+- **测试约定**：闸门接管后，本域图的真实 URL 统一在 `data-cdn-src`（不管在队还是已加载），`src` 可能是占位 GIF（未放行时）。e2e 断言图片地址一律读 `data-cdn-src || src`；旧 `toHaveAttribute('src', …)` 会假失败。全 404 占位类断言要先把目标 `scrollIntoViewIfNeeded()`，否则屏外图根本不会入队加载、404 永不触发。降级态另有 `data-cdn-degraded-src`（降级前的原地址）与 `data-cdn-placeholder`——**降级记录不写 `data-cdn-src`**，那是对闸门的接管凭据，写了会互相覆盖。
 - **`IMAGE_GATE_ROOT_MARGIN`（IntersectionObserver 的 `rootMargin`）与 `isNearViewport()` 的像素余量是同一语义的两处实现**：后者必须从前者 `parseInt` 派生，禁止各写一个字面量——两处不同步会让「视口 ±N 预加载」静默失效（一处 300 一处 250 时，靠近边界的图在两判定间反复进出队列）。
 
 ## 图片加载统一入口与背景图的边界

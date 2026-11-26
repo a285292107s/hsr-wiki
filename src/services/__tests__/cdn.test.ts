@@ -9,13 +9,12 @@ import {
   LOCAL_ICONS_FALLBACK_BASE,
   NANOKA_HUD,
   cdnFallbackFromPrimary,
-  cdnImgFallbackAttr,
   cdnRawUrl,
   cdnUri,
   installCdnImgFallback,
-  localFallback2FromPrimary,
   localFallbackFromPrimary,
   nanokaUrl,
+  nextFallbackFrom,
   resetCdnHealthForTest,
   resolveCdnUri,
   startCdnHealthProbe,
@@ -128,7 +127,7 @@ describe('resolveCdnUri 双源解析', () => {
     });
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`))
       .toBe(`${JD}/statusimmune/IconImmuneFrozen.webp`);
-    expect(localFallback2FromPrimary(`${LOCAL_ICONS_BASE}/statusimmune/IconImmuneFrozen.webp`))
+    expect(nextFallbackFrom(`${JD}/statusimmune/IconImmuneFrozen.webp`))
       .toBe(`${RAW}/statusimmune/IconImmuneFrozen.webp`);
   });
 
@@ -267,11 +266,10 @@ describe('resolveCdnUri 双源解析', () => {
   });
 });
 
-describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () => {
+describe('cdnFallbackFromPrimary（主源反查回退）', () => {
   it('jsDelivr 主源反查 nanoka 回退（lightconemediumicon）', () => {
     const src = `${JS_DELIVR_BASE}/lightconemediumicon/23000.png`;
     expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/lightconemediumicon/23000.webp`);
-    expect(cdnImgFallbackAttr(src)).toBe(` data-cdn-fallback="${BASE}/lightconemediumicon/23000.webp"`);
   });
 
   it('jsDelivr 主源反查 nanoka 回退（element 大小写还原）', () => {
@@ -292,8 +290,6 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
   it('nanoka 主源反查 jsDelivr 旧档回退（主源反转后的主路径）', () => {
     expect(cdnFallbackFromPrimary(`${BASE}/lightconemediumicon/23000.webp`))
       .toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
-    expect(cdnImgFallbackAttr(`${BASE}/lightconemediumicon/23000.webp`))
-      .toBe(` data-cdn-fallback="${JS_DELIVR_BASE}/lightconemediumicon/23000.png"`);
     expect(cdnFallbackFromPrimary(`${BASE}/rank/_dependencies/textures/1403/1403_Rank_3.webp`))
       .toBe(`${JS_DELIVR_UI3D_BASE}/ui/ui3d/rank/_dependencies/textures/1403/1403_Rank_3.png`);
   });
@@ -311,11 +307,10 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
     expect(cdnFallbackFromPrimary('https://example.com/x.webp')).toBe('');
   });
 
-  it('本地主源反查远端回退（localFallbackFromPrimary = jsDelivr，localFallback2FromPrimary = raw 镜像）', () => {
+  it('本地主源反查远端回退（localFallbackFromPrimary = jsDelivr 镜像）', () => {
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
       .toBe(`${JD}/element/fire.webp`);
-    expect(localFallback2FromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(`${RAW}/element/fire.webp`);
+    expect(nextFallbackFrom(`${JD}/element/fire.webp`)).toBe(`${RAW}/element/fire.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelicBody.webp`))
       .toBe(`${JD}/relicfigures/IconRelicBody.webp`);
     expect(localFallbackFromPrimary(`${LOCAL_ICONS_BASE}/relicfigures/IconRelic_101_1.webp`))
@@ -324,14 +319,26 @@ describe('cdnFallbackFromPrimary / cdnImgFallbackAttr（v-html 卡片）', () =>
     expect(localFallbackFromPrimary('https://example.com/x.webp')).toBe('');
     expect(cdnFallbackFromPrimary(`${LOCAL_ICONS_BASE}/element/fire.webp`))
       .toBe(`${JD}/element/fire.webp`);
-    expect(cdnImgFallbackAttr(`${LOCAL_ICONS_BASE}/element/fire.webp`))
-      .toBe(` data-cdn-fallback="${JD}/element/fire.webp" data-cdn-fallback2="${RAW}/element/fire.webp"`);
+    expect(nextFallbackFrom(`${LOCAL_ICONS_BASE}/element/fire.webp`))
+      .toBe(`${JD}/element/fire.webp`);
+    expect(nextFallbackFrom(`${JD}/element/fire.webp`)).toBe(`${RAW}/element/fire.webp`);
   });
 
   it('trace（jdPrimary）jsDelivr 主源反查 nanoka 回退属性', () => {
     const src = `${JS_DELIVR_BASE}/ui/avatar/icon/IconAttack.png`;
     expect(cdnFallbackFromPrimary(src)).toBe(`${BASE}/trace/IconAttack.webp`);
-    expect(cdnImgFallbackAttr(src)).toBe(` data-cdn-fallback="${BASE}/trace/IconAttack.webp"`);
+  });
+  it('nextFallbackFrom 逐跳推进：本地 → jsDelivr → raw → 终止', () => {
+    const local = `${LOCAL_ICONS_BASE}/element/fire.webp`;
+    expect(nextFallbackFrom(local)).toBe(`${JD}/element/fire.webp`);
+    expect(nextFallbackFrom(`${JD}/element/fire.webp`)).toBe(`${RAW}/element/fire.webp`);
+    expect(nextFallbackFrom(`${RAW}/element/fire.webp`)).toBe('');
+  });
+
+  it('nextFallbackFrom 不让 nanoka 与 jsDelivr 互相回退成环', () => {
+    const jd = nextFallbackFrom(`${BASE}/lightconemediumicon/23000.webp`);
+    expect(jd).toBe(`${JS_DELIVR_BASE}/lightconemediumicon/23000.png`);
+    expect(nextFallbackFrom(jd)).toBe('');
   });
 });
 
@@ -357,7 +364,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       expect(img.hasAttribute('data-cdn-fallback')).toBe(false);
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');
-      expect(img.dataset.cdnSrc).toBe('https://fb.example/x.webp');
+      expect(img.dataset.cdnDegradedSrc).toBe('https://fb.example/x.webp');
       expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
       off();
@@ -365,7 +372,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     }
   });
 
-  it('无回退属性且首选源（nanoka）失败 → 标记 data-cdn-down 并换占位图形（原 URL 存 dataset.cdnSrc）', () => {
+  it('无回退属性且首选源（nanoka）失败 → 标记 data-cdn-down 并换占位图形（原 URL 存 data-cdn-degraded-src）', () => {
     const off = installCdnImgFallback();
     const img = document.createElement('img');
     img.src = 'https://primary.example/x.webp';
@@ -374,7 +381,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');
       expect(img.dataset.cdnPlaceholder).toBe('1');
-      expect(img.dataset.cdnSrc).toBe('https://primary.example/x.webp');
+      expect(img.dataset.cdnDegradedSrc).toBe('https://primary.example/x.webp');
       expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     } finally {
       off();
@@ -412,7 +419,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       await Promise.resolve();
       expect(img.hasAttribute('data-cdn-down')).toBe(false);
       expect(img.hasAttribute('data-cdn-placeholder')).toBe(false);
-      expect(img.dataset.cdnSrc).toBeUndefined();
+      expect(img.dataset.cdnDegradedSrc).toBeUndefined();
     } finally {
       off();
       img.remove();
@@ -455,7 +462,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       expect(img.dataset.cdnDown).toBe('1');
       expect(img.dataset.cdnPlaceholder).toBe('1');
       expect(img.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
-      expect(img.dataset.cdnSrc).toBe('https://other.example/y.webp');
+      expect(img.dataset.cdnDegradedSrc).toBe('https://other.example/y.webp');
     } finally {
       off();
       img.remove();
@@ -491,7 +498,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
       expect(img.src).toBe(`${RAW}/element/fire.webp`);
       img.dispatchEvent(new Event('error', { bubbles: true }));
       expect(img.dataset.cdnDown).toBe('1');
-      expect(img.dataset.cdnSrc).toBe(`${RAW}/element/fire.webp`);
+      expect(img.dataset.cdnDegradedSrc).toBe(`${RAW}/element/fire.webp`);
     } finally {
       off();
       img.remove();
@@ -603,7 +610,7 @@ describe('installCdnImgFallback（DOM 副作用）', () => {
     document.body.appendChild(img2);
     await vi.advanceTimersByTimeAsync(CDN_STALL_TIMEOUT_MS + 100);
     expect(img2.dataset.cdnDown).toBe('1');
-    expect(img2.dataset.cdnSrc).toBe('https://primary.example/x.webp');
+    expect(img2.dataset.cdnDegradedSrc).toBe('https://primary.example/x.webp');
     expect(img2.getAttribute('src')!.startsWith('data:image/svg+xml,')).toBe(true);
     off();
     img.remove();

@@ -1,5 +1,5 @@
 import { CDN } from '../../lib/constants';
-import { LOCAL_ICONS_BASE } from './base';
+import { isLocalIconUrl } from './resolve';
 
 export const IMAGE_GATE_MAX_INFLIGHT = 6;
 export const IMAGE_GATE_ROOT_MARGIN = '300px';
@@ -8,20 +8,17 @@ export const IMAGE_GATE_ATTR = 'data-cdn-src';
 const BLANK_SRC =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-interface GateEntry {
-  el: HTMLImageElement;
-  real: string;
-  priority: boolean;
+function isThrottledRemote(url: string): boolean {
+  return (
+    url.startsWith(CDN) ||
+    url.includes('cdn.jsdelivr.net') ||
+    url.includes('raw.githubusercontent.com')
+  );
 }
 
 function isGatedImageUrl(url: string): boolean {
   if (!url || url.startsWith('data:') || url.startsWith('blob:')) return false;
-  return (
-    url.startsWith(CDN) ||
-    url.startsWith(`${LOCAL_ICONS_BASE}/`) ||
-    url.includes('cdn.jsdelivr.net') ||
-    url.includes('raw.githubusercontent.com')
-  );
+  return isLocalIconUrl(url) || isThrottledRemote(url);
 }
 
 const srcDesc = typeof HTMLImageElement !== 'undefined'
@@ -32,7 +29,7 @@ let inflight = 0;
 let gateActive = false;
 let restoreSrc: (() => void) | null = null;
 
-const queue: GateEntry[] = [];
+const queue: HTMLImageElement[] = [];
 const inflightEls = new Set<HTMLImageElement>();
 const waitingEls = new WeakSet<HTMLImageElement>();
 
@@ -65,41 +62,57 @@ function schedulePump(): void {
   });
 }
 
-function loadEntry(el: HTMLImageElement, real: string): void {
-  inflight++;
-  inflightEls.add(el);
-  srcDesc!.set!.call(el, real);
+function requestedUrl(el: HTMLImageElement): string {
+  return el.getAttribute(IMAGE_GATE_ATTR) || '';
+}
+
+function loadEntry(el: HTMLImageElement, url: string): void {
+  if (isThrottledRemote(url)) {
+    inflight++;
+    inflightEls.add(el);
+  }
+  srcDesc!.set!.call(el, url);
 }
 
 function pump(): void {
   for (let i = 0; i < queue.length; i++) {
-    const e = queue[i];
-    if (!e.el.isConnected) {
+    const el = queue[i];
+    if (!el.isConnected) {
       queue.splice(i, 1);
       i--;
       continue;
     }
-    if (!(e.priority || isNearViewport(e.el))) continue;
-    if (!e.priority && inflight >= IMAGE_GATE_MAX_INFLIGHT) continue;
+    const url = requestedUrl(el);
+    if (!url) {
+      queue.splice(i, 1);
+      i--;
+      io?.unobserve(el);
+      continue;
+    }
+    if (!isNearViewport(el)) continue;
+    if (isThrottledRemote(url) && inflight >= IMAGE_GATE_MAX_INFLIGHT) continue;
     queue.splice(i, 1);
     i--;
-    io?.unobserve(e.el);
-    loadEntry(e.el, e.real);
+    io?.unobserve(el);
+    loadEntry(el, url);
   }
 }
 
-function enqueue(el: HTMLImageElement, real: string, priority: boolean): void {
+function enqueue(el: HTMLImageElement, priority: boolean): void {
   if (priority) {
-    loadEntry(el, real);
+    const url = requestedUrl(el);
+    if (url) loadEntry(el, url);
     return;
   }
-  queue.push({ el, real, priority });
+  queue.push(el);
   getIO().observe(el);
   schedulePump();
 }
 
 function release(el: HTMLImageElement): void {
+  if (el.getAttribute('src') === BLANK_SRC) return;
   if (inflightEls.delete(el) && inflight > 0) inflight--;
+  waitingEls.delete(el);
   schedulePump();
 }
 
@@ -119,7 +132,7 @@ function adopt(el: HTMLImageElement): void {
   srcDesc!.set!.call(el, BLANK_SRC);
   const priority = el.getAttribute('fetchpriority') === 'high';
   if (priority) el.removeAttribute('fetchpriority');
-  enqueue(el, real, priority);
+  enqueue(el, priority);
 }
 
 export function gateImagesIn(root: ParentNode): void {
@@ -131,6 +144,13 @@ export function gateImagesIn(root: ParentNode): void {
   const imgs = (root as Document | Element).querySelectorAll?.('img');
   if (!imgs) return;
   for (const img of imgs) adopt(img as HTMLImageElement);
+}
+
+export function replaceImageSrc(img: HTMLImageElement, url: string): void {
+  if (inflightEls.delete(img) && inflight > 0) inflight--;
+  waitingEls.delete(img);
+  img.src = url;
+  schedulePump();
 }
 
 function installSrcInterceptor(): void {
@@ -148,7 +168,7 @@ function installSrcInterceptor(): void {
         srcDesc!.set!.call(el, BLANK_SRC);
         const priority = el.getAttribute('fetchpriority') === 'high';
         if (priority) el.removeAttribute('fetchpriority');
-        enqueue(el, value, priority);
+        enqueue(el, priority);
         return;
       }
       srcDesc!.set!.call(el, value);

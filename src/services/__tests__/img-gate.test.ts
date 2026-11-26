@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { IMAGE_GATE_ATTR, IMAGE_GATE_MAX_INFLIGHT, LOCAL_ICONS_BASE, gateImagesIn, installImageGate } from '../cdn';
+import { IMAGE_GATE_ATTR, IMAGE_GATE_MAX_INFLIGHT, LOCAL_ICONS_BASE, LOCAL_ICONS_DELIVR_BASE, gateImagesIn, installCdnImgFallback, installImageGate, replaceImageSrc } from '../cdn';
 
 const JSD = 'https://cdn.jsdelivr.net/gh/a285292107s/hsr-wiki@main/public/data/assets/icons/element/quantum.webp';
 const RAW = 'https://raw.githubusercontent.com/a285292107s/hsr-wiki/main/public/data/assets/icons/element/ice.webp';
@@ -122,5 +122,67 @@ describe('img-gate 并发闸门', () => {
     expect(img.getAttribute(IMAGE_GATE_ATTR)).toBe(url);
     await flush();
     expect(realSrc(img)).toBe(url);
+  });
+  it('同源本地图标不占远端并发名额：一批本地图一次性放行', async () => {
+    const imgs = Array.from({ length: 12 }, () => {
+      const img = document.createElement('img');
+      document.body.appendChild(img);
+      img.src = `${LOCAL_ICONS_BASE}/element/fire.webp`;
+      return img;
+    });
+    await flush();
+    expect(imgs.filter((i) => !isBlank(i)).length).toBe(12);
+  });
+
+  it('放行后再改写 src（回退跳转）重新纳入闸门，而非直连', async () => {
+    const img = document.createElement('img');
+    document.body.appendChild(img);
+    img.src = JSD;
+    await flush();
+    expect(realSrc(img)).toBe(JSD);
+    img.dispatchEvent(new Event('load'));
+    img.src = RAW;
+    expect(isBlank(img)).toBe(true);
+    expect(img.getAttribute(IMAGE_GATE_ATTR)).toBe(RAW);
+    await flush();
+    expect(realSrc(img)).toBe(RAW);
+  });
+
+  it('回退跳转放弃在途请求时退掉名额：挂起超时不再泄漏并发槽位', async () => {
+    const img = document.createElement('img');
+    document.body.appendChild(img);
+    img.src = JSD;
+    await flush();
+    expect(realSrc(img)).toBe(JSD);
+    replaceImageSrc(img, RAW);
+    await flush();
+    expect(realSrc(img)).toBe(RAW);
+    img.dispatchEvent(new Event('load'));
+    await flush();
+    const batch = Array.from({ length: IMAGE_GATE_MAX_INFLIGHT }, () => {
+      const el = document.createElement('img');
+      document.body.appendChild(el);
+      el.src = JSD;
+      return el;
+    });
+    await flush();
+    expect(batch.filter((i) => !isBlank(i)).length).toBe(IMAGE_GATE_MAX_INFLIGHT);
+  });
+
+  it('本地失败后经回退链改写的 jsDelivr 地址同样入闸，不绕过并发上限', async () => {
+    const offFallback = installCdnImgFallback();
+    const img = document.createElement('img');
+    document.body.appendChild(img);
+    const local = `${LOCAL_ICONS_BASE}/element/fire.webp`;
+    const mirror = `${LOCAL_ICONS_DELIVR_BASE}/element/fire.webp`;
+    img.src = local;
+    await flush();
+    expect(realSrc(img)).toBe(local);
+    img.dispatchEvent(new Event('error', { bubbles: true }));
+    expect(isBlank(img)).toBe(true);
+    expect(img.getAttribute(IMAGE_GATE_ATTR)).toBe(mirror);
+    await flush();
+    expect(realSrc(img)).toBe(mirror);
+    offFallback();
   });
 });

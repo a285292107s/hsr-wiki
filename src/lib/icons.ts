@@ -1,5 +1,5 @@
 
-import { cdnFallbackFromPrimary, cdnUri, localFallback2FromPrimary, nanokaUrl, resolveCdnUri } from '../services/cdn';
+import { cdnUri, nanokaUrl, resolveCdnUri } from '../services/cdn';
 import { uiartUri } from '../services/cdn/uiart';
 import {
   USE_OFFICIAL_PATHS,
@@ -26,12 +26,6 @@ export function iconUrl(i: string | null | undefined): string {
   }
   const name = i.includes('/') ? i.split('/').pop()! : i;
   return cdnUri('skillicons', name.replace('.png', '.webp'));
-}
-
-export function iconImgAttrs(url: string): { src: string; 'data-cdn-fallback'?: string; 'data-cdn-fallback2'?: string } {
-  const fb = cdnFallbackFromPrimary(url);
-  const fb2 = localFallback2FromPrimary(url);
-  return { src: url, 'data-cdn-fallback': fb || undefined, 'data-cdn-fallback2': fb2 || undefined };
 }
 
 export function memospriteId(charId: string, data: CharacterData | null): string {
