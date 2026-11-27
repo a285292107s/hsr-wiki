@@ -1,7 +1,7 @@
 
 import { pathLabel } from '../../../lib/enum-labels';
 import { activeHref } from '../../../lib/i18n/active';
-import { escHtml, lightconeIconUrl, pathIconUrl } from '../../../lib/format';
+import { escHtml, lightConeMaxFigureUrl, pathIconUrl } from '../../../lib/format';
 import { imgHtml } from '../../../lib/image';
 import { loadLocalLightCones } from '../../../services/api';
 import type { CatalogItem, CatalogPageConfig } from '../types';
@@ -23,7 +23,7 @@ export const lightconePage: CatalogPageConfig = {
         id: String(info.id),
         name: info.name,
         href: activeHref(`/lightcone/${info.id}`),
-        img: lightconeIconUrl(String(info.id)),
+        img: lightConeMaxFigureUrl(String(info.id)),
         pathImg: pathIconUrl(path),
         path,
         rarity: info.rarity,
