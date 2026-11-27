@@ -5,9 +5,6 @@ export async function expectTokenNumber(loc: Locator, prop: string, tokenValue: 
   expect(await computedNumber(loc, prop), `${label} 应等于令牌值 ${tokenValue}`).toBe(tokenValue);
 }
 
-export function seasonRewardGroups(page: import('@playwright/test').Page): Locator {
-  return page.locator('#egd-season-rewards .nk-egd-season-group');
-}
 
 export const noUnknownOverflow = expectNoUnknownOverflow;
 

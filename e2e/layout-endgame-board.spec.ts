@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, fontPx, readJson, readTokenPx, settleAnimations, waitForCatalogCards } from './helpers';
-import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonRewardGroups, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierBadges, tierceNodeBossNames, tierRuns, tierUnits } from './layout.shared';
+import { CN_NUM, cnBigNumber, expectTokenNumber, floorBossName, floorGuide, grouped, itemNameMap, lastWaveMonster, levelTabLabels, monsterBadge, noUnknownOverflow, peakTabId, peakTabLabels, pollutedMonsters, pollutedSeasonHrefs, pollutedSummons, pollutionEntries, rewardNames, rewardNums, seasonData, seasonTabLabels, stageGuide, summonBadge, summonsOf, tierBadges, tierceNodeBossNames, tierRuns, tierUnits } from './layout.shared';
 
 test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
   test('/endgame/boss/3021：层级子 tab（ADR 0026 / 0030）', async ({ page }) => {
@@ -22,13 +22,6 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(page.locator('.nk-egd-lvl__head')).toHaveCount(0);
     await expect(page.locator('#egd-level-panel .nk-egd-head')).toHaveCount(0);
     await expect(page.locator('#egd-level-panel .nk-egd-lvl__rules')).toHaveCount(0);
-    const flat = page.locator('#egd-season-rewards .nk-egd-season-flat');
-    await expect(flat).toHaveCount(1);
-    const floor1Targets = season.floor_details![0].targets!;
-    const starRows = flat.locator('.nk-egd-season-flat__conditions .nk-egd-node');
-    await expect(starRows).toHaveCount(floor1Targets.length);
-    await expect(starRows.last()).toContainText(String(floor1Targets[floor1Targets.length - 1].param));
-    await expect(page.locator('#egd-season-rewards .nk-egd-season-group')).toHaveCount(1);
     await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__buffhead'))
       .toHaveText(season.floor_details![0].buff!.name);
     await expect(page.locator('.nk-egd-buffzone .nk-egd-floor__bufflabel')).toHaveCount(0);
@@ -264,10 +257,6 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await page.locator('#egd-floor-half-tab-stage2').click();
     await expect(floorBoard.locator('.nk-egd-mon__name')).toHaveText(floorBossName(season, 4, 'stage2'));
     await expect(page.locator('.nk-egd-lvl')).not.toContainText(nodeBoss[2]);
-    const floor4Targets = (season.floor_details ?? []).find((f) => f.floor === 4)!.targets!;
-    const flatConditions = page.locator('#egd-season-rewards .nk-egd-season-flat__conditions .nk-egd-node');
-    await expect(flatConditions).toHaveCount(floor4Targets.length);
-    await expect(flatConditions.last()).toContainText(String(floor4Targets[floor4Targets.length - 1].param));
     const floor4Elems = await page.locator('.nk-egd-nodecards[aria-label="半场"] .nk-egd-nodecard__elems')
       .evaluateAll((els) => els.map((el) => el.innerHTML));
     const floor4Buffs: string[] = [];
@@ -584,25 +573,6 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await expect(tierce.locator('.nk-egd-tierce__stats')).toHaveCount(0);
     await expect(tierce.locator('.nk-egd-head')).toHaveCount(0);
     await expect(tierce.locator('.nk-egd-lvl__rules')).toHaveCount(0);
-    const tierceGroup = seasonRewardGroups(page).last();
-    await expect(tierceGroup.locator('.nk-egd-season-group__title')).toHaveText('星启模式');
-    await expect(tierceGroup.locator('.nk-egd-clear')).toHaveCount(1);
-    const tierceTargets = tierceData.targets!.filter((t) => !t.prism);
-    const prismTarget = tierceData.targets!.find((t) => t.prism)!;
-    const tierRows = tierceGroup.locator('.nk-egd-tiers li');
-    await expect(tierceGroup.locator('.nk-egd-tiers .nk-egd-node__type')).toHaveCount(0);
-    await expect(tierceGroup.locator('.nk-egd-tiers .nk-egd-tier__brace')).toHaveCount(0);
-    await expect(tierceGroup.locator('.nk-egd-tiers .nk-egd-tier__lead')).toHaveCount(tierceData.targets!.length);
-    await expect(tierceGroup.locator('.nk-egd-tiers .nk-egd-node')).toHaveCount(tierceData.targets!.length);
-    await expect(tierRows.nth(tierceTargets.length - 1).locator('.nk-egd-node__text'))
-      .toContainText(String(tierceTargets[tierceTargets.length - 1].param));
-    await expect(tierRows).toHaveCount(tierceTargets.length + 1);
-    await expect(tierRows.last().locator('.nk-egd-tier__badge')).toHaveText('棱彩星');
-    await expect(tierRows.last().locator('.nk-egd-node__text')).toContainText(String(prismTarget.param));
-    await expect(tierRows.last().locator('.nk-egd-reward__name'))
-      .toHaveText(rewardNames(tierceData.prism_reward!, itemNameMap()));
-    await expect(tierceGroup.locator('.nk-egd-season-group__rewards .nk-egd-reward__name'))
-      .toHaveCount(tierceData.rewards!.length);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
@@ -692,7 +662,7 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：统一压缩（共享头 + 完整阶梯）+ 星启分组 + 窄屏堆叠', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/endgame/boss/3020：层 / 星启两分支共用面板内距（留白节奏）', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -708,31 +678,13 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     await page.locator('#egd-level-tab-tierce').click();
     await expect(page.locator('#egd-level-panel .nk-egd-head')).toHaveCount(0);
     await expect(page.locator('#egd-level-panel .nk-egd-lvl__rules')).toHaveCount(0);
-    const tierceData = seasonData('maze_boss.json', '3020').tierce!;
-    const groups = seasonRewardGroups(page);
-    await expect(groups).toHaveCount(1);
-    const tierceGroup = groups.last();
-    await expect(tierceGroup.locator('.nk-egd-season-group__title')).toHaveText('星启模式');
-    await expect(tierceGroup.locator('.nk-egd-clear')).toHaveCount(1);
-    await expect(tierceGroup.locator('.nk-egd-tiers .nk-egd-node')).toHaveCount(tierceData.targets!.length);
-    await expect(tierceGroup.locator('.nk-egd-tiers li')).toHaveCount(tierceData.targets!.length);
-    await expect(tierceGroup.locator('.nk-egd-season-group__rewards .nk-egd-reward__name'))
-      .toHaveCount(tierceData.rewards!.length);
-    await expect(tierceGroup.locator('.nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
     const desktop = await page.evaluate(() => {
       const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
       const panel = document.querySelector('#egd-level-panel') as HTMLElement;
-      const season = document.querySelector('#egd-season-rewards') as HTMLElement;
-      const tierce = season.querySelector('.nk-egd-season-group:last-child') as HTMLElement;
       return {
         panel: box(panel),
-        season: box(season),
         wrap: box(panel.firstElementChild as HTMLElement),
         tabs: box(document.querySelector('.nk-egd-tabs') as HTMLElement),
-        clear: box(tierce.querySelector('.nk-egd-season-group__clear') as HTMLElement),
-        condition: box(tierce.querySelector('.nk-egd-clear') as HTMLElement),
-        rewards: box(tierce.querySelector('.nk-egd-season-group__rewards') as HTMLElement),
-        stars: box(tierce.querySelector('.nk-egd-season-group__stars') as HTMLElement),
         panelPadTop: parseFloat(getComputedStyle(panel).paddingTop) || 0,
       };
     });
@@ -747,42 +699,11 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       ).toBeLessThanOrEqual(1);
     }
     expect(floorBranch.panelPadTop, '两条分支必须共用同一面板内距').toBe(desktop.panelPadTop);
-    expect(desktop.season.top, '本期奖励板块应在关卡面板之后').toBeGreaterThanOrEqual(desktop.panel.bottom - 1);
-    expect(Math.round(desktop.condition.y), '通关条件与通关奖励应并排（同一行顶边）').toBe(Math.round(desktop.rewards.y));
-    expect(desktop.condition.right, '通关条件在左、通关奖励在右').toBeLessThanOrEqual(desktop.rewards.x + 1);
-    expect(desktop.stars.y, '星级列表应在通关条件 / 奖励行之下').toBeGreaterThanOrEqual(desktop.clear.bottom - 1);
-    const tierCols = await tierceGroup.locator('.nk-egd-tiers .nk-egd-tier').evaluateAll((rows) => rows.map((row) => ({
-      cond: Math.round((row.querySelector('.nk-egd-tier__cond') as HTMLElement).getBoundingClientRect().left),
-      reward: Math.round((row.querySelector('.nk-egd-tier__reward') as HTMLElement).getBoundingClientRect().left),
-    })));
-    expect(tierCols.length).toBeGreaterThan(1);
-    expect(
-      new Set(tierCols.map((r) => r.cond)).size,
-      '星级奖励各行必须共用同一条条件列左基准（棱彩星行的 badge 更窄不得内缩）',
-    ).toBe(1);
-    expect(
-      new Set(tierCols.map((r) => r.reward)).size,
-      '星级奖励各行必须共用同一条奖励列左基准',
-    ).toBe(1);
-    await page.setViewportSize({ width: 390, height: 844 });
-    const narrow = await page.evaluate(() => {
-      const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
-      const tierce = document.querySelector('#egd-season-rewards .nk-egd-season-group:last-child') as HTMLElement;
-      return {
-        clear: box(tierce.querySelector('.nk-egd-season-group__clear') as HTMLElement),
-        condition: box(tierce.querySelector('.nk-egd-clear') as HTMLElement),
-        rewards: box(tierce.querySelector('.nk-egd-season-group__rewards') as HTMLElement),
-        stars: box(tierce.querySelector('.nk-egd-season-group__stars') as HTMLElement),
-      };
-    });
-    expect(Math.round(narrow.condition.x)).toBe(Math.round(narrow.rewards.x));
-    expect(narrow.rewards.y, '窄屏通关条件在上、通关奖励在下').toBeGreaterThanOrEqual(narrow.condition.bottom - 1);
-    expect(narrow.stars.y, '窄屏星级列表在通关条件 / 奖励行之下').toBeGreaterThanOrEqual(narrow.clear.bottom - 1);
     await noUnknownOverflow(page);
     assertNoErrors();
   });
 
-  test('/endgame/boss/3020：层 tab 单看板 + 面板底部通关条件（奖励在页面底部）与字号五档与间距节奏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
+  test('/endgame/boss/3020：层 tab 单看板 + 字号五档与间距节奏', { tag: ['@visual-detail', '@viewport-pinned'] }, async ({ page }) => {
     const { assertNoErrors } = collectConsoleIssues(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/endgame/boss/3020');
@@ -799,7 +720,6 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
       };
     });
     expect(stack.board.y).toBeGreaterThanOrEqual(stack.cards.bottom - 1);
-    await expect(page.locator('#egd-season-rewards .nk-egd-tiers .nk-egd-node').first()).toHaveCSS('border-bottom-width', '0px');
     const cardBoxes = await page.locator('.nk-egd-nodecards[aria-label="半场"] [role="tab"]').evaluateAll((els) => els.map((el) => {
       const r = el.getBoundingClientRect();
       return { y: Math.round(r.y), w: Math.round(r.width) };
@@ -987,31 +907,6 @@ test.describe('布局验收：终局层级与看板 · 末日幻影', () => {
     assertNoErrors();
   });
 
-  test('/endgame/boss/3021：统一压缩取数（共享通关奖励 + 完整阶梯）', async ({ page }) => {
-    const { assertNoErrors } = collectConsoleIssues(page);
-    const season = seasonData('maze_boss.json', '3021');
-    const names = itemNameMap();
-    await page.goto('/endgame/boss/3021');
-    await expect(page.locator('#egd-level-panel .nk-egd-head')).toHaveCount(0);
-    const flat = page.locator('#egd-season-rewards .nk-egd-season-flat');
-    await expect(flat).toHaveCount(1);
-    const floor1 = season.floor_details![0];
-    const clearReward = page.locator('#egd-season-rewards .nk-egd-season-shared .nk-egd-season-group__rewards');
-    await expect(clearReward.locator('.nk-egd-head__label')).toHaveText('通关奖励');
-    await expect(clearReward.locator('.nk-egd-reward__name'))
-      .toHaveText(rewardNames(floor1.reward!, names));
-    await expect(clearReward.locator('.nk-egd-reward__num'))
-      .toHaveText(rewardNums(floor1.reward!));
-    const bossRuns = tierRuns(season.star_rewards!);
-    await expect(flat.locator('.nk-egd-tier__badge')).toHaveText(tierBadges(bossRuns));
-    await expect(flat.locator('.nk-egd-tier__unit')).toHaveText(tierUnits(bossRuns));
-    await expect(flat.locator('.nk-egd-tier__reward .nk-egd-reward__name'))
-      .toHaveText(bossRuns.flatMap((run) => rewardNames(run.items, names)));
-    expect(season.floor_details!.flatMap((f) => f.star_rewards!.map((t) => t.star)))
-      .toEqual(season.star_rewards!.map((t) => t.star));
-    await noUnknownOverflow(page);
-    assertNoErrors();
-  });
 });
 
 

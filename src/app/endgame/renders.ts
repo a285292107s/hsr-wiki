@@ -1,31 +1,13 @@
 
-import { shallowRef } from 'vue';
 import { elemLabel } from '../../lib/enum-labels';
 import { translate } from '../i18n';
 import { monsterRankKey } from '../../lib/enum-labels';
 import { hideImgOnError, imgHtml } from '../../lib/image';
 import { elementIconUrl, fmtDesc } from '../../lib/format';
 import { cdnSrc } from '../../lib/image';
-import { loadLocalItems } from '../../services/api';
 import type {
-  LocalItemEntry, MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo, MazeRewardItem,
-  MazeStarReward, MazeTargetInfo,
+  MazeBossTrait, MazeBuffInfo, MazeListEntry, MazeMonsterInfo,
 } from '../../services/types';
-
-export type RewardItemMeta = Pick<LocalItemEntry, 'name' | 'icon'>;
-export const rewardItemMap = shallowRef<Map<number, RewardItemMeta>>(new Map());
-let rewardItemPromise: Promise<void> | null = null;
-
-export function ensureRewardItemMap(): Promise<void> {
-  if (!rewardItemPromise) {
-    rewardItemPromise = loadLocalItems()
-      .then((items) => {
-        rewardItemMap.value = new Map(items.map((it) => [it.id, { name: it.name, icon: it.icon }]));
-      })
-      .catch(() => { rewardItemPromise = null; });
-  }
-  return rewardItemPromise;
-}
 
 export function buffDescHtml(b: MazeBuffInfo): string {
   return fmtDesc(b.desc, b.param_list || []);
@@ -114,87 +96,6 @@ export function monCountLabel(mons: MazeMonsterInfo[] | undefined): string {
   return translate('egd.wavesEnemies', { waves, mons: mons.length });
 }
 
-export const TARGET_TYPE_LABEL: Record<string, string> = {
-  TOTAL_SCORE: translate('egd.score.total'),
-  ROUNDS_LEFT: translate('egd.score.rounds'),
-  DEAD_AVATAR: translate('egd.score.dead'),
-};
 
-export const TARGET_TYPE_SVG: Record<string, string> = {
-  TOTAL_SCORE: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 16.4l-5.2 2.6 1-5.8L3.5 9.1l5.9-.8z"/></svg>`,
-  ROUNDS_LEFT: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M12 2v2M12 20v2M5 6h14v3a7 7 0 11-14 0z"/></svg>`,
-  DEAD_AVATAR: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.3-3.5 4.6-5.5 7.5-5.5s6.2 2 7.5 5.5"/><path d="M4 4l16 16"/></svg>`,
-};
-
-export function targetTypeIconHtml(type: string): string {
-  const label = TARGET_TYPE_LABEL[type];
-  const svg = TARGET_TYPE_SVG[type];
-  if (!label || !svg) return '';
-  return `<span class="nk-egd-node__typeicon">${svg}</span><span>${label}</span>`;
-}
-
-export function targetHtml(t: MazeTargetInfo): string {
-  if (t.param != null) return fmtDesc(t.text, [t.param]);
-  return t.text.replace(/#\d+\[[^\]]*\]%?/g, '').replace(/#\d+/g, '');
-}
-
-export interface StarTierRow {
-  star: number;
-  starTo?: number;
-  starStep?: number;
-  label?: string;
-  prism?: boolean;
-  targets: MazeTargetInfo[];
-  items: MazeRewardItem[];
-}
-
-function tierSignature(row: StarTierRow): string {
-  const items = row.items.map((item) => `${item.id}:${item.num ?? ''}`).sort().join(',');
-  const targets = row.targets.map((target) => `${target.type ?? ''}|${target.param ?? ''}|${target.text ?? ''}`).join(';');
-  return `${items}#${targets}`;
-}
-
-export function mergeStarTierRuns(rows: StarTierRow[]): StarTierRow[] {
-  const merged: StarTierRow[] = [];
-  for (const row of rows) {
-    const last = merged[merged.length - 1];
-    const continues = last != null
-      && !last.prism && !row.prism
-      && last.star > 0 && row.star > 0
-      && tierSignature(last) === tierSignature(row)
-      && (last.starTo == null
-        ? row.star > last.star
-        : last.starStep != null && row.star - last.starTo === last.starStep);
-    if (!continues) {
-      merged.push({ ...row });
-      continue;
-    }
-    if (last.starTo == null) last.starStep = row.star - last.star;
-    last.starTo = row.star;
-  }
-  return merged;
-}
-
-export function starTierRows(
-  targets: MazeTargetInfo[],
-  tiers: MazeStarReward[],
-  prism?: { target: MazeTargetInfo | null; items: MazeRewardItem[] },
-): StarTierRow[] {
-  const rows: StarTierRow[] = tiers.length
-    ? (() => {
-      const size = Math.ceil(targets.length / tiers.length);
-      return tiers.map((tier, i) => ({
-        star: tier.star,
-        label: tier.label,
-        targets: targets.slice(i * size, (i + 1) * size),
-        items: tier.items,
-      }));
-    })()
-    : targets.map((t) => ({ star: 0, targets: [t], items: [] }));
-  if (prism?.target) {
-    rows.push({ star: 0, prism: true, targets: [prism.target], items: prism.items });
-  }
-  return rows;
-}
 
 export const hideOnError = hideImgOnError;

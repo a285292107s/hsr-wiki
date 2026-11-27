@@ -76,3 +76,4 @@
 | 0070 | 图标工具链：单一映射真源 + 按引用集同步 + 覆盖度门禁 | Accepted | 映射只写 `config/sprite-map.json`，`ingest --from-refs` 按引用集补缺，`check-icon-coverage` 作第 9 个守卫进构建 |
 | 0071 | 图片回退链改为失败时推导 | Accepted | 回退链只在运行期由主源 URL 推导（`nextFallbackFrom`），取消逐图内联的 `data-cdn-fallback`/`-fallback2` |
 | 0072 | 全站导航统一为持久顶栏 | Accepted | 全断点用实际宽度决定行内 / 紧凑顶栏，替代侧栏与底部 Dock |
+| 0073 | 终局详情页移除「本期奖励」板块 | Accepted（已实现） | 四个终局玩法详情页移除底部「本期奖励」板块及其组件/样式/词典，关卡面板后直入相邻赛季导航 |

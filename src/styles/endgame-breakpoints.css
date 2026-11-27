@@ -28,8 +28,6 @@
   .nk-egd-hero__status { padding: 5px 11px; }
   .nk-egd-mon__art { --nk-egd-mon-fig: 84px; }
   .nk-egd-mon { gap: 14px; }
-  .nk-egd-node__type { padding: 5px 10px; gap: 5px; }
-  .nk-egd-node__typeicon { width: 15px; height: 15px; }
   .nk-egd-group__tail { padding-left: 0; border-left: 0; line-height: normal; }
   .nk-egd-board__body { gap: 20px; }
   .nk-egd-floor__head { flex-wrap: wrap; }
@@ -42,25 +40,6 @@
   .nk-egd-tabs .nk-tab--active::after { left: 9px; right: 9px; }
   .nk-egd-tabs .nk-tab:first-child::after { left: 0; }
   .nk-egd-lvl { gap: 18px; }
-  .nk-egd-tiers { gap: 10px; }
-  .nk-egd-tier {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    gap: 10px;
-    padding: 12px 14px;
-    background: color-mix(in srgb, var(--blk-900) 30%, transparent);
-    border: 1px solid var(--line-1);
-    border-radius: var(--nk-radius-card);
-  }
-  .nk-egd-tier__stars { grid-column: 1; grid-row: 1; justify-self: start; }
-  .nk-egd-tier__cond { grid-column: 1; grid-row: 2; gap: 8px; }
-  .nk-egd-tier__brace { display: none; }
-  .nk-egd-tier__reward {
-    grid-column: 1; grid-row: 3;
-    padding-top: 10px;
-    border-top: 1px solid var(--line-1);
-  }
-  .nk-egd-tier__cond .nk-egd-node { gap: 10px; }
   .nk-egd-hero__camp { letter-spacing: 0.1em; }
   .nk-egd-floor__wave { flex-direction: column; gap: 6px; }
 }
@@ -68,9 +47,6 @@
 @media (max-width: 360px) {
   .nk-egd-hero__camp { flex-wrap: wrap; }
   .nk-egd-hero__camp .nk-guide-link { margin-left: auto; }
-  .nk-egd-tier { padding: 10px; }
-  .nk-egd-tier__cond .nk-egd-node { gap: 6px; }
-  .nk-egd-tier__cond .nk-egd-node__type { padding: 4px 7px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -15,7 +15,7 @@
 - **单例只提供「首调发起、后续复用、失败重置」这一层，嵌套复用的并发合并要另写守卫**：缓存组内多条并行加载靠的是服务级缓存守卫，不是单例本身；把嵌套复用当成串行复用会重复请求。`src/services/api/singleton.ts`
 - **「就绪才渲染」的 watch 必须配 `immediate: true`**：触发源取的是共享单例数据的长度，从其它路由返回时组件重建而 store 里仍有旧数据，触发源初值已非 0 ⇒ 首次触发被漏掉，渲染永远空白。
 - **新增可索引路由必须同步三件（快照覆盖 + rewrite + sitemap）**：三者缺一由构建末步守卫拦截；但守卫只保证「覆盖到」，不保证条目正确——`nk-snapshot__more` 这类分区入口内链**不得**复用 `nk-snapshot__entry` 类名，否则会被条目级覆盖率算成收录条目。`tools/gen-ai-endpoints.mjs`
-- **按 id 查名称/图标的共享映射不要在消费实例里各建一份**：星数奖励每档一个 `EndgameReward`，各建一份全量 `items.json` Map 会让单页出现多份；改为 `renders.ts` 的模块级 `shallowRef` 一次构建、失败清 promise 允许重试（与共享单例同一纪律）。`src/app/endgame/renders.ts` `src/app/endgame/EndgameReward.vue`
+- **按 id 查名称/图标的共享映射不要在消费实例里各建一份**：各建一份全量 `items.json` Map 会让单页出现多份；应改为模块级 `shallowRef` 一次构建、失败清 promise 允许重试（与共享单例同一纪律）。`src/app/endgame/renders.ts`（原星级奖励 `EndgameReward` 的实例已随 [ADR 0073](../adr/0073-终局详情页移除本期奖励板块.md) 退场）
 - **图片回退能力只取决于主源 URL，不再靠模板绑属性**：`dom.ts` 的 `handleFailure` 只问 `nextFallbackFrom(src)`（[ADR 0071](../adr/0071-图片回退链改为失败时推导.md)），`imgHtml`/`imgAttrs` 只输出主源；`data-cdn-fallback` 仅作显式覆盖（首页立绘走 `imgAttrsPair`）。别再按「目录卡绑了属性、视图侧漏绑」判断回退是否可用。
 
 ## 请求与缓存层

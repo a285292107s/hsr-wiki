@@ -1,7 +1,6 @@
 .nk-egd-hero__status,
 .nk-egd-floor__wavelabel,
 .nk-egd-peak__kind,
-.nk-egd-reward__icon--void,
 .nk-egd-floor__moncount,
 .nk-egd-pollchip,
 .nk-egd-mon__hp-label,
@@ -15,11 +14,9 @@
 .nk-egd-mon__phase,
 .nk-egd-traits__owner,
 .nk-egd-phase__tab,
-.nk-egd-head__label,
 .nk-egd-nodecard__label,
 .nk-egd-nodecard__boss,
 .nk-egd-floor__datalabel,
-.nk-egd-rules__label,
 .nk-egd-hero__sid,
 .nk-egd-hero__scale,
 .nk-egd-hero__date,
@@ -28,14 +25,9 @@
 .nk-egd-mon__resval,
 .nk-egd-mon__skill,
 .nk-egd-mon__rank,
-.nk-egd-reward__num,
-.nk-egd-node__type,
 .nk-egd-nav__dir,
-.nk-egd-reward__star,
-.nk-egd-tier__badge,
 .nk-egd-phase__skilldesc { font-size: var(--nk-fs-3); }
 
-.nk-egd-tier__unit { font-size: var(--nk-fs-2); }
 
 .nk-egd-buff__desc,
 .nk-egd-floor__buffdesc,
@@ -44,8 +36,6 @@
 .nk-egd-phase__desc,
 .nk-egd-phase__answer,
 .nk-egd-phase__skillname,
-.nk-egd-node__text,
-.nk-egd-reward__goal,
 .nk-egd-mon__hp-val,
 .nk-egd-hero__camp,
 .nk-egd-summon__name { font-size: var(--nk-fs-4); }
@@ -58,7 +48,6 @@
 .nk-egd-floor__buffname,
 .nk-egd-mon__name,
 .nk-egd-floor__dataval,
-.nk-egd-reward__name,
 .nk-egd-nav__id { font-size: var(--nk-fs-5); }
 
 .nk-egd-group__title,
@@ -70,8 +59,6 @@
 .nk-egd-group--row .nk-egd-group__title { font-size: var(--nk-fs-3); }
 
 .nk-egd-nodecard__name { font-size: var(--nk-fs-6); }
-
-.nk-egd-rules__val { font-size: var(--nk-fs-7); }
 
 .nk-egd-hero__name { font-size: var(--nk-fs-title-1); }
 
@@ -92,7 +79,6 @@
   .nk-egd-phase__desc,
   .nk-egd-traits__desc,
   .nk-egd-phase__answer { font-size: var(--nk-fs-5); }
-  .nk-egd-node__text { font-size: var(--nk-fs-5); }
   .nk-egd-nodecard__name { font-size: var(--nk-fs-4); }
   .nk-egd-tabs .nk-tab { font-size: var(--nk-fs-3); }
 }

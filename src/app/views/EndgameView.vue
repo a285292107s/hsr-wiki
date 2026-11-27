@@ -23,7 +23,6 @@ import EndgameBuffs from '../endgame/EndgameBuffs.vue';
 import EndgameFloorBuff from '../endgame/EndgameFloorBuff.vue';
 import EndgameLevelTabs from '../endgame/EndgameLevelTabs.vue';
 import EndgameLevelPanel from '../endgame/EndgameLevelPanel.vue';
-import EndgameSeasonRewards from '../endgame/EndgameSeasonRewards.vue';
 import '../../styles/endgame-frame.css';
 import '../../styles/endgame-panels.css';
 import '../../styles/endgame-monsters.css';
@@ -277,7 +276,6 @@ onBeforeUnmount(() => {
               :system-choice="systemChoice"
             />
 
-            <EndgameSeasonRewards :data="data" />
           </template>
 
           <div v-else class="nk-slot-empty">{{ t('egd.empty.stages') }}</div>

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { collectConsoleIssues, computedNumber, readJson, readTokenPx, settleAnimations } from './helpers';
-import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData, seasonRewardGroups } from './layout.shared';
+import { cnBigNumber, PEAK_HARD_NODE, PEAK_KING_NODE, noUnknownOverflow, peakKnightLevels, peakKnightNodeTabId, peakKnightsTabId, peakNodeTabId, peakTabId, peakTabLabels, seasonData } from './layout.shared';
 import type { MechanicLike, MonsterLike } from './layout.shared';
 
 test.describe('布局验收：赛季级区块（行式排版 + 数据驱动上提）', () => {
@@ -140,17 +140,9 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     await expect(page.locator(peakNodeTabId(PEAK_KING_NODE))).toHaveAttribute('aria-selected', 'true');
 
     await expect(page.locator('#egd-badges, .nk-egd-badges')).toHaveCount(0);
-    await expect(page.locator('.nk-egd-starrewards')).toHaveCount(0);
     const panelOrder = await page.locator('.nk-egd-panel > *').evaluateAll((els) =>
       els.map((el) => el.className.split(' ')[0]));
-    expect(panelOrder[0], '子 tab 之上不再有赛季级块（星数奖励已下放本期奖励板块）').toBe('nk-egd-tabs');
-    await expect(page.locator('#egd-season-rewards')).toHaveCount(1);
-    const seasonAfterPanel = await page.evaluate(() => {
-      const panel = document.querySelector('#egd-level-panel')!.getBoundingClientRect();
-      const season = document.querySelector('#egd-season-rewards')!.getBoundingClientRect();
-      return { panelBottom: panel.bottom, seasonTop: season.top };
-    });
-    expect(seasonAfterPanel.seasonTop, '本期奖励板块应在关卡面板之后').toBeGreaterThanOrEqual(seasonAfterPanel.panelBottom - 1);
+    expect(panelOrder[0], '子 tab 之上不再有赛季级块').toBe('nk-egd-tabs');
 
     await expect(page.locator('#egd-buffs')).toHaveCount(0);
     await page.locator(peakTabId(king!)).click();
@@ -305,13 +297,6 @@ test.describe('异相仲裁赛季页并入关卡子 tab 编排（ADR 0043）', (
     await openKingNode(PEAK_HARD_NODE);
     await expect(panel.locator('.nk-egd-floor__tags .nk-egd-peak__tag'))
       .toHaveText(king!.hard!.tags!.map((m) => m.name));
-    const hardGroup = seasonRewardGroups(page).last();
-    await expect(hardGroup.locator('.nk-egd-season-group__title')).toHaveText(king!.hard!.name!);
-    await expect(hardGroup.locator('.nk-egd-tier')).toHaveCount(king!.hard!.star_rewards!.length);
-    await expect(hardGroup.locator('.nk-egd-node'))
-      .toHaveCount(king!.hard!.targets!.length);
-    await expect(hardGroup.locator('.nk-egd-tier__badge'))
-      .toHaveText(king!.hard!.star_rewards!.map((t) => `累计 ${t.star}★`));
     await expect(panel.locator('.nk-egd-floor__hardname, .nk-egd-floor__hard')).toHaveCount(0);
     await noUnknownOverflow(page);
     assertNoErrors();
